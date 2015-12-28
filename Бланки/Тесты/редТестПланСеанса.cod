@@ -21,66 +21,18 @@ import СИС2 classes Функции;
 
   inobject private
 
---  var фреймДопСервис: TemplateFrame;
   var секцСценарийЗаголовокТаблицы: TemplateSection;
   var секцСценарий: TemplateSection;
---  var кнСпецификация: Button;
---  var кнЗаполнитьПоШаблону: Button;
---  var кнЗаполнитьПоОбразцу: Button;
---  var кнДобавтьТест: Button;
-
   var NN: integer[] = $;
 
 --{{ Вспомогательные методы
-
---  proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
---    ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
---  end;
---
---  proc УстановитьФокусНаПервоеПолеВвода;
---    Self.Template.CellByField['ПолноеИмяКласса'].SetFocus;
---  end;
-
-  proc ВидФормы;
---    var ЗапретитьВыборКласса: logical;
---    var locCell: TemplateCell;
---    ЗапретитьВыборКласса = (ЭтоШаблон) or (ТестПП.Count > 0);
---    locCell = Self.Template.CellByField['ПолноеИмяКласса'];
---    locCell.Style = if(ЗапретитьВыборКласса, StyleByName('Поле вывода'), StyleByName('Поле выбора'));
---    locCell.Enabled = not ЗапретитьВыборКласса;
---    --locCell.Button = not ЗапретитьВыборКласса;
---    locCell = Self.Template.CellByField['ТипБазовогоКласса'];
---    locCell.Style = if((ТестПП.Count > 0), StyleByName('Поле вывода'), StyleByName('Поле выбора'));
---    locCell.Enabled = not (ТестПП.Count > 0);
---    locCell.Button = not (ТестПП.Count > 0);
---    locCell = Self.Template.CellByField['ЭтоШаблон'];
---    locCell.Enabled = not (ТестПП.Count > 0);
---    кнСпецификация.Enabled = (not ЭтоШаблон) and (ПолноеИмяКласса <> nil);
---    кнЗаполнитьПоШаблону.Enabled = (not ЭтоШаблон) and (ПолноеИмяКласса <> nil) and (ТестПП.Count = 0);
---    кнЗаполнитьПоОбразцу.Enabled = (not ЭтоШаблон) and (ПолноеИмяКласса <> nil) and (ТестПП.Count = 0);
---    кнДобавтьТест.Enabled = (not ЭтоШаблон) and (ПолноеИмяКласса <> nil);
-  end;
-
 --}}
 
 --{{ Обработчики событий шаблона
-
---  proc шаблон_ПриСоздании(Context :Variant);
---    var locCell: TemplateCell;
---    inherited шаблон_ПриСоздании(Context);
---    locCell = Self.Template.CellByField['ТипБазовогоКласса'];
---    Библио.ОбновитьСписокПоля(locCell, Константы.ТипыБазовыйхКлассов);
---    locCell.List.Add('Не определено|0');
---  end;
-
-  proc шаблон_ПриСчитывании;
-    inherited шаблон_ПриСчитывании;
-    ВидФормы;
-  end;
-
 --}}
 
 --{{ Обработчики событий клеток шаблона
+
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var locCrd: CardForm;
@@ -92,7 +44,7 @@ import СИС2 classes Функции;
           ТестПланКласса = локЗаписьТестПлана;
         end;
       fi;
-      ВидФормы;--}
+      --}
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий):--{ добавление тест-плана класса в тест-план из строки таблицы
       locCrd = Тесты.картТестПланКласса.Create;
       if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not ЭтоШаблон', Window.ModalWindow):
@@ -101,10 +53,10 @@ import СИС2 classes Функции;
           ТестПланКласса = локЗаписьТестПлана;
         end;
       fi;
-      ВидФормы;--}
+      --}
     elsif (Cell.Contents = '-') and (Cell.Owner = секцСценарий):--{ удаление строки из тест-плана (без удаления тест-плана класса из справочника)
       ТестПП.Delete(Index);
-      ВидФормы;--}
+      --}
     -- перемещение строк
     elsif (Cell.Contents = '5') and (Cell.Owner = секцСценарий):--{ вверх
       Cell.SetFocus;
@@ -128,210 +80,9 @@ import СИС2 classes Функции;
     fi;
   end;
 
-
-  func Поле_ПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
---    var vClass: Class;
---    if (Cell.Contents = 'ПолноеИмяКласса'):
---      if (Action = Template.Clear):
---        ПолноеИмяКласса = nil;
---        ИмяПроектаКласса = nil;
---      else
---        if (ТипБазовогоКласса in [Константы.ТипБланк,Константы.ТипБланкРедактор]):
---          if CmOk = ChooseClass(Kernel.BlankForm, vClass, ''):
---            ПолноеИмяКласса = FullClassName(vClass);
---            ИмяПроектаКласса = vClass.ClassProject;
---            ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
---            Template.EndEdit(true);
---          fi;
---        elsif (ТипБазовогоКласса in [Константы.типКартотека]):
---          if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
---            ПолноеИмяКласса = FullClassName(vClass);
---            ИмяПроектаКласса = vClass.ClassProject;
---            Template.EndEdit(true);
---          fi;
---        elsif (ТипБазовогоКласса in [Константы.типОтчет]):
---          if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
---            ПолноеИмяКласса = FullClassName(vClass);
---            ИмяПроектаКласса = vClass.ClassProject;
---            Template.EndEdit(true);
---          fi;
---        elsif (ТипБазовогоКласса  = nil):
---          Message ('Пожалуйста, заполните сначала поле <Тип класса>!');
---          Self.Template.CellByField['ТипБазовогоКласса'].SetFocus;
---        fi;
---      fi;
---      ВидФормы;
---    fi;
-  end;
-
-  func Поле_ПриВводе(Cell: TemplateCell; Value: Variant): Logical;
---    var Index: Integer;
---    Index = Cell.Frame;
---    if (Cell.Contents = 'Тест.Наим'):
---      if (ТестПП[Index].Тест <> nil):
---        ТестПП[Index].Тест.Наим = Value as string;
---      fi;
---    elsif (Cell.Contents = 'Тест.ОписаниеТеста'):
---      if (ТестПП[Index].Тест <> nil):
---        ТестПП[Index].Тест.ОписаниеТеста = Value as string;
---      fi;
---    elsif (Cell.Contents = 'Тест.ОжидаемыйРезультат'):
---      if (ТестПП[Index].Тест <> nil):
---        ТестПП[Index].Тест.ОжидаемыйРезультат = Value as string;
---      fi;
---    fi;
-  end;
-
---  func Поле_ПриОбзоре(Cell: TemplateCell; Value: Variant; var NewValue: Variant): Logical;
---    var vClass: Class;
---    if (Cell.Contents = 'ПолноеИмяКласса'):
---      if (ТипБазовогоКласса in [Константы.ТипБланк,Константы.ТипБланкРедактор]):
---        if CmOk = ChooseClass(Kernel.BlankForm, vClass, ''):
---          NewValue = FullClassName(vClass);
---          ИмяПроектаКласса = vClass.ClassProject;
---          ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
---          Template.EndEdit(true);
---        fi;
---      elsif (ТипБазовогоКласса in [Константы.типКартотека]):
---        if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
---          NewValue = FullClassName(vClass);
---          ИмяПроектаКласса = vClass.ClassProject;
---          Template.EndEdit(true);
---        fi;
---      elsif (ТипБазовогоКласса in [Константы.типОтчет]):
---        if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
---          NewValue = FullClassName(vClass);
---          ИмяПроектаКласса = vClass.ClassProject;
---          Template.EndEdit(true);
---        fi;
---      elsif (ТипБазовогоКласса  = nil):
---        Message ('Пожалуйста, заполните сначала поле <Тип класса>!');
---        Self.Template.CellByField['ТипБазовогоКласса'].SetFocus;
---      fi;
---    fi;
---  end;
-
-  proc Поле_ПриВыходе (Cell: TemplateCell; Index: Integer);
---    if (Cell.Contents = 'ТипБазовогоКласса'):
---      ВидФормы;
---    fi;
-  end;
-
-
-  func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
---    var Index: Integer;
---    Index = Cell.Frame;
---    if (Cell.Contents = 'Тест.Наим') and (Index <= секцСценарий.Count):
---      if (ТестПП[Index].Тест <> nil):
---        Result = if(ТестПП[Index].Тест.Наим <> nil, ТестПП[Index].Тест.Наим, '<cf:$808080>Тест № ' + Str(Index));
---      fi;
---    elsif (Cell.Contents = 'Тест.ОписаниеТеста') and (Index <= секцСценарий.Count):
---      Result = if(ТестПП[Index].Тест <> nil, ТестПП[Index].Тест.ОписаниеТеста, nil);
---    elsif (Cell.Contents = 'Тест.ОжидаемыйРезультат') and (Index <= секцСценарий.Count):
---      Result = if(ТестПП[Index].Тест <> nil, ТестПП[Index].Тест.ОжидаемыйРезультат, nil);
---    fi;
-  end;
-
---  func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
---    Window.Caption = if(ЭтоШаблон, 'Тест-план класса Т9 (шаблон)', 'Тест-план класса Т9');
---    Result = if(ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
---  end;
-
---  proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
---  end;
-
-
 --}}
 
 --{{ Обработчики событий прочих объектов шаблона
-  proc кнПриНажатии (Sender: Button);
---    var локЗаписьСпецификации: Т9_Тесты.СпецификацияКласса;
---    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
---    var локЗаписьТеста: Т9_Тесты.Тест;
---    var локЗаписьТестаШбл: Т9_Тесты.Тест;
---    var t, tt: integer;
---    var aId: integer[]; -- массив DocId использованных шаблонных тестов
---    if (Sender = кнСпецификация):
---      with Query.Create([Т9_Тесты.СпецификацияКласса]) do
---        Filter = 'ПолноеИмяКласса="' + ПолноеИмяКласса + '"';
---        if RecordsExists:
---          Select;
---          локЗаписьСпецификации = Current;
---        else
---          локЗаписьСпецификации = Т9_Тесты.СпецификацияКласса.Create;
---          локЗаписьСпецификации.ТипБазовогоКласса = ТипБазовогоКласса;
---          локЗаписьСпецификации.ПолноеИмяКласса   = ПолноеИмяКласса;
---          локЗаписьСпецификации.ИмяПроектаКласса  = ИмяПроектаКласса;
---          локЗаписьСпецификации.Post;
---        fi;
---        OpenBlankEditor('Тесты.редСпецификацияКласса', локЗаписьСпецификации,  Window.PopupWindow);
---      end;
---    elsif (Sender = кнЗаполнитьПоШаблону):
---      if CmOk = OpenCardfile('Тесты.картТестПланКласса', локЗаписьТестПлана, 'ЭтоШаблон and ТипБазовогоКласса=' + Str(ТипБазовогоКласса), Window.ModalWindow):
---        tt = локЗаписьТестПлана.ТестПП.Count;
---        for t = 1 .. tt do
---          with ТестПП.Insert(t) do
---            локЗаписьТеста = Т9_Тесты.Тест.Create;
---            локЗаписьТеста.ТипБазовогоКласса  = ТипБазовогоКласса;
---            локЗаписьТеста.ПолноеИмяКласса    = ПолноеИмяКласса;
---            локЗаписьТеста.ИмяПроектаКласса   = ИмяПроектаКласса;
---            локЗаписьТеста.ПоШаблону          = локЗаписьТестПлана.ТестПП[t].Тест;
---            локЗаписьТеста.МнемоКод           = локЗаписьТестПлана.ТестПП[t].Тест.МнемоКод;
---            локЗаписьТеста.Наим               = локЗаписьТестПлана.ТестПП[t].Тест.Наим;
---            локЗаписьТеста.ОписаниеТеста      = локЗаписьТестПлана.ТестПП[t].Тест.ОписаниеТеста;
---            локЗаписьТеста.ОжидаемыйРезультат = локЗаписьТестПлана.ТестПП[t].Тест.ОжидаемыйРезультат;
---            локЗаписьТеста.Post;
---            Тест = локЗаписьТеста;
---          end;
---        od;
---      fi;
---      ВидФормы;
---    elsif (Sender = кнЗаполнитьПоОбразцу):
---      if CmOk = OpenCardfile('Тесты.картТестПланКласса', локЗаписьТестПлана, 'not ЭтоШаблон and ТипБазовогоКласса=' + Str(ТипБазовогоКласса), Window.ModalWindow):
---        tt = локЗаписьТестПлана.ТестПП.Count;
---        for t = 1 .. tt do
---          with ТестПП.Insert(t) do
---            локЗаписьТеста = Т9_Тесты.Тест.Create;
---            локЗаписьТеста.ТипБазовогоКласса  = ТипБазовогоКласса;
---            локЗаписьТеста.ПолноеИмяКласса    = ПолноеИмяКласса;
---            локЗаписьТеста.ИмяПроектаКласса   = ИмяПроектаКласса;
---            локЗаписьТеста.ПоШаблону          = локЗаписьТестПлана.ТестПП[t].Тест.ПоШаблону;
---            локЗаписьТеста.МнемоКод           = локЗаписьТестПлана.ТестПП[t].Тест.МнемоКод;
---            локЗаписьТеста.Наим               = локЗаписьТестПлана.ТестПП[t].Тест.Наим;
---            локЗаписьТеста.ОписаниеТеста      = локЗаписьТестПлана.ТестПП[t].Тест.ОписаниеТеста;
---            локЗаписьТеста.ОжидаемыйРезультат = локЗаписьТестПлана.ТестПП[t].Тест.ОжидаемыйРезультат;
---            локЗаписьТеста.Post;
---            Тест = локЗаписьТеста;
---          end;
---        od;
---      fi;
---      ВидФормы;
---    elsif (Sender = кнДобавтьТест):
---      tt = ТестПП.Count;
---      for t = 1 .. tt do
---        if (ТестПП[t].Тест.ПоШаблону <> nil):
---          aId[t] = ТестПП[t].Тест.ПоШаблону.DocId;
---        fi;
---      od;
---      if CmOk = OpenCardfile('Тесты.картТест', локЗаписьТестаШбл, 'ЭтоШаблон and not DocId in ' + ToStr(aId), Window.ModalWindow):
---        with ТестПП.Insert(1) do
---          локЗаписьТеста = Т9_Тесты.Тест.Create;
---          локЗаписьТеста.ТипБазовогоКласса  = ТипБазовогоКласса;
---          локЗаписьТеста.ПолноеИмяКласса    = ПолноеИмяКласса;
---          локЗаписьТеста.ИмяПроектаКласса   = ИмяПроектаКласса;
---          локЗаписьТеста.ПоШаблону          = локЗаписьТестаШбл;
---          локЗаписьТеста.МнемоКод           = локЗаписьТестаШбл.МнемоКод;
---          локЗаписьТеста.Наим               = локЗаписьТестаШбл.Наим;
---          локЗаписьТеста.ОписаниеТеста      = локЗаписьТестаШбл.ОписаниеТеста;
---          локЗаписьТеста.ОжидаемыйРезультат = локЗаписьТестаШбл.ОжидаемыйРезультат;
---          локЗаписьТеста.Post;
---          Тест = локЗаписьТеста;
---        end;
---      fi;
---      ВидФормы;
---    fi;
-  end;
-
 --}}
 
 end

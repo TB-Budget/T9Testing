@@ -247,41 +247,11 @@ import СИС2 classes Функции;
     fi;
   end;
 
---  func Поле_ПриОбзоре(Cell: TemplateCell; Value: Variant; var NewValue: Variant): Logical;
---    var vClass: Class;
---    if (Cell.Contents = 'ПолноеИмяКласса'):
---      if (ТипБазовогоКласса in [Константы.ТипБланк,Константы.ТипБланкРедактор]):
---        if CmOk = ChooseClass(Kernel.BlankForm, vClass, ''):
---          NewValue = FullClassName(vClass);
---          ИмяПроектаКласса = vClass.ClassProject;
---          ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
---          Template.EndEdit(true);
---        fi;
---      elsif (ТипБазовогоКласса in [Константы.типКартотека]):
---        if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
---          NewValue = FullClassName(vClass);
---          ИмяПроектаКласса = vClass.ClassProject;
---          Template.EndEdit(true);
---        fi;
---      elsif (ТипБазовогоКласса in [Константы.типОтчет]):
---        if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
---          NewValue = FullClassName(vClass);
---          ИмяПроектаКласса = vClass.ClassProject;
---          Template.EndEdit(true);
---        fi;
---      elsif (ТипБазовогоКласса  = nil):
---        Message ('Пожалуйста, заполните сначала поле <Тип класса>!');
---        Self.Template.CellByField['ТипБазовогоКласса'].SetFocus;
---      fi;
---    fi;
---  end;
-
   proc Поле_ПриВыходе (Cell: TemplateCell; Index: Integer);
     if (Cell.Contents = 'ТипБазовогоКласса'):
       ВидФормы;
     fi;
   end;
-
 
   func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
     var Index: Integer;
@@ -301,10 +271,6 @@ import СИС2 classes Функции;
     Window.Caption = if(ЭтоШаблон, 'Тест-план класса Т9 (шаблон)', 'Тест-план класса Т9');
     Result = if(ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
   end;
-
---  proc Поле_ПриРисовании (Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
---  end;
-
 
 --}}
 

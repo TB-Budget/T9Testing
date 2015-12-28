@@ -15,41 +15,34 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.картБазовая "Тест-планы классов Т9";
+class inherited СИС2.БазовыйБланкРедактор "Сеанс тестирования", editor СеансТестирования;
 
-inobject private
+import СИС2 classes Функции;
+
+  inobject private
+
+  var фреймДопСервис: TemplateFrame;
+  var секцСценарийЗаголовокТаблицы: TemplateSection;
+  var секцСценарий: TemplateSection;
+  var NN: integer[] = $;
 
 --{{ Вспомогательные методы
+  proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
+    ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
+  end;
 --}}
 
 --{{ Обработчики событий шаблона
-
-  proc шаблон_ПриОткрытии(Create: Logical);
-    Запретить_Дублирование = true;
-    inherited шаблон_ПриОткрытии(Create);
-  end;
 --}}
 
---{{ Обработчики событий картотеки
+--{{ Обработчики событий клеток шаблона
 
-  func картотека_ПриИзменении (Action: Cardfile.ModifyActions; locRecord: Record; locGroup: Record): Logical;
-    if locRecord.ЭтоШаблон:
-      Result = True;
-    else
-      if (locRecord.ТестПП.Count = 0):
-        Result = True;
-      else
-        Message('Перед удалением тест-плана необходимо удалить все позиции :(');
-      fi;
-    fi;
+  func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
   end;
+
 --}}
 
---{{ Обработчики событий столбцов картотеки
-
-  func КартПоле_ПриВыводе (Column: CardfileColumn; Rec: Record; Action: Template.OutputTypes; var Format: String): Variant;
-    Result = Rec.ТестПП.Count;
-  end;
+--{{ Обработчики событий прочих объектов шаблона
 --}}
 
 end

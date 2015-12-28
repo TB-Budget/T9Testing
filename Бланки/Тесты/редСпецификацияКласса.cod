@@ -28,9 +28,9 @@ import СИС2 classes Функции;
 
 --{{ Вспомогательные методы
 
---  proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
---    ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
---  end;
+  proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
+    ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
+  end;
 
   proc УстановитьФокусНаПервоеПолеВвода;
     Self.Template.CellByField['Наим'].SetFocus;
@@ -53,6 +53,7 @@ import СИС2 classes Функции;
     секцРевизия.Visible = not isGroup;
   end;
 
+
 --}}
 
 --{{ Обработчики событий шаблона
@@ -69,7 +70,6 @@ import СИС2 classes Функции;
     inherited шаблон_ПриСчитывании;
     ВидФормы;
   end;
-
 --}}
 
 
@@ -92,6 +92,13 @@ import СИС2 classes Функции;
     elsif (Cell.Contents in ['-','x']) and (Cell.Owner = секцРевизия):--{ удаление строки
       Index = Cell.Frame;
       секцРевизия.DeleteFrame(Index);
+    elsif (Cell.Contents = 'R') and (Cell.Owner = секцРевизия):
+     if (Template.CurrentEdit  <> nil):
+       Message(Template.CurrentEdit .Text + chr(13) +
+               Template.CurrentEdit .SelText   + chr(13) +
+               Str(Template.CurrentEdit .SelStart)  + chr(13) +
+               Str(Template.CurrentEdit .SelLength));
+     fi;
     fi;
   end;
 
@@ -177,12 +184,34 @@ import СИС2 classes Функции;
     fi;
   end;
 
+--}}
 
---  func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
---    Window.Caption = if(ЭтоШаблон, 'Тест-план класса Т9 (шаблон)', 'Тест-план класса Т9');
---    Result = if(ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
---  end;
+--{{ Обработчики событий прочих объектов шаблона
 
+  proc кнПриНажатии (Sender: Button);
+    var TextBef, TextAft: String;
+    if (Sender.Caption in ['b+','b-','i+','i-','&u+','u+','u-','r+','bl+','g+','gr+','color-']):
+      if (Template.CurrentEdit <> nil):
+        with (Template.CurrentEdit) do
+          TextBef = SubStr(Text, 1, SelStart);
+          TextAft = SubStr(Text, (SelStart + 1), Length(Text));
+          if (Sender.Caption = 'b+'):        Text = TextBef + '<b+>' + TextAft;
+          elsif (Sender.Caption = 'b-'):     Text = TextBef + '<b->' + TextAft;
+          elsif (Sender.Caption = 'i+'):     Text = TextBef + '<i+>' + TextAft;
+          elsif (Sender.Caption = 'i-'):     Text = TextBef + '<i->' + TextAft;
+          elsif (Sender.Caption = 'u+'):     Text = TextBef + '<u->' + TextAft;
+          elsif (Sender.Caption = '&u+'):    Text = TextBef + '<u->' + TextAft;
+          elsif (Sender.Caption = 'u-'):     Text = TextBef + '<u->' + TextAft;
+          elsif (Sender.Caption = 'r+'):     Text = TextBef + '<cf:Red>' + TextAft;
+          elsif (Sender.Caption = 'bl+'):    Text = TextBef + '<cf:Blue>' + TextAft;
+          elsif (Sender.Caption = 'g+'):     Text = TextBef + '<cf:Green>' + TextAft;
+          elsif (Sender.Caption = 'gr+'):    Text = TextBef + '<cf:Gray>' + TextAft;
+          elsif (Sender.Caption = 'color-'): Text = TextBef + '<cf.>' + TextAft;
+          fi;
+        end;
+      fi;
+    fi;
+  end;
 --}}
 
 end

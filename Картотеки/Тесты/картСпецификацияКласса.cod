@@ -17,8 +17,4 @@
 
 class inherited СИС2.картБазовая "Спецификация классов Т9";
 
-inclass
-
-inobject
-
 end
