@@ -190,23 +190,31 @@ import СИС2 classes Функции;
 
   proc кнПриНажатии (Sender: Button);
     var TextBef, TextAft: String;
+    var l: integer;
     if (Sender.Caption in ['b+','b-','i+','i-','&u+','u+','u-','r+','bl+','g+','gr+','color-']):
       if (Template.CurrentEdit <> nil):
         with (Template.CurrentEdit) do
           TextBef = SubStr(Text, 1, SelStart);
-          TextAft = SubStr(Text, (SelStart + 1), Length(Text));
-          if (Sender.Caption = 'b+'):        Text = TextBef + '<b+>' + TextAft;
-          elsif (Sender.Caption = 'b-'):     Text = TextBef + '<b->' + TextAft;
-          elsif (Sender.Caption = 'i+'):     Text = TextBef + '<i+>' + TextAft;
-          elsif (Sender.Caption = 'i-'):     Text = TextBef + '<i->' + TextAft;
-          elsif (Sender.Caption = 'u+'):     Text = TextBef + '<u->' + TextAft;
-          elsif (Sender.Caption = '&u+'):    Text = TextBef + '<u->' + TextAft;
-          elsif (Sender.Caption = 'u-'):     Text = TextBef + '<u->' + TextAft;
-          elsif (Sender.Caption = 'r+'):     Text = TextBef + '<cf:Red>' + TextAft;
-          elsif (Sender.Caption = 'bl+'):    Text = TextBef + '<cf:Blue>' + TextAft;
-          elsif (Sender.Caption = 'g+'):     Text = TextBef + '<cf:Green>' + TextAft;
-          elsif (Sender.Caption = 'gr+'):    Text = TextBef + '<cf:Gray>' + TextAft;
-          elsif (Sender.Caption = 'color-'): Text = TextBef + '<cf.>' + TextAft;
+          l = SelLength;
+          TextAft = SubStr(Text, (SelStart + l + 1), Length(Text));
+          if (Sender.Caption = 'b+') and (l = 0):             Text = TextBef + '<b+>' + TextAft;
+          elsif (Sender.Caption = 'b+') and (l > 0):          Text = TextBef + '<b+>' + SelText + '<b->' + TextAft;
+          elsif (Sender.Caption = 'b-'):                      Text = TextBef + '<b->' + TextAft;
+          elsif (Sender.Caption = 'i+') and (l = 0):          Text = TextBef + '<i+>' + TextAft;
+          elsif (Sender.Caption = 'i+') and (l > 0):          Text = TextBef + '<i+>' + SelText + '<i->' + TextAft;
+          elsif (Sender.Caption = 'i-'):                      Text = TextBef + '<i->' + TextAft;
+          elsif (Sender.Caption in ['u+','&u+']) and (l = 0): Text = TextBef + '<u+>' + TextAft;
+          elsif (Sender.Caption in ['u+','&u+']) and (l > 0): Text = TextBef + '<u+>' + SelText + '<u->' + TextAft;
+          elsif (Sender.Caption = 'u-'):                      Text = TextBef + '<u->' + TextAft;
+          elsif (Sender.Caption = 'r+') and (l = 0):          Text = TextBef + '<cf:Red>' + TextAft;
+          elsif (Sender.Caption = 'r+') and (l > 0):          Text = TextBef + '<cf:Red>' + SelText + '<cf.>' + TextAft;
+          elsif (Sender.Caption = 'bl+') and (l = 0):         Text = TextBef + '<cf:Blue>' + TextAft;
+          elsif (Sender.Caption = 'bl+') and (l > 0):         Text = TextBef + '<cf:Blue>' + SelText + '<cf.>' + TextAft;
+          elsif (Sender.Caption = 'g+') and (l = 0):          Text = TextBef + '<cf:Green>' + TextAft;
+          elsif (Sender.Caption = 'g+') and (l > 0):          Text = TextBef + '<cf:Green>' + SelText + '<cf.>' + TextAft;
+          elsif (Sender.Caption = 'gr+') and (l = 0):         Text = TextBef + '<cf:Gray>' + TextAft;
+          elsif (Sender.Caption = 'gr+') and (l > 0):         Text = TextBef + '<cf:Gray>' + SelText + '<cf.>' + TextAft;
+          elsif (Sender.Caption = 'color-'):                  Text = TextBef + '<cf.>' + TextAft;
           fi;
         end;
       fi;
