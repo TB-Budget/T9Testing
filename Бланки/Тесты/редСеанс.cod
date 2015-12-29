@@ -1,5 +1,4 @@
 ﻿--{{ Т9_Тесты - проект для тестирования проектов, созданных на платформе Т9 (c) ТБ.Бюджет, 2015
-
 --Данный проект является свободным программным обеспечением. Вы вправе распространять его
 --и/или модифицировать в соответствии с условиями версии 2.1 либо по вашему выбору с условиями
 --более поздней версии Стандартной Общественной Лицензии Ограниченного Применения GNU,
@@ -22,6 +21,8 @@ import СИС2 classes Функции;
   inobject private
 
   var фреймДопСервис: TemplateFrame;
+  var тблНавигатор: Grid;
+
   var секцСценарийЗаголовокТаблицы: TemplateSection;
   var секцСценарий: TemplateSection;
   var NN: integer[] = $;
@@ -30,9 +31,152 @@ import СИС2 classes Функции;
   proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
     ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
   end;
+
+  proc СоздатьНавигатор;
+    var i, ii: integer;
+
+    --{ очистка навигатора
+    тблНавигатор.BeginModify;
+    тблНавигатор.Root.Clear;
+    ii = тблНавигатор.ColumnsCount;
+    for i = ii .. 1 step -1 do
+      тблНавигатор.DeleteColumn(i);
+    od;
+    тблНавигатор.EndModify;--}
+    --{ создание столбцов навигатора
+    with тблНавигатор.AddColumn do
+      Caption      = '';
+      Font.Name    = 'Arial';
+      Font.Size    = 8;
+      Width        = 0;
+      Alignment    = Kernel.Template.LeftAlign;
+      CanEdit      = false;
+      CanSort      = false;
+      ColumnFormat = Kernel.Cardfile.StringFormat;
+    end;
+    --}
+    --{ заполнение навигатора строками в соотв. с подтаблицей СеансПП
+    --}
+    --{ оформление навигатора
+    with тблНавигатор do
+      ShowHeader = false;
+      ShowIcons = true;
+      ShowRoot = false;
+      ShowGrid  = false;
+      ShowZebra  = false;
+    end;
+    --}
+
+--    var Column                  : TableColumn;
+--    var ЭлементНавигатора[]     : GridItem;
+--    var Q                       : Query;
+--    var k,j                     : integer;
+--    var аВидыФО                 : string[];
+--    аВидыФО             =  РазобратьСтрокуВМассив(ВидыФО,'|',true,false);
+--    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--    ОчиститьНавигатор(тблВФО);
+--    --создание и оформление колонок:
+--    --разрешено...
+--    Column              = тблВФО.AddColumn;
+--    Column.Caption      = 'Применяется';
+--    Column.Font.Name    = 'Arial';
+--    Column.Font.Size    = 8;
+--    Column.Width        = 85;
+--    Column.MinWidth     = 85;
+--    Column.Alignment    = Kernel.Template.CenterAlign;
+--    Column.CanEdit      = true;
+--    Column.CanSort      = false;
+--    Column.ColumnFormat = Kernel.Cardfile.LogicalFormat;
+--    --код...
+--    Column              = тблВФО.AddColumn;
+--    Column.Caption      = 'Код';
+--    Column.Font.Name    = 'Arial';
+--    Column.Font.Size    = 8;
+--    Column.Width        = 35;
+--    Column.MinWidth     = 35;
+--    Column.Alignment    = Kernel.Template.CenterAlign;
+--    Column.CanSort      = false;
+--    --описание...
+--    Column              = тблВФО.AddColumn;
+--    Column.Caption      = 'Наименование';
+--    Column.Font.Name    = 'Arial';
+--    Column.Font.Size    = 8;
+--    Column.Width        = 160;
+--    Column.MinWidth     = 160;
+--    Column.Alignment    = Kernel.Template.LeftAlign;
+--    Column.CanSort      = false;
+----    --Справочники...
+--    Column              = тблВФО.AddColumn;
+--    --Column.Caption      = 'Справочники';
+--    Column.Font.Name    = 'Arial';
+--    Column.Font.Bold    = True;
+--    Column.Font.Size    = 8;
+--    Column.Width        = 20;
+--    Column.MinWidth     = 20;
+--    Column.Alignment    = Kernel.Template.CenterAlign;
+--    Column.CanSort      = false;
+--    Column.CanSort      = false;
+--    Column.Color        = clLtGray;
+--
+--    --Column.FieldType    = Kernel.Template.StaticText;
+--    --Column.CanEdit      = true;
+----    Column.Button       = true;
+--    --Оформление:
+--    --тблВФО.ShowRoot=true;
+--    тблВФО.ShowRoot     = false;
+--    тблВФО.ShowHeader   = true;
+--    тблВФО.ShowIcons    = false;
+--    --тблВФО.ShowHeader   = false;
+--    тблВФО.ShowGrid     = true;
+--    --тблВФО.ShowZebra    = true;
+--    --собственно заполнение
+--    Q                   = Query.Create([Справочники.КодВФО]);
+--    if    КазенноеУчреждение then
+--      Q.Filter          = ФильтрСпрВФО1('КУ');
+--    elsif БюджетноеУчреждение then
+--      Q.Filter          = ФильтрСпрВФО1('БУ');
+--    elsif АвтономноеУчреждение then
+--      Q.Filter          = ФильтрСпрВФО1('АУ');
+--    end;
+--    --Q.LoadingFields     = '';
+--    Q.Order             = 'Код';
+--    Q.Select;
+--    ЭлементНавигатора[1]= тблВФО.Root;
+--    for k = 1..Q.Count do
+--      if Q.Current.Код in аВидыФО then
+--        ЭлементНавигатора[1].Add([true, Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
+--      else
+--        ЭлементНавигатора[1].Add([false,Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
+--      end;
+--      j                 = ЭлементНавигатора[1].Count;
+--      ЭлементНавигатора[1].Items[j].isGroup=false;
+--      Q.Next;
+--    end;
+  end;
+
+  proc ЗаполнитьНавигатор;
+    
+  end;
+
+
 --}}
 
 --{{ Обработчики событий шаблона
+
+  proc шаблон_ПриСоздании(Context: Variant);
+    inherited шаблон_ПриСоздании(Context);
+    СоздатьНавигатор;
+  end;
+
+  proc шаблон_ПриОткрытии(Create :Logical);
+    inherited шаблон_ПриОткрытии(Create);
+    тблНавигатор.Align = true;
+  end;
+
+  proc шаблон_ПриСчитывании;
+    inherited шаблон_ПриСчитывании;
+    ЗаполнитьНавигатор;
+  end;
 --}}
 
 --{{ Обработчики событий клеток шаблона

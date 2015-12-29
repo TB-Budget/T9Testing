@@ -186,7 +186,7 @@ import СИС2 classes Функции;
       Index = Cell.Frame;
       локЗаписьПримера = ТестПП[Index].Пример;
       if (локЗаписьПримера <> nil):
-        OpenBlankEditor('Тесты.редТест', локЗаписьПримера,  Window.ModalWindow);
+        OpenBlankEditor('Тесты.редТестовыйПример', локЗаписьПримера,  Window.ModalWindow);
       else
         Message('Ошибка. Тестовый пример был удален нештатным способом.');
       fi;--}
@@ -268,8 +268,8 @@ import СИС2 classes Функции;
   end;
 
   func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
-    Window.Caption = if(ЭтоШаблон, 'Тест-план класса Т9 (шаблон)', 'Тест-план класса Т9');
-    Result = if(ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
+    Window.Caption = if(Self.Record.ЭтоШаблон, 'Тест-план класса Т9 (шаблон)', 'Тест-план класса Т9');
+    Result = if(Self.Record.ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
   end;
 
 --}}
@@ -344,7 +344,7 @@ import СИС2 classes Функции;
           aId[t] = ТестПП[t].Пример.ПоШаблону.DocId;
         fi;
       od;
-      if CmOk = OpenCardfile('Тесты.картТест', локЗаписьПримераШбл, 'ЭтоШаблон and not DocId in ' + ToStr(aId), Window.ModalWindow):
+      if CmOk = OpenCardfile('Тесты.картТестовыйПример', локЗаписьПримераШбл, 'ЭтоШаблон and not DocId in ' + ToStr(aId), Window.ModalWindow):
         with ТестПП.Insert(1) do
           локЗаписьПримера = Т9_Тесты.ТестовыйПример.Create;
           локЗаписьПримера.ТипБазовогоКласса  = ТипБазовогоКласса;
