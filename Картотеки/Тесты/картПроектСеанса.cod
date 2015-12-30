@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.картБазовая "Тест-планы сеансов тестирования";
+class inherited СИС2.картБазовая "Проекты сеансов тестирования";
 
 inobject private
 
@@ -28,7 +28,7 @@ inobject private
 --{{ Обработчики событий столбцов картотеки
 
   func КартПоле_ПриВыводе (Column: CardfileColumn; Rec: Record; Action: Template.OutputTypes; var Format: String): Variant;
-    Result = Rec.ТестПП.Count;
+    Result = Rec.ТестПланПП.Count;
   end;
 --}}
 

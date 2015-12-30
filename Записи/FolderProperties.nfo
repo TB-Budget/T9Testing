@@ -2,10 +2,10 @@
 <Properties Version="1"/>
 <Items>
   <Item Name="БазоваяЗапись"/>
-  <Item Name="ТестовыйПример"/>
   <Item Name="СпецификацияКласса"/>
+  <Item Name="ТестовыйПример"/>
   <Item Name="ТестПланКласса"/>
-  <Item Name="ТестПланСеанса"/>
+  <Item Name="ПроектСеанса"/>
   <Item Name="СеансТестирования"/>
-  <Item Name="РезультатТеста"/>
+  <Item Name="Тест"/>
 </Items>

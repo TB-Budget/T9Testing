@@ -1,7 +1,7 @@
 [Options]
 Version=7
-Query=.ТестПланСеанса
-MBlank=.Тесты.редТестПланСеанса
+Query=.ПроектСеанса
+MBlank=.Тесты.редПроектСеанса
 ShowDeleted=0
 CanEdit=1
 ActionOnType=0
@@ -13,7 +13,7 @@ CanDropOnRecord=0
 OnMove=картотека_ПриПеремещении
 OnOpenBlank=картотека_ПриОткрытииБланка
 OnCreateRecord=картотека_ПриСозданииЗаписи
-CaptionRows=1
+CaptionRows=2
 ShowSummary=0
 ShowCount=1
 CanInplace=0
@@ -26,7 +26,7 @@ OnClick=картотека_ПриНажатии
 OnRearrange=картотека_ПриОформлении
 ColumnCount=2
 Column:0=Наим
-Column:1=КолШагов
+Column:1=КолТестПланов
 TreeVisible=0
 TreeWidth=120
 SubTableVisible=0
@@ -42,7 +42,7 @@ CanResizeTemplate=0
 SubTableCount=0
 
 [.Column.Наим]
-Caption=Наименование тест-плана
+Caption=Наименование проекта сеанса
 Width=0
 MinWidth=0
 Visible=1
@@ -59,8 +59,8 @@ FieldSize=0
 ManualEdit=0
 UseFont=0
 
-[.Column.КолШагов]
-Caption=Кол-во тестов
+[.Column.КолТестПланов]
+Caption=Кол-во тест-планов
 Width=100
 MinWidth=100
 Visible=1

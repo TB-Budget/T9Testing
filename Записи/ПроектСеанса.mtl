@@ -15,11 +15,11 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-record ТестПланСеанса inherited БазоваяЗаписьТесты title "Тест-планы для сеансов тестирования";
+record ПроектСеанса inherited БазоваяЗаписьТесты title "Проект сеанса тестирования";
   field Наим: string title 'Наименование тест-плана'; --
   field Комментарий: string title 'Комментарий'; -- Произвольный комментарий
 
-  struct ТестПП array Integer title "Порядок прохождения тестов";
+  struct ТестПланПП array Integer title "Порядок прохождения тестов";
     field ТестПланКласса: ТестПланКласса; --
   end;
 

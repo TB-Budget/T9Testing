@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.БазовыйБланкРедактор "Тест-план сеанса тестирования", editor ТестПланСеанса;
+class inherited СИС2.БазовыйБланкРедактор "Тест-план сеанса тестирования", editor ПроектСеанса;
 
 import СИС2 classes Функции;
 
@@ -40,7 +40,7 @@ import СИС2 classes Функции;
     if (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы):--{ добавление тест-плана класса в тест-план из заголовка таблицы
       locCrd = Тесты.картТестПланКласса.Create;
       if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not ЭтоШаблон', Window.ModalWindow):
-        with ТестПП.Insert(1) do
+        with ТестПланПП.Insert(1) do
           ТестПланКласса = локЗаписьТестПлана;
         end;
       fi;
@@ -49,13 +49,13 @@ import СИС2 classes Функции;
       locCrd = Тесты.картТестПланКласса.Create;
       if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not ЭтоШаблон', Window.ModalWindow):
         Index = Cell.Frame;
-        with ТестПП.Insert(Index + 1) do
+        with ТестПланПП.Insert(Index + 1) do
           ТестПланКласса = локЗаписьТестПлана;
         end;
       fi;
       --}
     elsif (Cell.Contents = '-') and (Cell.Owner = секцСценарий):--{ удаление строки из тест-плана (без удаления тест-плана класса из справочника)
-      ТестПП.Delete(Index);
+      ТестПланПП.Delete(Index);
       --}
     -- перемещение строк
     elsif (Cell.Contents = '5') and (Cell.Owner = секцСценарий):--{ вверх
@@ -71,7 +71,7 @@ import СИС2 classes Функции;
     -- карточка тест-плана класса
     elsif (Cell.Contents = '...') and (Cell.Owner = секцСценарий):--{
       Index = Cell.Frame;
-      локЗаписьТестПлана = ТестПП[Index].ТестПланКласса;
+      локЗаписьТестПлана = ТестПланПП[Index].ТестПланКласса;
       if (локЗаписьТестПлана <> nil):
         OpenBlankEditor('Тесты.редТестПланКласса', локЗаписьТестПлана,  Window.ModalWindow);
       else
