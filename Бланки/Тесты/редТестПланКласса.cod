@@ -22,11 +22,14 @@ import СИС2 classes Функции;
   inclass private
 
   stored var ЗаморозитьЗаголовокТаблицы: logical;
+  stored var ПоказыватьЗебру: logical;
 
   inobject private
 
   var фреймДопСервис: TemplateFrame;
   var фреймРабочееПоле: TemplateFrame;
+  var фреймРеквизиты: TemplateFrame;
+  var фреймСценарий: TemplateFrame;
   var секцНаимТестПлана: TemplateSection;
   var секцСценарийЗаголовокТаблицы: TemplateSection;
   var секцСценарий: TemplateSection;
@@ -69,8 +72,15 @@ import СИС2 classes Функции;
 
   proc ЗаморозкаЗаголовкаТаблицы;
     var локГраницаЗаморозки: numeric;
-    локГраницаЗаморозки = 50;
-    фреймРабочееПоле.FreezeArea(0, 0, 0, локГраницаЗаморозки);
+    var r: integer;
+    with секцСценарийЗаголовокТаблицы do
+      for r = 1 .. RowsCount do
+        локГраницаЗаморозки = локГраницаЗаморозки + Row[r].Height;
+      od;
+    end;
+    --локГраницаЗаморозки = 50;
+    --фреймРабочееПоле.FreezeArea(0, 0, 0, локГраницаЗаморозки);
+    фреймСценарий.FreezeArea(0, 0, 0, локГраницаЗаморозки);
   end;
 
 --}}
@@ -287,6 +297,22 @@ import СИС2 classes Функции;
   end;
 
   proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    var locStyle: TemplateStyle;
+    var locColor, locR, locG, locB, newR, newG, newB: Integer;
+    var Delta: integer;
+    if ПоказыватьЗебру and (Cell.Contents in ['Пример.Наим','Пример.СценарийТеста','Пример.ОжидаемыйРезультат','NN']):
+      if (Mod(Cell.Frame, 2) = 0): -- это четная позиция
+        Delta = -40;
+        locStyle = Cell.Style;
+        locColor = locStyle.FieldColor;
+        SplitColor(locColor, locR, locG, locB);
+        newR = if(((locR + Delta) > 0), Min([255, (locR + Delta)]), 0);
+        newG = if(((locG + Delta) > 0), Min([255, (locG + Delta)]), 0);
+        newB = if(((locB + Delta) > 0), Min([255, (locB + Delta)]), 0);
+        locColor = newR + (newG * 256) + (newB * 256 * 256);
+        FieldColor = locColor;
+      fi;
+    fi;
   end;
 
 

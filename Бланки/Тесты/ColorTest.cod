@@ -1,0 +1,54 @@
+Class  "" ;
+
+InClass Public
+
+Color1: integer;
+R1: integer;
+G1: integer;
+B1: integer;
+D0: integer;
+D1: integer;
+D2: integer;
+D3: integer;
+R2: integer = if((R1 +  D1) > 0, Min([255, R1 +  D1]), 0);
+G2: integer = if((G1 +  D1) > 0, Min([255, G1 +  D2]), 0);
+B2: integer = if((B1 +  D1) > 0, Min([255, B1 +  D3]), 0);
+Color2: integer = R2 + (256 * G2) + (256 * 256 * B2);
+
+--{{
+inobject
+
+  func Поле_ПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+    var locColor: integer;
+    if (Cell.Contents = 'Color1') and (Action <> Template.Clear):
+      locColor = Color1;
+      if cmOk = (ChooseColor(locColor)):
+        Color1 = locColor;
+        SplitColor(locColor, R1, G1, B1);
+      fi;
+    elsif (Cell.Contents = 'Color1') and (Action = Template.Clear):
+        Color1 = -1;
+        SplitColor(Color1, R1, G1, B1);
+    fi;
+  end;
+
+  proc Поле_ПриВыходе(Cell: TemplateCell; Index: Integer);
+    if (Cell.Contents = 'D0'):
+      D1 = D0;
+      D2 = D0;
+      D3 = D0;
+    fi;
+  end;
+
+  proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    if (Cell.Contents = 'Color1'):
+      FieldColor = Color1;
+    elsif (Cell.Contents = 'Color2'):
+      FieldColor = Color2;
+    fi;
+  end;
+
+--}}
+
+
+end
