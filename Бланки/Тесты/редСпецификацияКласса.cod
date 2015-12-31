@@ -128,23 +128,27 @@ import СИС2 classes Функции;
         ПолноеИмяКласса = nil;
         ИмяПроектаКласса = nil;
       else
+        vClass = if(ПолноеИмяКласса <> nil, FindClass(ПолноеИмяКласса), nil);
         if (ТипБазовогоКласса in [Константы.ТипБланк,Константы.ТипБланкРедактор]):
           if CmOk = ChooseClass(Kernel.BlankForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
             ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
+            Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
         elsif (ТипБазовогоКласса in [Константы.типКартотека]):
           if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
+            Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
         elsif (ТипБазовогоКласса in [Константы.типОтчет]):
           if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
+            Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
         elsif (ТипБазовогоКласса  = nil):
