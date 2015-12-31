@@ -50,6 +50,16 @@ inclass public
     fi;
   end;
 
-
+  --@doc То же для столбцов картотеки
+  proc ОбновитьСписокКартПоля(locColumn: CardFileColumn; locList: variant[2]; ИндексКода: integer = 1; ИндексОписания: integer = 2);
+    var i, ii: integer;
+    if (locColumn <> nil):
+      locColumn.List.Clear;
+      ii = LengthOfArray(locList);
+      for i = 1 .. ii do
+        locColumn.List.Add(locList[i,ИндексОписания] as String + '|' + Str(locList[i,ИндексКода]));
+      od;
+    fi;
+  end;
 
 end

@@ -24,6 +24,14 @@ inobject private
 
 --{{ Обработчики событий шаблона
 
+  proc шаблон_ПриСоздании(Context :Variant);
+    var locColumn: CardFileColumn;
+    inherited шаблон_ПриСоздании(Context);
+    locColumn = Self.CardFile.ColumnByField['ТипБазовогоКласса'];
+    Библио.ОбновитьСписокКартПоля(locColumn, Константы.ТипыБазовыйхКлассов);
+    locColumn.List.Add('Не определено|0');
+  end;
+
   proc шаблон_ПриОткрытии(Create: Logical);
     --Запретить_Добавление = true;
     inherited шаблон_ПриОткрытии(Create);

@@ -23,9 +23,10 @@ CanCopy=1
 ShowRecords=0
 OnClick=картотека_ѕриЌажатии
 OnRearrange=картотека_ѕриќформлении
-ColumnCount=2
-Column:0=Ќаим
-Column:1=ѕолное»м€ ласса
+ColumnCount=3
+Column:0=“ипЅазового ласса
+Column:1=Ќаим
+Column:2=ѕолное»м€ ласса
 TreeVisible=1
 TreeWidth=120
 SubTableVisible=0
@@ -39,6 +40,24 @@ TemplateHeight=0
 TemplatePlace=1
 CanResizeTemplate=0
 SubTableCount=0
+
+[.Column.“ипЅазового ласса]
+Caption=“ип базового класса
+Width=120
+MinWidth=120
+Visible=1
+Editable=0
+Sortable=1
+Summary=0
+Designated=0
+Lookup=0
+Alignment=2
+ColumnType=0
+ColumnFormat=5
+FindMaskFormat=0
+FieldSize=0
+ManualEdit=0
+UseFont=0
 
 [.Column.Ќаим]
 Caption=Ќаименование класса

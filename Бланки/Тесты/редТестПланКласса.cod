@@ -78,8 +78,6 @@ import СИС2 classes Функции;
         локГраницаЗаморозки = локГраницаЗаморозки + Row[r].Height;
       od;
     end;
-    --локГраницаЗаморозки = 50;
-    --фреймРабочееПоле.FreezeArea(0, 0, 0, локГраницаЗаморозки);
     фреймСценарий.FreezeArea(0, 0, 0, локГраницаЗаморозки);
   end;
 
@@ -281,8 +279,10 @@ import СИС2 classes Функции;
     var Index: Integer;
     Index = Cell.Frame;
     if (Cell.Contents = 'Пример.Наим') and (Index <= секцСценарий.Count):
-      if (ТестПП[Index].Пример <> nil):
+      if (ТестПП[Index].Пример <> nil) and (Action = Template.Output):
         Result = if(ТестПП[Index].Пример.Наим <> nil, ТестПП[Index].Пример.Наим, '<cf:$808080>Тест № ' + Str(Index));
+      elsif (ТестПП[Index].Пример <> nil) and (Action <> Template.Output):
+        Result = if(ТестПП[Index].Пример.Наим <> nil, ТестПП[Index].Пример.Наим, 'Тест № ' + Str(Index));
       fi;
     elsif (Cell.Contents = 'Пример.СценарийТеста') and (Index <= секцСценарий.Count):
       Result = if(ТестПП[Index].Пример <> nil, ТестПП[Index].Пример.СценарийТеста, nil);
@@ -314,9 +314,6 @@ import СИС2 classes Функции;
       fi;
     fi;
   end;
-
-
-
 --}}
 
 --{{ Обработчики событий прочих объектов шаблона
@@ -410,7 +407,7 @@ import СИС2 classes Функции;
 
   proc флПриИзменении (Sender: CheckBox);
     if not ЗаморозитьЗаголовокТаблицы:
-      фреймРабочееПоле.UnFreezeArea;
+      фреймСценарий.UnFreezeArea;
     else
       ЗаморозкаЗаголовкаТаблицы;
     fi;

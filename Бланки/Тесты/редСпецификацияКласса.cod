@@ -19,9 +19,15 @@ class inherited СИС2.БазовыйБланкРедактор "Функцио
 
 import СИС2 classes Функции;
 
+  inclass private
+
+  stored var ЗаморозитьЗаголовокТаблицы: logical;
+  stored var ПоказыватьЗебру: logical;
+
   inobject private
 
   var фреймДопСервис: TemplateFrame;
+  var фреймОписание: TemplateFrame;
   var секцРеквизиты: TemplateSection;
   var секцРевизияЗаголовокТаблицы: TemplateSection;
   var секцРевизия: TemplateSection;
@@ -53,6 +59,16 @@ import СИС2 classes Функции;
     секцРевизия.Visible = not isGroup;
   end;
 
+  proc ЗаморозкаЗаголовкаТаблицы;
+    var локГраницаЗаморозки: numeric;
+    var r: integer;
+    with секцРевизияЗаголовокТаблицы do
+      for r = 1 .. RowsCount do
+        локГраницаЗаморозки = локГраницаЗаморозки + Row[r].Height;
+      od;
+    end;
+    фреймОписание.FreezeArea(0, 0, 0, локГраницаЗаморозки);
+  end;
 
 --}}
 
@@ -69,9 +85,12 @@ import СИС2 classes Функции;
   proc шаблон_ПриСчитывании;
     inherited шаблон_ПриСчитывании;
     ВидФормы;
+    if ЗаморозитьЗаголовокТаблицы:
+      ЗаморозкаЗаголовкаТаблицы;
+    fi;
   end;
---}}
 
+--}}
 
 --{{ Обработчики событий клеток шаблона
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
@@ -184,6 +203,24 @@ import СИС2 classes Функции;
     fi;
   end;
 
+  proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    var locStyle: TemplateStyle;
+    var locColor, locR, locG, locB, newR, newG, newB: Integer;
+    var Delta: integer;
+    if ПоказыватьЗебру and (Cell.Owner = секцРевизия):
+      if (Mod(Cell.Frame, 2) = 0): -- это четная позиция
+        Delta = -40;
+        locStyle = Cell.Style;
+        locColor = locStyle.FieldColor;
+        SplitColor(locColor, locR, locG, locB);
+        newR = if(((locR + Delta) > 0), Min([255, (locR + Delta)]), 0);
+        newG = if(((locG + Delta) > 0), Min([255, (locG + Delta)]), 0);
+        newB = if(((locB + Delta) > 0), Min([255, (locB + Delta)]), 0);
+        locColor = newR + (newG * 256) + (newB * 256 * 256);
+        FieldColor = locColor;
+      fi;
+    fi;
+  end;
 --}}
 
 --{{ Обработчики событий прочих объектов шаблона
@@ -218,6 +255,14 @@ import СИС2 classes Функции;
           fi;
         end;
       fi;
+    fi;
+  end;
+
+  proc флПриИзменении (Sender: CheckBox);
+    if not ЗаморозитьЗаголовокТаблицы:
+      фреймОписание.UnFreezeArea;
+    else
+      ЗаморозкаЗаголовкаТаблицы;
     fi;
   end;
 --}}
