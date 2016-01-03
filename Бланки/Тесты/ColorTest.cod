@@ -48,6 +48,13 @@ inobject
     fi;
   end;
 
+  proc BlankOnOpen(Create :Logical);
+    var лок»нт—хема: String;
+    лок»нт—хема = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\»нтерфейс_“есты.shi';
+    LoadInterfaceSchema(лок»нт—хема);
+  end;
+
+
 --}}
 
 

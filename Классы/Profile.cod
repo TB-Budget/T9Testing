@@ -21,6 +21,8 @@ import СИС2 classes Функции, Переменные;
 
 inclass public
 
+  var locStart: Старт;
+
   proc PreInit;
     if ПроцессЗагрузкиПрерван: Return;
     fi;
@@ -28,6 +30,9 @@ inclass public
 
   proc Init;
     var локВерсияПроектаИзИнфБазы: Numeric;
+    var общИнтСхема: String;
+    var сисКнфСхема: String;
+
     --{ регистрация в системной таблице
     with Константы do
       if НоваяИнформационнаяБазаДляПроекта(ClassProject, ИмяВерсииПроекта, ПолучитьВерсиюПроекта, локВерсияПроектаИзИнфБазы):
@@ -37,6 +42,18 @@ inclass public
         end;
       fi;
     end;--}
+    --{ при использовании голого проекта Т9_Тесты загружается интерфейсная схема, содержащая команды, специфичные для процесса тестирования
+    with SessionInfo.Infobase do
+      if (ProjectCount = 2) and not (nil in [ProjectByName['Т9_Тесты'],ProjectByName['СИС2']]):
+        общИнтСхема = ProjectByName['Т9_Тесты'].Folder + 'ИнтСхемы\Интерфейс_Тесты.shi';
+        сисКнфСхема = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\Интерфейс_Тесты.shi';
+        --if not ExistFile(сисКнфСхема):
+          CopyFile(общИнтСхема, сисКнфСхема);
+        --fi;
+        locStart = Старт.CreateEx;
+      fi;
+    end;--}
   end;
+
 
 end

@@ -9,5 +9,7 @@
     <Group Name="Записи" Type="Documents" Disabled="False"/>
     <Group Name="Бланки" Type="Blanks" Disabled="False"/>
     <Group Name="Картотеки" Type="Cards" Disabled="False"/>
+    <Group Name="ИнтСхемы" Type="Interfaces" Disabled="False"/>
+    <Group Name="СхемыДоступа" Type="Access" Disabled="True"/>
   </Groups>
 </Project>

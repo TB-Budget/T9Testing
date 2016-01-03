@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Layout Version="6">
+  <Commands>
+    <Group Name="Тесты" Caption="Тесты">
+      <Command Name="СпецификацияКласса" Caption="Спецификации классов" Action="Card" Param="Т9_Тесты.Тесты.картСпецификацияКласса"/>
+      <Command Name="ТестПланыКлассов" Caption="Тест - планы классов" Action="Card" Param="Т9_Тесты.Тесты.картТестПланКласса"/>
+    </Group>
+  </Commands>
+  <Menus>
+    <Menu Name="FMainMenu">
+      <Item Caption="&amp;Файл">
+        <Item Command="Kernel.File.New" Caption="&amp;Новый"/>
+        <Item Command="Kernel.File.Open" Caption="&amp;Открыть..."/>
+        <Item Command="Kernel.File.OpenProject" Caption="Отк&amp;рыть проект..."/>
+        <Item Command="Kernel.File.OpenInfobase" Caption="Открыть с&amp;ессию..."/>
+        <Item Command="Kernel.File.Save" Caption="&amp;Сохранить"/>
+        <Item Command="Kernel.File.SaveAs" Caption="Сохранить &amp;как..."/>
+        <Item Command="Kernel.File.SaveAll" Caption="Сохранить &amp;все"/>
+        <Item Command="Kernel.File.CloseAll" Caption="&amp;Закрыть все"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.File.Import" Caption="&amp;Импорт..."/>
+        <Item Command="Kernel.File.Export" Caption="&amp;Экспорт..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Setup.PrintSetup" Caption="Н&amp;астройка печати..."/>
+        <Item Command="Kernel.File.PrintPreview" Caption="Предварительный прос&amp;мотр"/>
+        <Item Command="Kernel.File.Print" Caption="&amp;Печать..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.File.ClosedStates" Caption="&lt;Закрытые проекты&gt;"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.File.ClosedDocs" Caption="&lt;Закрытые документы&gt;"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Service.Quit" Caption="В&amp;ыход"/>
+      </Item>
+      <Item Caption="&amp;Правка">
+        <Item Command="Kernel.Edit.Undo" Caption="&amp;Отменить"/>
+        <Item Command="Kernel.Edit.Redo" Caption="В&amp;ернуть"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Edit.Cut" Caption="В&amp;ырезать"/>
+        <Item Command="Kernel.Edit.Copy" Caption="&amp;Копировать"/>
+        <Item Command="Kernel.Edit.Paste" Caption="&amp;Вставить"/>
+        <Item Command="Kernel.Edit.Delete" Caption="&amp;Удалить"/>
+        <Item Command="Kernel.Edit.Clipboard" Caption="К&amp;арман"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Find.Find" Caption="&amp;Поиск..."/>
+        <Item Command="Kernel.Find.FindReplace" Caption="&amp;Замена..."/>
+        <Item Command="Kernel.Find.FindNext" Caption="Пов&amp;тор"/>
+        <Item Command="Kernel.Find.Goto" Caption="Пере&amp;ход..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Find.FindFiles" Caption="Поиск в &amp;файлах..."/>
+        <Item Command="Kernel.Find.FindResults" Caption="&amp;Результаты поиска"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Setup.FormatSetup" Caption="&amp;Настройка формата..."/>
+        <Item Command="Kernel.Edit.Properties" Caption="&amp;Свойства..."/>
+      </Item>
+      <Item Caption="&amp;Разработка">
+        <Item Command="Custom.Тесты.СпецификацияКласса" Caption="Спецификации классов"/>
+        <Item Command="Custom.Тесты.ТестПланыКлассов" Caption="Тест - планы классов"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Project.Design.Editor" Caption="&amp;Редактор проекта"/>
+        <Item Command="Kernel.Project.Design.Compile" Caption="&amp;Компилировать"/>
+        <Item Command="Kernel.Project.Design.Build" Caption="Компилиро&amp;вать все"/>
+        <Item Command="Kernel.Project.Design.Run" Caption="&amp;Запустить"/>
+        <Item Command="Kernel.Project.Design.Stop" Caption="&amp;Остановить"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Project.Design.Browser" Caption="&amp;Иерархия классов"/>
+        <Item Command="Kernel.Project.Debug.CallStack" Caption="&amp;Стек вызовов"/>
+        <Item Command="Kernel.Project.Debug.Watches" Caption="&amp;Переменные"/>
+        <Item Command="Kernel.Project.Debug.Breakpoints" Caption="Контрол&amp;ьные точки"/>
+        <Item Command="Kernel.Project.Debug.AddWatch" Caption="&amp;Добавить переменную..."/>
+        <Item Command="Kernel.Project.Debug.AddBreakpoint" Caption="Контрольная то&amp;чка"/>
+        <Item Command="Kernel.Project.Debug.Profiler" Caption="Про&amp;филировщик"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Project.Debug.TraceInto" Caption="&amp;Трассировка вызовов"/>
+        <Item Command="Kernel.Project.Debug.StepOver" Caption="По&amp;шаговое исполнение"/>
+        <Item Command="Kernel.Project.Debug.Run" Caption="Продол&amp;жить исполнение"/>
+        <Item Command="Kernel.Project.Debug.Reset" Caption="Пр&amp;екратить исполнение"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Project.Design.Options" Caption="&amp;Настройки проекта..."/>
+      </Item>
+      <Item Caption="&amp;Управление">
+        <Item Command="Kernel.Account.Journals" Caption="Открыть &amp;журнал..."/>
+        <Item Command="Kernel.Account.References" Caption="Открыть &amp;справочник..."/>
+        <Item Command="Kernel.Account.Variables" Caption="Открыть переме&amp;нные"/>
+        <Item Command="Kernel.Account.Blanks" Caption="Открыть &amp;бланк..."/>
+        <Item Command="Kernel.Account.Cardfiles" Caption="От&amp;крыть картотеку..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Account.InputTrans" Caption="Ввод &amp;проводки..."/>
+        <Item Command="Kernel.Account.InputOper" Caption="Ввод оп&amp;ерации..."/>
+        <Item Command="Kernel.Account.Change" Caption="&amp;Модифицировать..."/>
+        <Item Command="Kernel.Account.Expand" Caption="&amp;Раскрыть..."/>
+        <Item Command="Kernel.Account.Comment" Caption="&amp;Закомментировать"/>
+        <Item Command="Kernel.Account.Accounts" Caption="Выбор с&amp;чета..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Account.Reports" Caption="&amp;Отчеты..."/>
+        <Item Command="Kernel.Account.TotalJur" Caption="И&amp;тоговый журнал..."/>
+        <Item Command="Kernel.Account.Periods" Caption="Закр&amp;ытие периода..."/>
+        <Item Command="Kernel.Account.Information" Caption="&amp;Информация..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Account.Refresh" Caption="Обр&amp;аботать"/>
+        <Item Command="Kernel.Account.RefresAll" Caption="Обработать &amp;все"/>
+      </Item>
+      <Item Caption="&amp;Сервис">
+        <Item Command="Kernel.Service.Administration" Caption="&amp;Администрирование"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Service.ImportRec" Caption="И&amp;мпорт записей..."/>
+        <Item Command="Kernel.Service.ExportRec" Caption="&amp;Экспорт записей..."/>
+        <Item Command="Kernel.Service.ReplConflicts" Caption="Ко&amp;нфликты репликации..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Setup.Toolbar" Caption="Панель инс&amp;трументов"/>
+        <Item Command="Kernel.Setup.WindowBar" Caption="Закладки &amp;окон"/>
+        <Item Command="Kernel.Setup.StatusBar" Caption="&amp;Строка состояния"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Service.Calculator" Caption="&amp;Калькулятор..."/>
+        <Item Command="Kernel.Service.Calendar" Caption="Ка&amp;лендарь..."/>
+        <Item Command="Kernel.Service.Messages" Caption="Соо&amp;бщения"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Setup.ProgramSetup" Caption="Настройки &amp;программы..."/>
+      </Item>
+      <Item Caption="&amp;Окна">
+        <Item Command="Kernel.Window.New" Caption="&amp;Дублировать окно"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Window.Cascade" Caption="&amp;Каскад окон"/>
+        <Item Command="Kernel.Window.Tile" Caption="&amp;Разложить окна"/>
+        <Item Command="Kernel.Window.TileTwo" Caption="&amp;Сравнить окна"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Window.Next" Caption="С&amp;ледующее"/>
+        <Item Command="Kernel.Window.Prev" Caption="&amp;Предыдущее"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Window.Close" Caption="&amp;Закрыть"/>
+        <Item Command="Kernel.Window.CloseAll" Caption="Закрыть &amp;все"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Window.Select" Caption="В&amp;ыбор окна..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Window.List" Caption="&lt;Список окон&gt;"/>
+      </Item>
+      <Item Caption="По&amp;мощь">
+        <Item Command="Kernel.Help.About" Caption="&amp;Информация производителя..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Help.Help" Caption="&amp;Помощь..."/>
+        <Item Command="Kernel.Help.Contents" Caption="&amp;Содержание"/>
+        <Item Command="Kernel.Help.Index" Caption="Словарь &amp;терминов"/>
+        <Item Command="Kernel.Help.HelpOnWord" Caption="&amp;Контекстная помощь"/>
+        <Item Command="Kernel.Help.MainConcept" Caption="&amp;Основные понятия"/>
+        <Item Command="Kernel.Help.HelpOnHelp" Caption="&amp;Работа со Cправочной cистемой"/>
+      </Item>
+    </Menu>
+    <Menu Name="AppWinTabMenu1">
+      <Item Command="Kernel.Window.New" Caption="Дублировать окно"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Window.Cascade" Caption="Каскад окон"/>
+      <Item Command="Kernel.Window.Tile" Caption="Разложить окна"/>
+      <Item Command="Kernel.Window.TileTwo" Caption="Сравнить окна"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Window.Toggle" Caption="Переключить окна"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Window.CloseAll" Caption="Закрыть все"/>
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+    </Menu>
+    <Menu Name="MEdtEditPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Command="Kernel.File.Open" Caption="Открыть..."/>
+      <Item Command="Kernel.File.SaveAs" Caption="Сохранить как..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Text.Block.Read" Caption="Считать блок"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Undo" Caption="Отменить"/>
+      <Item Command="Kernel.Edit.Redo" Caption="Вернуть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Find.Find" Caption="Поиск..."/>
+      <Item Command="Kernel.Find.FindReplace" Caption="Замена..."/>
+      <Item Command="Kernel.Find.Goto" Caption="Переход..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Setup.EditorSetup" Caption="Настройка редактора..."/>
+    </Menu>
+    <Menu Name="MEdtBlockPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Text.Block.Write" Caption="Сохранить блок"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Undo" Caption="Отменить"/>
+      <Item Command="Kernel.Edit.Redo" Caption="Вернуть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Text.Block.Indent" Caption="Сдвинуть вправо"/>
+      <Item Command="Kernel.Text.Block.Unindent" Caption="Сдвинуть влево"/>
+      <Item Command="Kernel.Text.Block.Upcase" Caption="Поднять регистр"/>
+      <Item Command="Kernel.Text.Block.Locase" Caption="Опустить регистр"/>
+      <Item Command="Kernel.Text.Block.ChangeFont" Caption="Заменить шрифт"/>
+      <Item Command="Kernel.Text.Block.Comment" Caption="Закомментировать"/>
+      <Item Command="Kernel.Text.Block.Format" Caption="Форматировать"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Service.CalcSum" Caption="Подсчитать сумму"/>
+    </Menu>
+    <Menu Name="MTplBlankPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.View.SetVisible" Caption="Настроить видимость..."/>
+      <Item Command="Kernel.View.FreezeTable" Caption="Просмотр таблиц"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MTplMultiPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.InsertObj" Caption="Добавить "/>
+      <Item Command="Kernel.Edit.DeleteObj" Caption="Удалить "/>
+      <Item Command="Kernel.Form.Run.StrokeMoveUp" Caption="Кадр вверх"/>
+      <Item Command="Kernel.Form.Run.StrokeMoveDown" Caption="Кадр вниз"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.View.SetVisible" Caption="Настроить видимость..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MTplEdtPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Command="Kernel.File.Replace" Caption="Заменить..."/>
+      <Item Command="Kernel.File.SaveAs" Caption="Сохранить как..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.InsSects" Caption="Вставка секций..."/>
+      <Item Command="Kernel.Form.Design.SectProps" Caption="Свойства секций..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.CellProps" Caption="Свойства клеток..."/>
+      <Item Command="Kernel.Form.Design.FrameProps" Caption="Свойства фрейма..."/>
+      <Item Command="Kernel.Form.Design.FormProps" Caption="Свойства шаблона..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Service.DocumentExplorer" Caption="Структура документа"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MTplRowPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.InsSects" Caption="Вставка секций..."/>
+      <Item Command="Kernel.Form.Design.SectProps" Caption="Свойства секций..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.InsRows" Caption="Вставка строк..."/>
+      <Item Command="Kernel.Form.Design.RowProps" Caption="Свойства строк..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.CellProps" Caption="Свойства клеток..."/>
+      <Item Command="Kernel.Form.Design.FormProps" Caption="Свойства шаблона..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MTplColPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.InsCols" Caption="Вставка столбцов..."/>
+      <Item Command="Kernel.Form.Design.ColProps" Caption="Свойства столбцов..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.CellProps" Caption="Свойства клеток..."/>
+      <Item Command="Kernel.Form.Design.FormProps" Caption="Свойства шаблона..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MTplObjPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.Design.ObjectMoveUp" Caption="Поднять"/>
+      <Item Command="Kernel.Form.Design.ObjectMoveDown" Caption="Опустить"/>
+      <Item Command="Kernel.Edit.Properties" Caption="Свойства..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MTplGridPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Copy" Caption="Копировать"/>
+      <Item Command="Kernel.Edit.Cut" Caption="Вырезать"/>
+      <Item Command="Kernel.Edit.Paste" Caption="Вставить"/>
+      <Item Command="Kernel.Edit.Delete" Caption="Удалить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.SelectAll" Caption="Выделить все"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MCrvPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Card.Run.Edit" Caption="Редактировать"/>
+      <Item Command="Kernel.Card.Run.AddRec" Caption="Добавить"/>
+      <Item Command="Kernel.Card.Run.AddGroup" Caption="Добавить группу"/>
+      <Item Command="Kernel.Card.Run.CloneRec" Caption="Дублировать"/>
+      <Item Command="Kernel.Card.Run.DeleteRec" Caption="Удалить"/>
+      <Item Command="Kernel.Card.Run.UndeleteRec" Caption="Восстановить"/>
+      <Item Command="Kernel.Card.Run.CompareRecords" Caption="Сравнить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Find.Find" Caption="Поиск..."/>
+      <Item Command="Kernel.Card.Run.Filter" Caption="Фильтр..."/>
+      <Item Caption="Выделение">
+        <Item Command="Kernel.Edit.SelectAll" Caption="Выделить все"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Card.Run.Select" Caption="Выделить..."/>
+        <Item Command="Kernel.Card.Run.Deselect" Caption="Снять выделение..."/>
+        <Item Command="Kernel.Card.Run.InvertSelection" Caption="Инвертировать выделение"/>
+        <Item Command="Kernel.Card.Run.SaveSelection" Caption="Сохранить выделение..."/>
+        <Item Command="Kernel.Card.Run.RestoreSelection" Caption="Восстановить выделение..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Card.Run.FilterSelection" Caption="Отфильтровать выделенное"/>
+      </Item>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Card.Run.ShowHierarchy" Caption="Иерархический вид"/>
+      <Item Command="Kernel.Card.Run.ShowDeleted" Caption="Удаленные записи"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Properties" Caption="Свойства..."/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MCrvSubPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.InsertObj" Caption="Добавить "/>
+      <Item Command="Kernel.Edit.DeleteObj" Caption="Удалить "/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Card.Run.Filter" Caption="Фильтр..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MCrvDesignPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.InsertObj" Caption="Добавить "/>
+      <Item Command="Kernel.Card.Design.AddCalcColumn" Caption="Добавить вычислимый столбец"/>
+      <Item Command="Kernel.Edit.DeleteObj" Caption="Удалить "/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Card.Design.AddTable" Caption="Добавить подтаблицу..."/>
+      <Item Command="Kernel.Card.Design.DelTable" Caption="Удалить подтаблицу"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Card.Design.ColProps" Caption="Свойства столбца..."/>
+      <Item Command="Kernel.Card.Design.CardProps" Caption="Свойства картотеки..."/>
+      <Item Command="Kernel.Form.Design.FormProps" Caption="Свойства шаблона..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MGraPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Graph.Type" Caption="Вид графика"/>
+      <Item Command="Kernel.Graph.Legend" Caption="Легенда"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Graph.Hints" Caption="Подсказки"/>
+      <Item Command="Kernel.Graph.Look3D" Caption="Трехмерность"/>
+      <Item Command="Kernel.Graph.Hatched" Caption="Штриховка"/>
+      <Item Command="Kernel.Graph.Turn" Caption="Переворот графика"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Graph.Data" Caption="Данные"/>
+      <Item Command="Kernel.Graph.PrevTab" Caption="Предыдущая таблица"/>
+      <Item Command="Kernel.Graph.NextTab" Caption="Следующая таблица"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Graph.GraphSetup" Caption="Настройки графика..."/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MGraDesignPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Graph.GraphSetup" Caption="Настройки графика..."/>
+      <Item Command="Kernel.Form.Design.FormProps" Caption="Свойства шаблона..."/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MJurTabMainPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Account.InputTrans" Caption="Ввод проводки..."/>
+      <Item Command="Kernel.Account.InputOper" Caption="Ввод операции..."/>
+      <Item Command="Kernel.Account.Change" Caption="Модифицировать..."/>
+      <Item Command="Kernel.Account.Expand" Caption="Раскрыть..."/>
+      <Item Command="Kernel.Account.Comment" Caption="Закомментировать"/>
+      <Item Command="Kernel.Card.Run.CloneRec" Caption="Дублировать"/>
+      <Item Command="Kernel.Card.Run.DeleteRec" Caption="Удалить"/>
+      <Item Command="Kernel.Card.Run.UndeleteRec" Caption="Восстановить"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Find.Find" Caption="Поиск..."/>
+      <Item Command="Kernel.Card.Run.Filter" Caption="Фильтр..."/>
+      <Item Caption="Выделение">
+        <Item Command="Kernel.Edit.SelectAll" Caption="Выделить все"/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Card.Run.Select" Caption="Выделить..."/>
+        <Item Command="Kernel.Card.Run.Deselect" Caption="Снять выделение..."/>
+        <Item Command="Kernel.Card.Run.InvertSelection" Caption="Инвертировать выделение"/>
+        <Item Command="Kernel.Card.Run.SaveSelection" Caption="Сохранить выделение..."/>
+        <Item Command="Kernel.Card.Run.RestoreSelection" Caption="Восстановить выделение..."/>
+        <Item Caption="-"/>
+        <Item Command="Kernel.Card.Run.FilterSelection" Caption="Отфильтровать выделенное"/>
+      </Item>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Card.Run.ShowDeleted" Caption="Удаленные записи"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.Properties" Caption="Свойства..."/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+    <Menu Name="MJurTransPopup">
+      <Item Command="Kernel.Window.Close" Caption="Закрыть"/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Edit.InsertObj" Caption="Добавить "/>
+      <Item Command="Kernel.Edit.DeleteObj" Caption="Удалить "/>
+      <Item Command="Kernel.Edit.EditObj" Caption="Редактировать "/>
+      <Item Caption="-"/>
+      <Item Command="Kernel.Form.DesignMode" Caption="Дизайн-режим"/>
+    </Menu>
+  </Menus>
+  <Toolbars>
+    <FixedToolbars>
+      <Toolbar>
+        <Button Command="Kernel.File.OpenInfobase"/>
+        <Button Command="Kernel.File.OpenProject"/>
+        <Divider/>
+        <Button Command="Kernel.File.New"/>
+        <Button Command="Kernel.File.Open"/>
+        <Button Command="Kernel.File.Save"/>
+        <Divider/>
+        <Button Command="Kernel.File.PrintPreview"/>
+        <Button Command="Kernel.File.Print"/>
+        <Button Command="Kernel.View.Scale"/>
+        <Divider/>
+        <Button Command="Kernel.Find.Find"/>
+        <Button Command="Kernel.Find.FindReplace"/>
+        <Divider/>
+        <Button Command="Kernel.Edit.Cut"/>
+        <Button Command="Kernel.Edit.Copy"/>
+        <Button Command="Kernel.Edit.Paste"/>
+        <Button Command="Kernel.Edit.Delete"/>
+        <Button Command="Kernel.Edit.Undo"/>
+        <Button Command="Kernel.Edit.Redo"/>
+        <Divider/>
+        <Button Command="Kernel.Setup.ProgramSetup"/>
+        <Button Command="Kernel.Service.Administration"/>
+        <Divider/>
+        <Button Command="Kernel.Help.About"/>
+        <Divider/>
+        <Button Command="Kernel.Service.Quit"/>
+      </Toolbar>
+    </FixedToolbars>
+    <ScrollToolbars/>
+  </Toolbars>
+  <Keyboards>
+    <Keyboard Name="Main">
+      <Bind Command="Kernel.Edit.Copy" Key="Ctrl+Ins"/>
+      <Bind Command="Kernel.Edit.Cut" Key="Shift+Del"/>
+      <Bind Command="Kernel.Edit.Delete" Key="Ctrl+Del"/>
+      <Bind Command="Kernel.Edit.Paste" Key="Shift+Ins"/>
+      <Bind Command="Kernel.Edit.Properties" Key="Alt+Enter"/>
+      <Bind Command="Kernel.Edit.Redo" Key="Ctrl+BkSp"/>
+      <Bind Command="Kernel.Edit.Undo" Key="Alt+BkSp"/>
+      <Bind Command="Kernel.File.Open" Key="F3"/>
+      <Bind Command="Kernel.File.Print" Key="F7"/>
+      <Bind Command="Kernel.File.PrintPreview" Key="Shift+F7"/>
+      <Bind Command="Kernel.File.Save" Key="F2"/>
+      <Bind Command="Kernel.File.SaveAll" Key="Shift+F2"/>
+      <Bind Command="Kernel.File.SaveAs" Key="Alt+F2"/>
+      <Bind Command="Kernel.Find.Find" Key="Ctrl+S"/>
+      <Bind Command="Kernel.Find.FindNext" Key="Ctrl+L"/>
+      <Bind Command="Kernel.Find.FindPrev" Key="Ctrl+Shift+L"/>
+      <Bind Command="Kernel.Find.FindReplace" Key="Ctrl+R"/>
+      <Bind Command="Kernel.Find.Goto" Key="Ctrl+G"/>
+      <Bind Command="Kernel.Help.Contents" Key="Alt+F1"/>
+      <Bind Command="Kernel.Help.Help" Key="F1"/>
+      <Bind Command="Kernel.Help.HelpOnWord" Key="Ctrl+F1"/>
+      <Bind Command="Kernel.Help.Index" Key="Shift+F1"/>
+      <Bind Command="Kernel.Service.Administration" Key="F12"/>
+      <Bind Command="Kernel.Service.Calculator" Key="Alt+R"/>
+      <Bind Command="Kernel.Service.Calendar" Key="Alt+F"/>
+      <Bind Command="Kernel.Service.DocumentExplorer" Key="Ctrl+F11"/>
+      <Bind Command="Kernel.Service.Quit" Key="Alt+F4"/>
+      <Bind Command="Kernel.Service.Quit" Key="Alt+X"/>
+      <Bind Command="Kernel.View.ScaleDec" Key="Alt+Num -"/>
+      <Bind Command="Kernel.View.ScaleInc" Key="Alt+Num +"/>
+      <Bind Command="Kernel.Window.Close" Key="Alt+F3"/>
+      <Bind Command="Kernel.Window.Close" Key="Ctrl+F4"/>
+      <Bind Command="Kernel.Window.Minimize" Key="Alt+F5"/>
+      <Bind Command="Kernel.Window.Next" Key="Ctrl+Tab"/>
+      <Bind Command="Kernel.Window.Next" Key="F6"/>
+      <Bind Command="Kernel.Window.Prev" Key="Ctrl+Shift+Tab"/>
+      <Bind Command="Kernel.Window.Prev" Key="Shift+F6"/>
+      <Bind Command="Kernel.Window.Select" Key="Alt+0"/>
+      <Bind Command="Kernel.Window.Toggle" Key="F4"/>
+      <Bind Command="Kernel.Window.Zoom" Key="F5"/>
+    </Keyboard>
+    <Keyboard Name="Session">
+      <Bind Command="Kernel.Account.Accounts" Key="Alt+S"/>
+      <Bind Command="Kernel.Account.Blanks" Key="Alt+B"/>
+      <Bind Command="Kernel.Account.Cardfiles" Key="Alt+T"/>
+      <Bind Command="Kernel.Account.Comment" Key="Ctrl+-"/>
+      <Bind Command="Kernel.Account.InputOper" Key="Alt+W"/>
+      <Bind Command="Kernel.Account.InputTrans" Key="Alt+D"/>
+      <Bind Command="Kernel.Account.Journals" Key="Alt+J"/>
+      <Bind Command="Kernel.Account.References" Key="Alt+P"/>
+      <Bind Command="Kernel.Account.RefresAll" Key="Alt+F9"/>
+      <Bind Command="Kernel.Account.Refresh" Key="F9"/>
+      <Bind Command="Kernel.Account.Reports" Key="Alt+Q"/>
+      <Bind Command="Kernel.Service.LockApp" Key="Alt+Ctrl+Ins"/>
+    </Keyboard>
+    <Keyboard Name="Project">
+      <Bind Command="Kernel.Project.Debug.AddBreakpoint" Key="Alt+Del"/>
+      <Bind Command="Kernel.Project.Debug.AddWatch" Key="Alt+Ins"/>
+      <Bind Command="Kernel.Project.Debug.GotoExecPoint" Key="Alt+Home"/>
+      <Bind Command="Kernel.Project.Debug.Reset" Key="Alt+End"/>
+      <Bind Command="Kernel.Project.Debug.Run" Key="Alt+PgDn"/>
+      <Bind Command="Kernel.Project.Debug.RunToCursor" Key="Alt+Left"/>
+      <Bind Command="Kernel.Project.Debug.StepOver" Key="Alt+Right"/>
+      <Bind Command="Kernel.Project.Debug.TraceInto" Key="Alt+Down"/>
+      <Bind Command="Kernel.Project.Design.Browser" Key="Alt+F11"/>
+      <Bind Command="Kernel.Project.Design.Build" Key="Alt+F9"/>
+      <Bind Command="Kernel.Project.Design.Compile" Key="Ctrl+F9"/>
+      <Bind Command="Kernel.Project.Design.Editor" Key="F11"/>
+      <Bind Command="Kernel.Project.Design.Run" Key="F9"/>
+      <Bind Command="Kernel.Project.Design.Stop" Key="Ctrl+F12"/>
+    </Keyboard>
+    <Keyboard Name="Editor">
+      <Bind Command="Kernel.Edit.AlignCenter" Key="Ctrl+K, L"/>
+      <Bind Command="Kernel.Edit.AlignLeft" Key="Ctrl+K, б"/>
+      <Bind Command="Kernel.Edit.AlignRight" Key="Ctrl+K, ю"/>
+      <Bind Command="Kernel.Edit.Copy" Key="Ctrl+C"/>
+      <Bind Command="Kernel.Edit.Copy" Key="Ctrl+Ins"/>
+      <Bind Command="Kernel.Edit.Cut" Key="Ctrl+X"/>
+      <Bind Command="Kernel.Edit.Cut" Key="Shift+Del"/>
+      <Bind Command="Kernel.Edit.Delete" Key="Ctrl+Del"/>
+      <Bind Command="Kernel.Edit.Delete" Key="Ctrl+K, Y"/>
+      <Bind Command="Kernel.Edit.FontBold" Key="Ctrl+J, B"/>
+      <Bind Command="Kernel.Edit.FontItalic" Key="Ctrl+J, I"/>
+      <Bind Command="Kernel.Edit.FontUnderline" Key="Ctrl+J, U"/>
+      <Bind Command="Kernel.Edit.Paste" Key="Ctrl+V"/>
+      <Bind Command="Kernel.Edit.Paste" Key="Shift+Ins"/>
+      <Bind Command="Kernel.Edit.Redo" Key="Ctrl+BkSp"/>
+      <Bind Command="Kernel.Edit.SelectAll" Key="Ctrl+A"/>
+      <Bind Command="Kernel.Edit.Undo" Key="Alt+BkSp"/>
+      <Bind Command="Kernel.Find.Find" Key="Ctrl+Q, F"/>
+      <Bind Command="Kernel.Find.FindNext" Key="Ctrl+L"/>
+      <Bind Command="Kernel.Find.FindReplace" Key="Ctrl+Q, A"/>
+      <Bind Command="Kernel.Find.Goto" Key="Ctrl+Q, G"/>
+      <Bind Command="Kernel.Move.DocBegin" Key="Ctrl+PgUp"/>
+      <Bind Command="Kernel.Move.DocEnd" Key="Ctrl+PgDn"/>
+      <Bind Command="Kernel.Move.Down" Key="Down"/>
+      <Bind Command="Kernel.Move.Left" Key="Left"/>
+      <Bind Command="Kernel.Move.PageBegin" Key="Ctrl+Home"/>
+      <Bind Command="Kernel.Move.PageDown" Key="PgDn"/>
+      <Bind Command="Kernel.Move.PageEnd" Key="Ctrl+End"/>
+      <Bind Command="Kernel.Move.PageUp" Key="PgUp"/>
+      <Bind Command="Kernel.Move.Right" Key="Right"/>
+      <Bind Command="Kernel.Move.RowBegin" Key="Home"/>
+      <Bind Command="Kernel.Move.RowEnd" Key="End"/>
+      <Bind Command="Kernel.Move.Up" Key="Up"/>
+      <Bind Command="Kernel.Move.WordLeft" Key="Ctrl+Left"/>
+      <Bind Command="Kernel.Move.WordRight" Key="Ctrl+Right"/>
+      <Bind Command="Kernel.Service.CalcSum" Key="Ctrl+K, Z"/>
+      <Bind Command="Kernel.Service.InsertHyperlink" Key="Alt+H"/>
+      <Bind Command="Kernel.Text.Block.Change" Key="Ctrl+K, M"/>
+      <Bind Command="Kernel.Text.Block.ChangeFont" Key="Ctrl+K, S"/>
+      <Bind Command="Kernel.Text.Block.Comment" Key="Ctrl+-"/>
+      <Bind Command="Kernel.Text.Block.Copy" Key="Ctrl+K, C"/>
+      <Bind Command="Kernel.Text.Block.Format" Key="Ctrl+K, F"/>
+      <Bind Command="Kernel.Text.Block.GoBegin" Key="Ctrl+K, E"/>
+      <Bind Command="Kernel.Text.Block.GoBegin" Key="Ctrl+K, Home"/>
+      <Bind Command="Kernel.Text.Block.GoBegin" Key="Ctrl+Q, B"/>
+      <Bind Command="Kernel.Text.Block.GoEnd" Key="Ctrl+K, End"/>
+      <Bind Command="Kernel.Text.Block.GoEnd" Key="Ctrl+K, N"/>
+      <Bind Command="Kernel.Text.Block.GoEnd" Key="Ctrl+Q, K"/>
+      <Bind Command="Kernel.Text.Block.Hide" Key="Ctrl+K, H"/>
+      <Bind Command="Kernel.Text.Block.Indent" Key="Ctrl+I"/>
+      <Bind Command="Kernel.Text.Block.Indent" Key="Ctrl+K, I"/>
+      <Bind Command="Kernel.Text.Block.Locase" Key="Ctrl+K, Down"/>
+      <Bind Command="Kernel.Text.Block.Locase" Key="Ctrl+K, O"/>
+      <Bind Command="Kernel.Text.Block.Move" Key="Ctrl+K, V"/>
+      <Bind Command="Kernel.Text.Block.Read" Key="Ctrl+K, R"/>
+      <Bind Command="Kernel.Text.Block.SelectBegin" Key="Ctrl+K, B"/>
+      <Bind Command="Kernel.Text.Block.SelectEnd" Key="Ctrl+K, K"/>
+      <Bind Command="Kernel.Text.Block.SelectWord" Key="Ctrl+K, T"/>
+      <Bind Command="Kernel.Text.Block.Unindent" Key="Ctrl+K, U"/>
+      <Bind Command="Kernel.Text.Block.Unindent" Key="Ctrl+U"/>
+      <Bind Command="Kernel.Text.Block.Upcase" Key="Ctrl+K, P"/>
+      <Bind Command="Kernel.Text.Block.Upcase" Key="Ctrl+K, Up"/>
+      <Bind Command="Kernel.Text.Block.Write" Key="Ctrl+K, W"/>
+      <Bind Command="Kernel.Text.Edit.Backspace" Key="BkSp"/>
+      <Bind Command="Kernel.Text.Edit.CodePatter" Key="Ctrl+Space"/>
+      <Bind Command="Kernel.Text.Edit.DelChar" Key="Del"/>
+      <Bind Command="Kernel.Text.Edit.DelRow" Key="Ctrl+Y"/>
+      <Bind Command="Kernel.Text.Edit.DelRowBegin" Key="Ctrl+Q, H"/>
+      <Bind Command="Kernel.Text.Edit.DelRowEnd" Key="Ctrl+Q, Y"/>
+      <Bind Command="Kernel.Text.Edit.DelWord" Key="Ctrl+T"/>
+      <Bind Command="Kernel.Text.Edit.DirectKey" Key="Ctrl+P, &lt;Key&gt;"/>
+      <Bind Command="Kernel.Text.Edit.DoubleLine" Key="Alt+="/>
+      <Bind Command="Kernel.Text.Edit.Enter" Key="Enter"/>
+      <Bind Command="Kernel.Text.Edit.Fold" Key="Shift+Num -"/>
+      <Bind Command="Kernel.Text.Edit.FoldAll" Key="Ctrl+Num -"/>
+      <Bind Command="Kernel.Text.Edit.GotoMarker" Key="Ctrl+Q, &lt;Digit&gt;"/>
+      <Bind Command="Kernel.Text.Edit.IndentMode" Key="Ctrl+O"/>
+      <Bind Command="Kernel.Text.Edit.InsertDate" Key="Ctrl+Z"/>
+      <Bind Command="Kernel.Text.Edit.InsMode" Key="Ins"/>
+      <Bind Command="Kernel.Text.Edit.InsRow" Key="Ctrl+N"/>
+      <Bind Command="Kernel.Text.Edit.LineDraw" Key="Ctrl+Q, L"/>
+      <Bind Command="Kernel.Text.Edit.Markers" Key="Ctrl+Q, M"/>
+      <Bind Command="Kernel.Text.Edit.NormalFont" Key="Ctrl+J, N"/>
+      <Bind Command="Kernel.Text.Edit.SelectFont" Key="Ctrl+J, &lt;Digit&gt;"/>
+      <Bind Command="Kernel.Text.Edit.SetMarker" Key="Ctrl+K, &lt;Digit&gt;"/>
+      <Bind Command="Kernel.Text.Edit.SingleLine" Key="Alt+-"/>
+      <Bind Command="Kernel.Text.Edit.SomeFont" Key="Ctrl+J, J"/>
+      <Bind Command="Kernel.Text.Edit.Tab" Key="Tab"/>
+      <Bind Command="Kernel.Text.Edit.Unfold" Key="Shift+Num +"/>
+      <Bind Command="Kernel.Text.Edit.UnfoldAll" Key="Ctrl+Num +"/>
+      <Bind Command="Kernel.View.FreezeTable" Key="Ctrl+Q, T"/>
+      <Bind Command="Kernel.View.ReadOnly" Key="Ctrl+Q, O"/>
+      <Bind Command="Kernel.View.ScaleDec" Key="Alt+Num -"/>
+      <Bind Command="Kernel.View.ScaleInc" Key="Alt+Num +"/>
+    </Keyboard>
+    <Keyboard Name="Template">
+      <Bind Command="Kernel.Edit.Copy" Key="Ctrl+C"/>
+      <Bind Command="Kernel.Edit.Cut" Key="Ctrl+X"/>
+      <Bind Command="Kernel.Edit.DeleteObj" Key="Del"/>
+      <Bind Command="Kernel.Edit.InsertObj" Key="Ins"/>
+      <Bind Command="Kernel.Edit.Paste" Key="Ctrl+V"/>
+      <Bind Command="Kernel.Edit.Select" Key="Shift+Space"/>
+      <Bind Command="Kernel.Edit.SelectAll" Key="Ctrl+A"/>
+      <Bind Command="Kernel.Edit.SelectCol" Key="Ctrl+Space"/>
+      <Bind Command="Kernel.Form.Design.BorderBottom" Key="Alt+Ctrl+Down"/>
+      <Bind Command="Kernel.Form.Design.BorderInside" Key="Alt+Ctrl+Num 5"/>
+      <Bind Command="Kernel.Form.Design.BorderLeft" Key="Alt+Ctrl+Left"/>
+      <Bind Command="Kernel.Form.Design.BorderRight" Key="Alt+Ctrl+Right"/>
+      <Bind Command="Kernel.Form.Design.BorderTop" Key="Alt+Ctrl+Up"/>
+      <Bind Command="Kernel.Form.Design.BreakSect" Key="Ctrl+B"/>
+      <Bind Command="Kernel.Form.Design.DecHeight" Key="Alt+Up"/>
+      <Bind Command="Kernel.Form.Design.DecWidth" Key="Alt+Left"/>
+      <Bind Command="Kernel.Form.Design.DelCol" Key="Ctrl+Q, Y"/>
+      <Bind Command="Kernel.Form.Design.DelRow" Key="Ctrl+Y"/>
+      <Bind Command="Kernel.Form.Design.IncHeight" Key="Alt+Down"/>
+      <Bind Command="Kernel.Form.Design.IncWidth" Key="Alt+Right"/>
+      <Bind Command="Kernel.Form.Design.InsCol" Key="Ctrl+Q, N"/>
+      <Bind Command="Kernel.Form.Design.InsRow" Key="Ctrl+N"/>
+      <Bind Command="Kernel.Form.Design.JoinSect" Key="Ctrl+J"/>
+      <Bind Command="Kernel.Form.Design.LinkCells" Key="Ctrl+M"/>
+      <Bind Command="Kernel.Form.Design.ObjectMoveDown" Key="Alt+PgDn"/>
+      <Bind Command="Kernel.Form.Design.ObjectMoveUp" Key="Alt+PgUp"/>
+      <Bind Command="Kernel.Form.DesignMode" Key="Ctrl+D"/>
+      <Bind Command="Kernel.Move.DocBegin" Key="Ctrl+PgUp"/>
+      <Bind Command="Kernel.Move.DocEnd" Key="Ctrl+PgDn"/>
+      <Bind Command="Kernel.Move.Down" Key="Down"/>
+      <Bind Command="Kernel.Move.Left" Key="Left"/>
+      <Bind Command="Kernel.Move.NextField" Key="Tab"/>
+      <Bind Command="Kernel.Move.PageBegin" Key="Ctrl+Home"/>
+      <Bind Command="Kernel.Move.PageDown" Key="PgDn"/>
+      <Bind Command="Kernel.Move.PageEnd" Key="Ctrl+End"/>
+      <Bind Command="Kernel.Move.PageUp" Key="PgUp"/>
+      <Bind Command="Kernel.Move.PrevField" Key="Shift+Tab"/>
+      <Bind Command="Kernel.Move.Right" Key="Right"/>
+      <Bind Command="Kernel.Move.RowBegin" Key="Home"/>
+      <Bind Command="Kernel.Move.RowEnd" Key="End"/>
+      <Bind Command="Kernel.Move.ScrollDown" Key="Ctrl+Down"/>
+      <Bind Command="Kernel.Move.ScrollLeft" Key="Ctrl+Left"/>
+      <Bind Command="Kernel.Move.ScrollRight" Key="Ctrl+Right"/>
+      <Bind Command="Kernel.Move.ScrollUp" Key="Ctrl+Up"/>
+      <Bind Command="Kernel.Move.Up" Key="Up"/>
+      <Bind Command="Kernel.View.ReadOnly" Key="Ctrl+Q, O"/>
+      <Bind Command="Kernel.View.Ruler" Key="Alt+Num *"/>
+      <Bind Command="Kernel.View.ScaleDec" Key="Alt+Num -"/>
+      <Bind Command="Kernel.View.ScaleInc" Key="Alt+Num +"/>
+    </Keyboard>
+    <Keyboard Name="Blank">
+      <Bind Command="Kernel.Card.Run.AddRec" Key="Alt+Ins"/>
+      <Bind Command="Kernel.Card.Run.Cancel" Key="Alt+BkSp"/>
+      <Bind Command="Kernel.Card.Run.DeleteRec" Key="Alt+Del"/>
+      <Bind Command="Kernel.Card.Run.FirstRec" Key="Alt+Home"/>
+      <Bind Command="Kernel.Card.Run.LastRec" Key="Alt+End"/>
+      <Bind Command="Kernel.Card.Run.NextRec" Key="Alt+Right"/>
+      <Bind Command="Kernel.Card.Run.Post" Key="F2"/>
+      <Bind Command="Kernel.Card.Run.PrevRec" Key="Alt+Left"/>
+      <Bind Command="Kernel.Edit.Copy" Key="Ctrl+C"/>
+      <Bind Command="Kernel.Edit.Cut" Key="Ctrl+X"/>
+      <Bind Command="Kernel.Edit.DeleteObj" Key="Del"/>
+      <Bind Command="Kernel.Edit.InsertObj" Key="Ins"/>
+      <Bind Command="Kernel.Edit.Paste" Key="Ctrl+V"/>
+      <Bind Command="Kernel.Edit.Select" Key="Shift+Space"/>
+      <Bind Command="Kernel.Edit.SelectAll" Key="Ctrl+A"/>
+      <Bind Command="Kernel.Edit.SelectCol" Key="Ctrl+Space"/>
+      <Bind Command="Kernel.Find.Sort" Key="F8"/>
+      <Bind Command="Kernel.Form.DesignMode" Key="Ctrl+D"/>
+      <Bind Command="Kernel.Form.Run.ClearStroke" Key="Alt+Space"/>
+      <Bind Command="Kernel.Form.Run.StrokeMoveDown" Key="Alt+PgDn"/>
+      <Bind Command="Kernel.Form.Run.StrokeMoveUp" Key="Alt+PgUp"/>
+      <Bind Command="Kernel.Move.DocBegin" Key="Ctrl+PgUp"/>
+      <Bind Command="Kernel.Move.DocEnd" Key="Ctrl+PgDn"/>
+      <Bind Command="Kernel.Move.Down" Key="Down"/>
+      <Bind Command="Kernel.Move.Left" Key="Left"/>
+      <Bind Command="Kernel.Move.NextField" Key="Tab"/>
+      <Bind Command="Kernel.Move.PageBegin" Key="Ctrl+Home"/>
+      <Bind Command="Kernel.Move.PageDown" Key="PgDn"/>
+      <Bind Command="Kernel.Move.PageEnd" Key="Ctrl+End"/>
+      <Bind Command="Kernel.Move.PageUp" Key="PgUp"/>
+      <Bind Command="Kernel.Move.PrevField" Key="Shift+Tab"/>
+      <Bind Command="Kernel.Move.Right" Key="Right"/>
+      <Bind Command="Kernel.Move.RowBegin" Key="Home"/>
+      <Bind Command="Kernel.Move.RowEnd" Key="End"/>
+      <Bind Command="Kernel.Move.ScrollDown" Key="Ctrl+Down"/>
+      <Bind Command="Kernel.Move.ScrollLeft" Key="Ctrl+Left"/>
+      <Bind Command="Kernel.Move.ScrollRight" Key="Ctrl+Right"/>
+      <Bind Command="Kernel.Move.ScrollUp" Key="Ctrl+Up"/>
+      <Bind Command="Kernel.Move.Up" Key="Up"/>
+      <Bind Command="Kernel.Service.CalcSum" Key="Ctrl+K, Z"/>
+      <Bind Command="Kernel.View.FreezeTable" Key="Ctrl+Q, T"/>
+      <Bind Command="Kernel.View.Ruler" Key="Alt+Num *"/>
+      <Bind Command="Kernel.View.ScaleDec" Key="Alt+Num -"/>
+      <Bind Command="Kernel.View.ScaleInc" Key="Alt+Num +"/>
+    </Keyboard>
+    <Keyboard Name="Card">
+      <Bind Command="Kernel.Card.Run.AddRec" Key="Alt+Ins"/>
+      <Bind Command="Kernel.Card.Run.Cancel" Key="Alt+BkSp"/>
+      <Bind Command="Kernel.Card.Run.CompareRecords" Key="Ctrl+Q, C"/>
+      <Bind Command="Kernel.Card.Run.DeleteRec" Key="Alt+Del"/>
+      <Bind Command="Kernel.Card.Run.Deselect" Key="Num -"/>
+      <Bind Command="Kernel.Card.Run.Edit" Key="Alt+Enter"/>
+      <Bind Command="Kernel.Card.Run.EnterGroup" Key="Ctrl+Down"/>
+      <Bind Command="Kernel.Card.Run.Filter" Key="Ctrl+F"/>
+      <Bind Command="Kernel.Card.Run.FirstRec" Key="Alt+Home"/>
+      <Bind Command="Kernel.Card.Run.GoToRoot" Key="Ctrl+\"/>
+      <Bind Command="Kernel.Card.Run.InvertSelection" Key="Num *"/>
+      <Bind Command="Kernel.Card.Run.LastRec" Key="Alt+End"/>
+      <Bind Command="Kernel.Card.Run.LeaveGroup" Key="BkSp"/>
+      <Bind Command="Kernel.Card.Run.LeaveGroup" Key="Ctrl+Up"/>
+      <Bind Command="Kernel.Card.Run.NextRec" Key="Alt+Right"/>
+      <Bind Command="Kernel.Card.Run.Post" Key="F2"/>
+      <Bind Command="Kernel.Card.Run.PrevRec" Key="Alt+Left"/>
+      <Bind Command="Kernel.Card.Run.Select" Key="Num +"/>
+      <Bind Command="Kernel.Card.Run.SelectRec" Key="Ctrl+Enter"/>
+      <Bind Command="Kernel.Card.Run.ShowSum" Key="Alt+Num *"/>
+      <Bind Command="Kernel.Card.Run.UndeleteRec" Key="Ctrl+U"/>
+      <Bind Command="Kernel.Card.Run.UseFilter" Key="Ctrl+Q, F"/>
+      <Bind Command="Kernel.Edit.Copy" Key="Ctrl+C"/>
+      <Bind Command="Kernel.Edit.Cut" Key="Ctrl+X"/>
+      <Bind Command="Kernel.Edit.DeleteObj" Key="Del"/>
+      <Bind Command="Kernel.Edit.EditObj" Key="Enter"/>
+      <Bind Command="Kernel.Edit.InsertObj" Key="Ins"/>
+      <Bind Command="Kernel.Edit.Paste" Key="Ctrl+V"/>
+      <Bind Command="Kernel.Edit.Select" Key="Space"/>
+      <Bind Command="Kernel.Edit.SelectAll" Key="Ctrl+A"/>
+      <Bind Command="Kernel.Find.AddSort" Key="Ctrl+F8"/>
+      <Bind Command="Kernel.Find.Sort" Key="F8"/>
+      <Bind Command="Kernel.Form.DesignMode" Key="Ctrl+D"/>
+      <Bind Command="Kernel.Move.DocBegin" Key="Ctrl+PgUp"/>
+      <Bind Command="Kernel.Move.DocEnd" Key="Ctrl+PgDn"/>
+      <Bind Command="Kernel.Move.Down" Key="Down"/>
+      <Bind Command="Kernel.Move.EnterField" Key="Shift+Enter"/>
+      <Bind Command="Kernel.Move.Left" Key="Left"/>
+      <Bind Command="Kernel.Move.NextField" Key="Tab"/>
+      <Bind Command="Kernel.Move.PageBegin" Key="Ctrl+Home"/>
+      <Bind Command="Kernel.Move.PageDown" Key="PgDn"/>
+      <Bind Command="Kernel.Move.PageEnd" Key="Ctrl+End"/>
+      <Bind Command="Kernel.Move.PageUp" Key="PgUp"/>
+      <Bind Command="Kernel.Move.PrevField" Key="Shift+Tab"/>
+      <Bind Command="Kernel.Move.Right" Key="Right"/>
+      <Bind Command="Kernel.Move.RowBegin" Key="Home"/>
+      <Bind Command="Kernel.Move.RowEnd" Key="End"/>
+      <Bind Command="Kernel.Move.Up" Key="Up"/>
+      <Bind Command="Kernel.Service.CalcSum" Key="Ctrl+K, Z"/>
+      <Bind Command="Kernel.View.ColDecWidth" Key="Ctrl+Num -"/>
+      <Bind Command="Kernel.View.ColIncWidth" Key="Ctrl+Num +"/>
+      <Bind Command="Kernel.View.ColMoveLeft" Key="Ctrl+Left"/>
+      <Bind Command="Kernel.View.ColMoveRight" Key="Ctrl+Right"/>
+    </Keyboard>
+    <Keyboard Name="Graphic">
+      <Bind Command="Kernel.Form.DesignMode" Key="Ctrl+D"/>
+      <Bind Command="Kernel.Graph.Data" Key="D, &lt;Digit&gt;"/>
+      <Bind Command="Kernel.Graph.FirstPage" Key="Home"/>
+      <Bind Command="Kernel.Graph.FirstTab" Key="Ctrl+Home"/>
+      <Bind Command="Kernel.Graph.LastPage" Key="End"/>
+      <Bind Command="Kernel.Graph.LastTab" Key="Ctrl+End"/>
+      <Bind Command="Kernel.Graph.Legend" Key="L, &lt;Digit&gt;"/>
+      <Bind Command="Kernel.Graph.NextPage" Key="Right"/>
+      <Bind Command="Kernel.Graph.NextTab" Key="Ctrl+Right"/>
+      <Bind Command="Kernel.Graph.PrevPage" Key="Left"/>
+      <Bind Command="Kernel.Graph.PrevTab" Key="Ctrl+Left"/>
+      <Bind Command="Kernel.Graph.Type" Key="V, &lt;Digit&gt;"/>
+    </Keyboard>
+    <Keyboard Name="Help">
+      <Bind Command="Kernel.Edit.SelectAll" Key="Ctrl+A"/>
+      <Bind Command="Kernel.Move.Back" Key="Alt+Left"/>
+      <Bind Command="Kernel.Move.Forward" Key="Alt+Right"/>
+    </Keyboard>
+  </Keyboards>
+</Layout>

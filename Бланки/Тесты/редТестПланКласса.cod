@@ -40,8 +40,6 @@ import СИС2 classes Функции;
 
   var NN: integer[] = $;
 
-  var Интерфейс: Т9_Тесты.Интерфейс.зТестПланКласса;
-
 --{{ Вспомогательные методы
 
   proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
@@ -83,9 +81,18 @@ import СИС2 classes Функции;
     фреймСценарий.FreezeArea(0, 0, 0, локГраницаЗаморозки);
   end;
 
+  proc ИзменитьСостояниеЗаписи;
+    СИС2.ФункцииДокумента.RecordEdit(Record);
+    if not Record.Modified then
+      Record.Modified = true;
+    end;
+  end;
+
+
 --}}
 
 --{{ Обработчики событий шаблона
+  локТранзакция: Transaction;
 
   proc шаблон_ПриСоздании(Context :Variant);
     var locCell: TemplateCell;
@@ -97,14 +104,32 @@ import СИС2 classes Функции;
 
   proc шаблон_ПриСчитывании;
     inherited шаблон_ПриСчитывании;
-    Интерфейс = Т9_Тесты.Интерфейс.зТестПланКласса.CreateByRecord(Record);
+    локТранзакция = Transaction.Create([ТестПланКласса,ТестовыйПример]);
     ВидФормы;
     if ЗаморозитьЗаголовокТаблицы:
       ЗаморозкаЗаголовкаТаблицы;
     fi;
   end;
 
+  func шаблон_ПриЗаписи :Logical;
+    --Result = inherited шаблон_ПриЗаписи;
+    if СИС2.ФункцииДокумента.RecordEdited(Record):
+      локТранзакция.Apply(true);
+    fi;
+    Result = true;
+  end;
+
+  func шаблон_ПриОтмене :Logical;
+    if СИС2.ФункцииДокумента.RecordEdited(Record):
+      локТранзакция.Cancel;
+      if (not БланкЗакрывается) and (not Window.Closing):
+        Шаблон_ПриСчитывании;
+      fi;
+      --Result = inherited шаблон_ПриОтмене;
+    fi;
+  end;
 --}}
+
 
 --{{ Обработчики событий клеток шаблона
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
@@ -137,6 +162,7 @@ import СИС2 classes Функции;
         with ТестПП.Insert(1) do
           Пример = локЗаписьПримера;
         end;
+        ИзменитьСостояниеЗаписи;
       fi;
       ВидФормы;
       Template.EndModify;--}
@@ -149,11 +175,13 @@ import СИС2 classes Функции;
         with ТестПП.Insert(Index + 1) do
           Пример = локЗаписьПримера;
         end;
+        ИзменитьСостояниеЗаписи;
       fi;
       ВидФормы;
       Template.EndModify;--}
     elsif (Cell.Contents in ['-','x']) and (Cell.Owner = секцСценарий) and (ЭтоШаблон):--{ удаление строки из шаблонного тест-плана (без удаления теста из справочника)
       ТестПП.Delete(Index);
+      ИзменитьСостояниеЗаписи;
       ВидФормы;--}
     -- обычный тест-план
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы) and (not ЭтоШаблон) and МожноДобавлятьПозиции:--{ добавление уникального теста обычный тест-план из заголовка таблицы
@@ -166,6 +194,7 @@ import СИС2 classes Функции;
         локЗаписьПримера.Post;
         Пример = локЗаписьПримера;
       end;
+      ИзменитьСостояниеЗаписи;
       ВидФормы;
       Template.EndModify;--}
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий) and (not ЭтоШаблон) and МожноДобавлятьПозиции:--{ добавление уникального теста обычный тест-план из строки таблицы
@@ -179,6 +208,7 @@ import СИС2 classes Функции;
         локЗаписьПримера.Post;
         Пример = локЗаписьПримера;
       end;
+      ИзменитьСостояниеЗаписи;
       ВидФормы;
       Template.EndModify;--}
     elsif (Cell.Contents in ['-','x']) and (Cell.Owner = секцСценарий) and (not ЭтоШаблон):--{ удаление строки из обычного тест-плана (вместе с удалением теста из справочника - если это возможно!)
@@ -188,6 +218,7 @@ import СИС2 classes Функции;
       try
         ТестПП[Index].Пример = nil;
         локЗаписьПримера.Delete(true);
+        ИзменитьСостояниеЗаписи;
       except
         ТестПП[Index].Пример = локЗаписьПримера;
       end;
@@ -201,11 +232,13 @@ import СИС2 classes Функции;
       Cell.SetFocus;
       if (Cell.Frame > 1):
         секцСценарий.FrameUp(Cell.Frame);
+        ИзменитьСостояниеЗаписи;
       fi;--}
     elsif (Cell.Contents = '6') and (Cell.Owner = секцСценарий):--{ вниз
       Cell.SetFocus;
       if (Cell.Frame < секцСценарий.FramesCount):
         секцСценарий.FrameDown(Cell.Frame);
+        ИзменитьСостояниеЗаписи;
       fi;--}
     -- карточка тестового примера
     elsif (Cell.Contents = '...') and (Cell.Owner = секцСценарий):--{
@@ -264,14 +297,17 @@ import СИС2 classes Функции;
     if (Cell.Contents = 'Пример.Наим'):
       if (ТестПП[Index].Пример <> nil):
         ТестПП[Index].Пример.Наим = Value as string;
+        ИзменитьСостояниеЗаписи;
       fi;
     elsif (Cell.Contents = 'Пример.СценарийТеста'):
       if (ТестПП[Index].Пример <> nil):
         ТестПП[Index].Пример.СценарийТеста = Value as string;
+        ИзменитьСостояниеЗаписи;
       fi;
     elsif (Cell.Contents = 'Пример.ОжидаемыйРезультат'):
       if (ТестПП[Index].Пример <> nil):
         ТестПП[Index].Пример.ОжидаемыйРезультат = Value as string;
+        ИзменитьСостояниеЗаписи;
       fi;
     fi;
   end;
@@ -364,6 +400,7 @@ import СИС2 classes Функции;
             Пример = локЗаписьПримера;
           end;
         od;
+        ИзменитьСостояниеЗаписи;
       fi;
       ВидФормы;
     elsif (Sender = кнЗаполнитьПоОбразцу):
@@ -384,6 +421,7 @@ import СИС2 classes Функции;
             Пример = локЗаписьПримера;
           end;
         od;
+        ИзменитьСостояниеЗаписи;
       fi;
       ВидФормы;
     elsif (Sender = кнДобавтьТест):
@@ -407,6 +445,7 @@ import СИС2 classes Функции;
           локЗаписьПримера.Post;
           Пример = локЗаписьПримера;
         end;
+        ИзменитьСостояниеЗаписи;
       fi;
       ВидФормы;
     fi;

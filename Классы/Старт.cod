@@ -1,0 +1,26 @@
+class "";
+
+inclass public
+
+  func CreateEx: “9_“есты.—тарт;
+    Result = “9_“есты.—тарт.Create;
+    Result.tmr = Timer.Create(Result);
+    Result.tmr.OnTimer = '«агрузить»нт—хему';
+    Result.tmr.Interval = 500;
+    Result.tmr.Active = true;
+  end;
+
+inobject private
+
+  var tmr: Timer;
+
+  proc «агрузить»нт—хему(loctmr: Timer = tmr);
+    var лок»нт—хема: String;
+    лок»нт—хема = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\»нтерфейс_“есты.shi';
+    LoadInterfaceSchema(лок»нт—хема);
+    if (tmr.Active):
+      tmr.Active = false;
+    fi;
+  end;
+
+end
