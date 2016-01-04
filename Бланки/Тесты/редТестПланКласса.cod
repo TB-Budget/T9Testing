@@ -17,7 +17,7 @@
 
 class inherited СИС2.БазовыйБланкРедактор "Тест-план класса Т9", editor ТестПланКласса;
 
-import СИС2 classes Функции;
+import СИС2 classes Функции, СтроковыеФункции;
 
   inclass private
 
@@ -39,6 +39,8 @@ import СИС2 classes Функции;
   var кнДобавтьТест: Button;
 
   var NN: integer[] = $;
+
+  var локТранзакция: Transaction;
 
 --{{ Вспомогательные методы
 
@@ -92,7 +94,6 @@ import СИС2 classes Функции;
 --}}
 
 --{{ Обработчики событий шаблона
-  локТранзакция: Transaction;
 
   proc шаблон_ПриСоздании(Context :Variant);
     var locCell: TemplateCell;
@@ -114,13 +115,15 @@ import СИС2 classes Функции;
   func шаблон_ПриЗаписи :Logical;
     --Result = inherited шаблон_ПриЗаписи;
     if СИС2.ФункцииДокумента.RecordEdited(Record):
+      Record.Post;
       локТранзакция.Apply(true);
     fi;
-    Result = true;
+    --Result = true;
   end;
 
   func шаблон_ПриОтмене :Logical;
     if СИС2.ФункцииДокумента.RecordEdited(Record):
+      Record.Cancel;
       локТранзакция.Cancel;
       if (not БланкЗакрывается) and (not Window.Closing):
         Шаблон_ПриСчитывании;
@@ -135,7 +138,9 @@ import СИС2 classes Функции;
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     var локЗаписьПримера: Т9_Тесты.ТестовыйПример;
     var locCrd: CardForm;
-    var Index: integer;
+    var Index, p: integer;
+    var aDocId: integer[];
+    var locFlt: string[];
     func МожноДобавлятьПозиции: logical;--{
       if ЭтоШаблон:
         Result = (ТипБазовогоКласса <> nil) and (ПолноеИмяКласса = nil) and (ИмяПроектаКласса = nil);
@@ -155,10 +160,17 @@ import СИС2 classes Функции;
       ВидФормы;--}
     -- шаблонный тест-план
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы) and (ЭтоШаблон) and МожноДобавлятьПозиции:--{ добавление шаблонного теста в шаблонный тест-план из заголовка таблицы
+      for p = 1 .. ТестПП.Count do
+        aDocId[p] = ТестПП[p].Пример.DocId;
+      od;
       Template.BeginModify;
       locCrd = Тесты.картТестовыйПример.Create;
       locCrd.ТипБазовогоКлассаПоУмолчанию = ТипБазовогоКласса;
-      if CmOk = locCrd.ShowEx(локЗаписьПримера, 'ЭтоШаблон and ТипБазовогоКласса=' + Str(ТипБазовогоКласса), Window.ModalWindow):
+      locFlt[1] = 'ТипБазовогоКласса=' + Str(ТипБазовогоКласса);
+      locFlt[2] = 'not DocId in ' + Str(aDocId);
+      locCrd.обУсловие_ТипТеста = 1; -- только шаблоны
+      locCrd.НеИзменятьПростойФильтр = true;
+      if CmOk = locCrd.ShowEx(локЗаписьПримера, СложитьСтрокиФильтраПоИ(locFlt), Window.ModalWindow):
         with ТестПП.Insert(1) do
           Пример = локЗаписьПримера;
         end;
@@ -167,10 +179,17 @@ import СИС2 classes Функции;
       ВидФормы;
       Template.EndModify;--}
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий) and (ЭтоШаблон) and МожноДобавлятьПозиции:--{ добавление шаблонного теста в шаблонный тест-план из строки таблицы
+      for p = 1 .. ТестПП.Count do
+        aDocId[p] = ТестПП[p].Пример.DocId;
+      od;
       Template.BeginModify;
       locCrd = Тесты.картТестовыйПример.Create;
       locCrd.ТипБазовогоКлассаПоУмолчанию = ТипБазовогоКласса;
-      if CmOk = locCrd.ShowEx(локЗаписьПримера, 'ЭтоШаблон and ТипБазовогоКласса=' + Str(ТипБазовогоКласса), Window.ModalWindow):
+      locFlt[1] = 'ТипБазовогоКласса=' + Str(ТипБазовогоКласса);
+      locFlt[2] = 'not DocId in ' + Str(aDocId);
+      locCrd.обУсловие_ТипТеста = 1; -- только шаблоны
+      locCrd.НеИзменятьПростойФильтр = true;
+      if CmOk = locCrd.ShowEx(локЗаписьПримера, СложитьСтрокиФильтраПоИ(locFlt), Window.ModalWindow):
         Index = Cell.Frame;
         with ТестПП.Insert(Index + 1) do
           Пример = локЗаписьПримера;
@@ -180,9 +199,12 @@ import СИС2 classes Функции;
       ВидФормы;
       Template.EndModify;--}
     elsif (Cell.Contents in ['-','x']) and (Cell.Owner = секцСценарий) and (ЭтоШаблон):--{ удаление строки из шаблонного тест-плана (без удаления теста из справочника)
+      Template.BeginModify;
+      Index = Cell.Frame;
       ТестПП.Delete(Index);
       ИзменитьСостояниеЗаписи;
-      ВидФормы;--}
+      ВидФормы;
+      Template.EndModify;--}
     -- обычный тест-план
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы) and (not ЭтоШаблон) and МожноДобавлятьПозиции:--{ добавление уникального теста обычный тест-план из заголовка таблицы
       Template.BeginModify;
@@ -360,6 +382,7 @@ import СИС2 classes Функции;
 --}}
 
 --{{ Обработчики событий прочих объектов шаблона
+
   proc кнПриНажатии (Sender: Button);
     var локЗаписьСпецификации: Т9_Тесты.СпецификацияКласса;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;

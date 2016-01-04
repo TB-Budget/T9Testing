@@ -11,5 +11,6 @@
     <Group Name="Картотеки" Type="Cards" Disabled="False"/>
     <Group Name="ИнтСхемы" Type="Interfaces" Disabled="False"/>
     <Group Name="СхемыДоступа" Type="Access" Disabled="True"/>
+    <Group Name="Приложения" Type="Other" Disabled="False"/>
   </Groups>
 </Project>

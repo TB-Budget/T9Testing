@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.БазовыйБланкРедактор "Тест-план сеанса тестирования", editor ПроектСеанса;
+class inherited СИС2.БазовыйБланкРедактор "Проект программы тестирования", editor ПроектСеанса;
 
 import СИС2 classes Функции;
 
@@ -61,7 +61,9 @@ import СИС2 classes Функции;
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var locCrd: CardForm;
-    var Index: integer;
+    var Index, p: integer;
+    var aDocId: integer[];
+    var locFlt: string[];
     proc ДоУдаления;--{
       if (Cell.Owner.Count >= Cell.Frame):
         try
@@ -78,8 +80,13 @@ import СИС2 classes Функции;
       fi;
     end;--}
     if (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы):--{ добавление тест-плана класса в тест-план из заголовка таблицы
+      for p = 1 .. ТестПланПП.Count do
+        aDocId[p] = ТестПланПП[p].ТестПланКласса.DocId;
+      od;
       locCrd = Тесты.картТестПланКласса.Create;
-      if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not ЭтоШаблон', Window.ModalWindow):
+      locCrd.обУсловие_ТипТестПлана = 2; -- только НЕ шаблоны
+      locCrd.НеИзменятьПростойФильтр = true;
+      if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not DocId in ' + Str(aDocId), Window.ModalWindow):
         with ТестПланПП.Insert(1) do
           ТестПланКласса = локЗаписьТестПлана;
         end;
@@ -88,8 +95,13 @@ import СИС2 classes Функции;
       --}
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий):--{ добавление тест-плана класса в тест-план из строки таблицы
       Index = Cell.Frame;
+      for p = 1 .. ТестПланПП.Count do
+        aDocId[p] = ТестПланПП[p].ТестПланКласса.DocId;
+      od;
       locCrd = Тесты.картТестПланКласса.Create;
-      if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not ЭтоШаблон', Window.ModalWindow):
+      locCrd.обУсловие_ТипТестПлана = 2; -- только НЕ шаблоны
+      locCrd.НеИзменятьПростойФильтр = true;
+      if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not DocId in ' + Str(aDocId), Window.ModalWindow):
         Index = Cell.Frame;
         with ТестПланПП.Insert(Index + 1) do
           ТестПланКласса = локЗаписьТестПлана;
