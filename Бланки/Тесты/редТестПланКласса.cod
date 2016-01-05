@@ -104,6 +104,13 @@ import СИС2 classes Функции, СтроковыеФункции;
   end;
 
   proc шаблон_ПриСчитывании;
+    var vClass: Class;
+    if (not ЭтоШаблон) and (ПолноеИмяКласса <> nil) and (НаимКласса = nil):
+      vClass = if(ПолноеИмяКласса <> nil, FindClass(ПолноеИмяКласса), nil);
+      if (vClass <> nil):
+        НаимКласса = vClass.ClassInfo.Description;
+      fi;
+    fi;
     inherited шаблон_ПриСчитывании;
     локТранзакция = Transaction.Create([ТестПланКласса,ТестовыйПример]);
     ВидФормы;
@@ -278,6 +285,7 @@ import СИС2 classes Функции, СтроковыеФункции;
     var vClass: Class;
     if (Cell.Contents = 'ПолноеИмяКласса'):
       if (Action = Template.Clear):
+        НаимКласса = nil;
         ПолноеИмяКласса = nil;
         ИмяПроектаКласса = nil;
       else
@@ -287,6 +295,7 @@ import СИС2 classes Функции, СтроковыеФункции;
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
             ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
+            НаимКласса = vClass.ClassInfo.Description;
             Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
@@ -294,6 +303,7 @@ import СИС2 classes Функции, СтроковыеФункции;
           if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
+            НаимКласса = vClass.ClassInfo.Description;
             Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
@@ -301,6 +311,7 @@ import СИС2 classes Функции, СтроковыеФункции;
           if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
+            НаимКласса = vClass.ClassInfo.Description;
             Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;

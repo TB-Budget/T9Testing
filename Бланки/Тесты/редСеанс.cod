@@ -46,7 +46,6 @@ import СИС2 classes Функции;
 
   proc СоздатьНавигатор;
     var i, ii: integer;
-
     --{ очистка навигатора
     тблНавигатор.BeginModify;
     тблНавигатор.Root.Clear;
@@ -79,68 +78,6 @@ import СИС2 classes Функции;
     end;
     --}
 
---    var Column                  : TableColumn;
---    var ЭлементНавигатора[]     : GridItem;
---    var Q                       : Query;
---    var k,j                     : integer;
---    var аВидыФО                 : string[];
---    аВидыФО             =  РазобратьСтрокуВМассив(ВидыФО,'|',true,false);
---    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
---    ОчиститьНавигатор(тблВФО);
---    --создание и оформление колонок:
---    --разрешено...
---    Column              = тблВФО.AddColumn;
---    Column.Caption      = 'Применяется';
---    Column.Font.Name    = 'Arial';
---    Column.Font.Size    = 8;
---    Column.Width        = 85;
---    Column.MinWidth     = 85;
---    Column.Alignment    = Kernel.Template.CenterAlign;
---    Column.CanEdit      = true;
---    Column.CanSort      = false;
---    Column.ColumnFormat = Kernel.Cardfile.LogicalFormat;
---    --код...
---    Column              = тблВФО.AddColumn;
---    Column.Caption      = 'Код';
---    Column.Font.Name    = 'Arial';
---    Column.Font.Size    = 8;
---    Column.Width        = 35;
---    Column.MinWidth     = 35;
---    Column.Alignment    = Kernel.Template.CenterAlign;
---    Column.CanSort      = false;
---    --описание...
---    Column              = тблВФО.AddColumn;
---    Column.Caption      = 'Наименование';
---    Column.Font.Name    = 'Arial';
---    Column.Font.Size    = 8;
---    Column.Width        = 160;
---    Column.MinWidth     = 160;
---    Column.Alignment    = Kernel.Template.LeftAlign;
---    Column.CanSort      = false;
-----    --Справочники...
---    Column              = тблВФО.AddColumn;
---    --Column.Caption      = 'Справочники';
---    Column.Font.Name    = 'Arial';
---    Column.Font.Bold    = True;
---    Column.Font.Size    = 8;
---    Column.Width        = 20;
---    Column.MinWidth     = 20;
---    Column.Alignment    = Kernel.Template.CenterAlign;
---    Column.CanSort      = false;
---    Column.CanSort      = false;
---    Column.Color        = clLtGray;
---
---    --Column.FieldType    = Kernel.Template.StaticText;
---    --Column.CanEdit      = true;
-----    Column.Button       = true;
---    --Оформление:
---    --тблВФО.ShowRoot=true;
---    тблВФО.ShowRoot     = false;
---    тблВФО.ShowHeader   = true;
---    тблВФО.ShowIcons    = false;
---    --тблВФО.ShowHeader   = false;
---    тблВФО.ShowGrid     = true;
---    --тблВФО.ShowZebra    = true;
 --    --собственно заполнение
 --    Q                   = Query.Create([Справочники.КодВФО]);
 --    if    КазенноеУчреждение then
@@ -167,6 +104,84 @@ import СИС2 classes Функции;
   end;
 
   proc ЗаполнитьНавигатор;
+    var ImageProject: Image;
+    var ImageClassGray: Image;
+    var ImageCheckBoxes: Image;
+    var ImageUnCheck: Image;
+    var локПозиции: Subtable;
+    var locRoot: GridItem;
+    var ЭлементНавигатора: GridItem[];
+    var локЭлементНавигатора: GridItem;
+    var ItemsCount, p, pp, n, t, tt: integer;
+    var vClass: Class;
+    var локНаимЭлемента: string;
+    var локЗаписьТеста: Т9_Тесты.Тест;
+    var locFlt: string[];
+    --{
+    ImageProject = Image.Create;
+    ImageProject.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
+    ImageClassGray = Image.Create;
+    ImageClassGray.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
+    ImageUnCheck = Image.Create;
+    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_uncheck.ico");
+    --}
+    СоздатьНавигатор;
+    --тблНавигатор.Root.Value = ['Классы'];
+    --локЭлементНавигатора[1].Add([true, Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
+    локПозиции = ТестПланПП.CreateSubtableView('not inGroup','');
+    pp = локПозиции.Count;
+    --локЭлементНавигатора[1] = тблНавигатор.Root;
+    --ЭлементНавигатора[1] = тблНавигатор.Root;
+    --pp = ТестПланПП.Count;
+    тблНавигатор.Root.Add(['Классы']);
+    тблНавигатор.Root[1].Image = ImageProject;
+    тблНавигатор.Root[1].isGroup = true;
+    тблНавигатор.Root[1].Opened = true;
+    locRoot = тблНавигатор.Root[1];
+    for p = 1 .. pp do
+      vClass = FindClass(локПозиции.ItemsByNumber[p].ПолноеИмяКласса);
+      локНаимЭлемента = if((vClass <> nil), vClass.ClassInfo.Description, локПозиции.ItemsByNumber[p].НаимКласса);
+      if (локПозиции.ItemsByNumber[p].ТестПланКласса = nil): -- это заголовок группы тест-планов (тест-планы класса)
+        locRoot.Add([локНаимЭлемента,локПозиции.IndexByNumber[p]]);
+        n = locRoot.Count;
+        locRoot[n].isGroup = true;
+        locRoot[n].Opened = false;
+        locRoot[n].Image = ImageClassGray;
+        локЭлементНавигатора = locRoot[n];
+      else -- это заголовок тест-плана (тест-план единственный для класса)
+        locRoot.Add([локНаимЭлемента,локПозиции.IndexByNumber[p]]);
+        n = locRoot.Count;
+        locRoot[n].isGroup = true;
+        locRoot[n].Opened = false;
+        locRoot[n].Image = ImageClassGray;
+        локЭлементНавигатора = locRoot[n];
+        tt = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП.Count;
+        for t = 1 .. tt do
+          локНаимЭлемента = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП.ItemsByNumber[t].Пример.Наим;
+          --локЗаписьТеста = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП[t].Наим;
+--          with Query.Create[Т9_Тесты.Тест] do
+--            locFlt[1] = 'Сеанс =' + Str(Record);
+--            locFlt[1] = 'Пример =' + Str(Record);
+--          end;
+          локЭлементНавигатора.Add([локНаимЭлемента]);
+          локЭлементНавигатора.Items[t].Image = ImageUnCheck;
+          
+        od;
+--        with Query.Create[Т9_Тесты.Тест] do
+--          locFlt[1] = 'Сеанс =' + Str(Record);
+--          locFlt[1] = 'ПримерСеанс =' + Str(Record);
+----          Filter = 'Сеан =' + Str(Record);
+----
+----
+----
+--        end;
+
+
+
+      fi;
+      --локЭлементНавигатора[1].Add([true, Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
+      
+    od;
     
   end;
 
@@ -249,10 +264,13 @@ import СИС2 classes Функции;
   proc кнПриНажатии (Sender: Button);
     var locCrd: Тесты.картПроектСеанса;
     var локЗаписьПроектаСеанса: Т9_Тесты.ПроектСеанса;
+    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var локРешение: integer;
     var p, pp: integer;
     var t, tt: integer;
+    var vClass: Class;
     var локИмяТестируемогоКласса: string;
+    var локНаимТестируемогоКласса: string;
     var локТест: Т9_Тесты.Тест;
     if Sender.Name = 'кнСоздатьПрограмму':
       if (ТестПланПП.Count = 0): -- загрузка проекта сеанса допускается только при пустой подтаблице тест-планов
@@ -264,18 +282,36 @@ import СИС2 classes Функции;
             pp = локЗаписьПроектаСеанса.ТестПланПП.Count;
             for p = 1 .. pp do
               with ТестПланПП.Insert(p) do
-                ТестПланКласса = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса;
-                локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;
+                локЗаписьТестПлана = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса;
+                ТестПланКласса = локЗаписьТестПлана; -- stb
+                локИмяТестируемогоКласса = if(локЗаписьТестПлана <> nil, локЗаписьТестПлана.ПолноеИмяКласса, локЗаписьПроектаСеанса.ТестПланПП[p].ПолноеИмяКласса);  --{ служебные действия
                 УдалениеСлучайныхЗаписейТестов(локИмяТестируемогоКласса);
-                tt = ТестПланКласса.ТестПП.Count;
-                for t = 1 .. tt do
-                  локТест = Т9_Тесты.Тест.Create;
-                  локТест.Пример = ТестПланКласса.ТестПП[t].Пример;
-                  локТест.Сеанс = Record;
-                  локТест.Post;
-                od;
+                vClass = FindClass(локИмяТестируемогоКласса);
+                if (vClass <> nil):
+                  локНаимТестируемогоКласса = vClass.ClassInfo.Description;
+                else
+                  if (локЗаписьТестПлана <> nil):
+                    локНаимТестируемогоКласса = локЗаписьТестПлана.НаимКласса;
+                  else
+                    локНаимТестируемогоКласса = локЗаписьПроектаСеанса.ТестПланПП[p].НаимКласса;
+                  fi;
+                fi;
+                --}
+                ПолноеИмяКласса = локИмяТестируемогоКласса; -- stb
+                НаимКласса = локНаимТестируемогоКласса; -- stb
+                inGroup = локЗаписьПроектаСеанса.ТестПланПП[p].inGroup; -- stb
+                if (локЗаписьТестПлана <> nil):
+                  tt = локЗаписьТестПлана.ТестПП.Count;
+                  for t = 1 .. tt do
+                    локТест = Т9_Тесты.Тест.Create;
+                    локТест.Пример = локЗаписьТестПлана.ТестПП[t].Пример;
+                    локТест.Сеанс = Record;
+                    локТест.Post;
+                  od;
+                fi;
               end;
             od;
+            ЗаполнитьНавигатор;
           fi;
         elsif (локРешение = 2):
           locCrd = Тесты.картПроектСеанса.Create;
@@ -284,9 +320,16 @@ import СИС2 classes Функции;
             pp = локЗаписьПроектаСеанса.ТестПланПП.Count;
             for p = 1 .. pp do
               with ТестПланПП.Insert(p) do
-                ТестПланКласса = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса;
-                локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;
+                ТестПланКласса = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса; -- stb
+                локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;  --{ служебные действия
+                локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;  --{ служебные действия
                 УдалениеСлучайныхЗаписейТестов(локИмяТестируемогоКласса);
+                vClass = FindClass(локИмяТестируемогоКласса);
+                локНаимТестируемогоКласса = if((vClass <> nil), vClass.ClassInfo.Description, локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса.Наим);
+                --}
+                ПолноеИмяКласса = локИмяТестируемогоКласса; -- stb
+                НаимКласса = локНаимТестируемогоКласса; -- stb
+                inGroup = локЗаписьПроектаСеанса.ТестПланПП[p].inGroup; -- stb
                 tt = ТестПланКласса.ТестПП.Count;
                 for t = 1 .. tt do
                   локТест = Т9_Тесты.Тест.Create;
@@ -296,6 +339,7 @@ import СИС2 classes Функции;
                 od;
               end;
             od;
+            ЗаполнитьНавигатор;
           fi;
         fi;
       fi;

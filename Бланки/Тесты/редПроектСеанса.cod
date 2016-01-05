@@ -57,13 +57,68 @@ import СИС2 classes Функции;
 --}}
 
 --{{ Обработчики событий клеток шаблона
+  type типДействия = (СоздатьЕслиНет, УдалитьЕслиЕсть);
+
+  func ЕстьГруппаТестПланов(локПолноеИмяКласса: string; var IndexGroup: integer = 0; var LastIndex: integer = 0; локДействие: типДействия): logical;--{ Проверка того, что в программе тестирования уже сформирована запись для описания группы тестов
+    var i, Index, p: integer;
+    var локНаимКласса: string;
+    for i = 1 .. ТестПланПП.Count do
+      if (ТестПланПП[i].ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланКласса = nil):
+        Result = true;
+        Break;
+      fi;
+    od;
+    if Result:
+      IndexGroup = i;
+      if (локДействие = УдалитьЕслиЕсть):--{
+        if ЕстьТестКласса(локПолноеИмяКласса, Index, LastIndex):
+          for p = Index .. LastIndex do
+            ТестПланПП[p].inGroup = false;
+          od;
+        fi;
+        ТестПланПП.Delete(IndexGroup);
+        IndexGroup = 0;
+        Result = false;
+      fi;--}
+    else
+      if (локДействие = СоздатьЕслиНет):--{
+        if ЕстьТестКласса(локПолноеИмяКласса, Index):
+          локНаимКласса = ТестПланПП[Index].ТестПланКласса.НаимКласса;
+          with ТестПланПП.Insert(Index) do
+            ПолноеИмяКласса = локПолноеИмяКласса;
+            НаимКласса = локНаимКласса;
+            Result = true;
+          end;
+        fi;
+        if ЕстьТестКласса(локПолноеИмяКласса, Index, LastIndex):
+          for p = Index .. LastIndex do
+            ТестПланПП[p].inGroup = true;
+          od;
+        fi;
+      fi;--}
+    fi;
+  end;--}
+
+  func ЕстьТестКласса(локПолноеИмяКласса: string; var Index: integer = 0; var LastIndex: integer = 0): logical;--{ Проверка того, что в программе тестирования уже есть тест-план для такого класса
+    var i, locIndex1, locIndex2: integer;
+    for i = 1 .. ТестПланПП.Count do
+      if (ТестПланПП[i].ТестПланКласса.ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланКласса <> nil):
+        Result = true;
+        if (locIndex1 = 0): locIndex1 = i; fi;
+        if (locIndex1 > 0): locIndex2 = i; fi;
+      fi;
+    od;
+    Index = locIndex1;
+    LastIndex = locIndex2;
+  end;--}
 
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var locCrd: CardForm;
-    var Index, p: integer;
+    var Index, IndexGroup, p, LastIndex: integer;
     var aDocId: integer[];
     var locFlt: string[];
+    var ЕстьГруппа: logical;
     proc ДоУдаления;--{
       if (Cell.Owner.Count >= Cell.Frame):
         try
@@ -87,10 +142,19 @@ import СИС2 classes Функции;
       locCrd.обУсловие_ТипТестПлана = 2; -- только НЕ шаблоны
       locCrd.НеИзменятьПростойФильтр = true;
       if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not DocId in ' + Str(aDocId), Window.ModalWindow):
-        with ТестПланПП.Insert(1) do
-          ТестПланКласса = локЗаписьТестПлана;
-        end;
-        ПослеДобавления;
+        if ЕстьТестКласса(локЗаписьТестПлана.ПолноеИмяКласса, , LastIndex):
+          ЕстьГруппа = ЕстьГруппаТестПланов(локЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, СоздатьЕслиНет);
+          with ТестПланПП.Insert(LastIndex + 1) do
+            ТестПланКласса = локЗаписьТестПлана;
+            inGroup = ЕстьГруппа;
+          end;
+          ПослеДобавления;
+        else
+          with ТестПланПП.Insert(1) do
+            ТестПланКласса = локЗаписьТестПлана;
+          end;
+          ПослеДобавления;
+        fi;
       fi;
       --}
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий):--{ добавление тест-плана класса в тест-план из строки таблицы
@@ -102,17 +166,32 @@ import СИС2 classes Функции;
       locCrd.обУсловие_ТипТестПлана = 2; -- только НЕ шаблоны
       locCrd.НеИзменятьПростойФильтр = true;
       if CmOk = locCrd.ShowEx(локЗаписьТестПлана, 'not DocId in ' + Str(aDocId), Window.ModalWindow):
-        Index = Cell.Frame;
-        with ТестПланПП.Insert(Index + 1) do
-          ТестПланКласса = локЗаписьТестПлана;
-        end;
-        ПослеДобавления;
+        if ЕстьТестКласса(локЗаписьТестПлана.ПолноеИмяКласса, , LastIndex):
+          ЕстьГруппа = ЕстьГруппаТестПланов(локЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, СоздатьЕслиНет);
+          with ТестПланПП.Insert(LastIndex + 1) do
+            ТестПланКласса = локЗаписьТестПлана;
+            inGroup = ЕстьГруппа;
+          end;
+          ПослеДобавления;
+        else
+          Index = Cell.Frame;
+          with ТестПланПП.Insert(Index + 1) do
+            ТестПланКласса = локЗаписьТестПлана;
+          end;
+          ПослеДобавления;
+        fi;
       fi;
       --}
     elsif (Cell.Contents = 'x') and (Cell.Owner = секцСценарий):--{ удаление строки из тест-плана (без удаления тест-плана класса из справочника)
       Index = Cell.Frame;
-      ДоУдаления;
-      ТестПланПП.Delete(Index);
+      локЗаписьТестПлана = ТестПланПП[Index].ТестПланКласса;
+      if (локЗаписьТестПлана <> nil):
+        ДоУдаления;
+        ТестПланПП.Delete(Index);
+        ЕстьГруппаТестПланов(локЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, УдалитьЕслиЕсть);
+      else
+        Message('Удаление группы тест-планов не предусмотрено.');
+      fi;
       --}
     -- перемещение строк
     elsif (Cell.Contents = '5') and (Cell.Owner = секцСценарий):--{ вверх
@@ -135,6 +214,21 @@ import СИС2 classes Функции;
         Message('Ошибка. Тест-план класса был удален нештатным способом.');
       fi;--}
     fi;
+  end;
+
+  func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+    var Index: Integer;
+    Index = Cell.Frame;
+    if ТестПланПП[Index].inGroup:
+      Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланКласса.Наим;
+    else
+      if (ТестПланПП[Index].ТестПланКласса = nil):
+        Result = '<b+>' + ТестПланПП[Index].НаимКласса;
+      else
+        Result = ТестПланПП[Index].ТестПланКласса.Наим;
+      fi;
+    fi;
+
   end;
 
   proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
