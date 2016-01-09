@@ -25,11 +25,13 @@ CanCopy=0
 ShowRecords=0
 OnClick=картотека_ПриНажатии
 OnRearrange=картотека_ПриОформлении
-ColumnCount=4
-Column:0=ТипБазовогоКласса
-Column:1=Наим
+ColumnCount=6
+Column:0=ИмяПроектаКласса
+Column:1=ТипБазовогоКласса
 Column:2=ПолноеИмяКласса
-Column:3=КолШагов
+Column:3=НаимКласса
+Column:4=Наим
+Column:5=КолШагов
 TreeVisible=0
 TreeWidth=120
 SubTableVisible=0
@@ -43,6 +45,26 @@ TemplateHeight=0
 TemplatePlace=1
 CanResizeTemplate=0
 SubTableCount=0
+
+[.Column.ИмяПроектаКласса]
+Caption=Проект Т9
+Width=100
+MinWidth=0
+Visible=1
+Editable=1
+Sortable=1
+Summary=0
+Designated=0
+Lookup=0
+Alignment=2
+ColumnType=0
+ColumnFormat=0
+FindMaskFormat=0
+FieldSize=0
+ManualEdit=0
+UseFont=0
+OnOutput=КартПоле_ПриВыводе
+OnDraw=картПоле_ПриРисовании
 
 [.Column.ТипБазовогоКласса]
 Caption=Тип базового класса
@@ -61,24 +83,7 @@ FindMaskFormat=0
 FieldSize=0
 ManualEdit=0
 UseFont=0
-
-[.Column.Наим]
-Caption=Наименование тест-плана
-Width=0
-MinWidth=0
-Visible=1
-Editable=1
-Sortable=1
-Summary=0
-Designated=0
-Lookup=0
-Alignment=0
-ColumnType=0
-ColumnFormat=0
-FindMaskFormat=0
-FieldSize=0
-ManualEdit=0
-UseFont=0
+OnDraw=картПоле_ПриРисовании
 
 [.Column.ПолноеИмяКласса]
 Caption=Имя тестируемого класса
@@ -97,6 +102,47 @@ FindMaskFormat=0
 FieldSize=0
 ManualEdit=0
 UseFont=0
+OnOutput=КартПоле_ПриВыводе
+OnDraw=картПоле_ПриРисовании
+
+[.Column.НаимКласса]
+Caption=Наименование класса
+Width=0
+MinWidth=0
+Visible=1
+Editable=1
+Sortable=0
+Summary=0
+Designated=0
+Lookup=0
+Alignment=0
+ColumnType=1
+ColumnFormat=0
+FindMaskFormat=0
+FieldSize=0
+ManualEdit=0
+UseFont=0
+OnOutput=КартПоле_ПриВыводе
+OnDraw=картПоле_ПриРисовании
+
+[.Column.Наим]
+Caption=Наименование тест-плана
+Width=0
+MinWidth=0
+Visible=1
+Editable=1
+Sortable=1
+Summary=0
+Designated=0
+Lookup=0
+Alignment=0
+ColumnType=0
+ColumnFormat=0
+FindMaskFormat=0
+FieldSize=0
+ManualEdit=0
+UseFont=0
+OnDraw=картПоле_ПриРисовании
 
 [.Column.КолШагов]
 Caption=Кол-во тестов
@@ -117,3 +163,4 @@ Format="##0;;0"
 ManualEdit=0
 UseFont=0
 OnOutput=КартПоле_ПриВыводе
+OnDraw=картПоле_ПриРисовании

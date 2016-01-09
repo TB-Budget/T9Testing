@@ -23,10 +23,11 @@ CanCopy=1
 ShowRecords=0
 OnClick=картотека_ѕриЌажатии
 OnRearrange=картотека_ѕриќформлении
-ColumnCount=3
-Column:0=“ипЅазового ласса
-Column:1=Ќаим
+ColumnCount=4
+Column:0=»м€ѕроекта ласса
+Column:1=“ипЅазового ласса
 Column:2=ѕолное»м€ ласса
+Column:3=Ќаим ласса
 TreeVisible=1
 TreeWidth=120
 SubTableVisible=0
@@ -40,6 +41,24 @@ TemplateHeight=0
 TemplatePlace=1
 CanResizeTemplate=0
 SubTableCount=0
+
+[.Column.»м€ѕроекта ласса]
+Caption=ѕроект “9
+Width=100
+MinWidth=0
+Visible=1
+Editable=1
+Sortable=1
+Summary=0
+Designated=0
+Lookup=0
+Alignment=2
+ColumnType=0
+ColumnFormat=0
+FindMaskFormat=0
+FieldSize=0
+ManualEdit=0
+UseFont=0
 
 [.Column.“ипЅазового ласса]
 Caption=“ип базового класса
@@ -59,8 +78,8 @@ FieldSize=0
 ManualEdit=0
 UseFont=0
 
-[.Column.Ќаим]
-Caption=Ќаименование класса
+[.Column.ѕолное»м€ ласса]
+Caption=»м€ класса
 Width=0
 MinWidth=0
 Visible=1
@@ -77,8 +96,8 @@ FieldSize=0
 ManualEdit=0
 UseFont=0
 
-[.Column.ѕолное»м€ ласса]
-Caption=»м€ класса
+[.Column.Ќаим ласса]
+Caption=Ќаименование класса
 Width=0
 MinWidth=0
 Visible=1

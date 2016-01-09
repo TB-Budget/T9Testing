@@ -39,7 +39,7 @@ import СИС2 classes Функции;
   end;
 
   proc УстановитьФокусНаПервоеПолеВвода;
-    Self.Template.CellByField['Наим'].SetFocus;
+    Self.Template.CellByField['Комментарий'].SetFocus;
   end;
 
   proc ВидФормы;
@@ -83,6 +83,13 @@ import СИС2 classes Функции;
   end;
 
   proc шаблон_ПриСчитывании;
+    var vClass: Class;
+    if (ПолноеИмяКласса <> nil):
+      vClass = if(ПолноеИмяКласса <> nil, FindClass(ПолноеИмяКласса), nil);
+      if (vClass <> nil):
+        НаимКласса = vClass.ClassInfo.Description;
+      fi;
+    fi;
     inherited шаблон_ПриСчитывании;
     ВидФормы;
     if ЗаморозитьЗаголовокТаблицы:
@@ -129,26 +136,26 @@ import СИС2 classes Функции;
         ИмяПроектаКласса = nil;
       else
         vClass = if(ПолноеИмяКласса <> nil, FindClass(ПолноеИмяКласса), nil);
-        if (ТипБазовогоКласса in [Константы.ТипБланк,Константы.ТипБланкРедактор]):
+        if (ТипБазовогоКласса in [Константы.ТипБланк, Константы.ТипБланкРедактор]):
           if CmOk = ChooseClass(Kernel.BlankForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
             ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
-            Наим = vClass.ClassInfo.Description;
+            НаимКласса = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
         elsif (ТипБазовогоКласса in [Константы.типКартотека]):
           if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
-            Наим = vClass.ClassInfo.Description;
+            НаимКласса = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
         elsif (ТипБазовогоКласса in [Константы.типОтчет]):
           if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
-            Наим = vClass.ClassInfo.Description;
+            НаимКласса = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
         elsif (ТипБазовогоКласса  = nil):
@@ -204,6 +211,23 @@ import СИС2 classes Функции;
           fi;
         end;
       fi;
+    fi;
+  end;
+
+  func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+    if (ТипБазовогоКласса = nil):
+      Result = inherited ПолеЗаголовокОкнаФормы_ПриВыводе (Cell, Value, Action, Format);
+    else
+      if (ТипБазовогоКласса = Константы.ТипБланк):
+        Result = '<s->Функциональная спецификация бланка';
+      elsif (ТипБазовогоКласса = Константы.ТипБланкРедактор):
+        Result = '<s->Функциональная спецификация бланка-редактора';
+      elsif (ТипБазовогоКласса = Константы.ТипКартотека):
+        Result = '<s->Функциональная спецификация картотеки';
+      elsif (ТипБазовогоКласса = Константы.ТипОтчет):
+        Result = '<s->Функциональная спецификация отчета';
+      fi;
+      Result = Result + Chr(13) + '<s.>"' + НаимКласса + '"';
     fi;
   end;
 

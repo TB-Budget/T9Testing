@@ -22,6 +22,7 @@ import СИС2 classes СтроковыеФункции;
 inclass public
 
   stored var Условие_ТипТестПлана: Integer;
+         var Условие_ИмяНаим: string;
 
 inobject public
 
@@ -39,12 +40,30 @@ inobject private
 
   --@doc Ф-я перекрывает СИС2
   func ПолучитьФильтрКартотеки(var locTreeFilter: string = nil): string;
+    var locFltAnd: string[];
+    var locFltOr: string[];
+    var locName: string[];
     if (Условие_ТипТестПлана = 1):
-      Result = 'ЭтоШаблон';
+      locFltAnd[1] = 'ЭтоШаблон';
     elsif (Условие_ТипТестПлана = 2):
-      Result = 'not ЭтоШаблон';
+      locFltAnd[1] = 'not ЭтоШаблон';
     fi;
+    if (Условие_ИмяНаим <> nil):
+      locFltOr[1] = 'Match(ПолноеИмяКласса,"*' + Условие_ИмяНаим + '*")';
+      with Query.Create([Т9_Тесты.СпецификацияКласса]) do
+        Filter = 'Match(НаимКласса,"*' + Условие_ИмяНаим + '*")';
+        Select;
+        while not Eof do
+          СИС2.Функции.AddInArray(locName, Current.ПолноеИмяКласса);
+          Next;
+        end;
+      end;
+      locFltOr[2] = 'ПолноеИмяКласса in ' + ToStr(locName);
+      locFltAnd[2] = СложитьСтрокиФильтраПоИли(locFltOr);
+    fi;
+    Result = СложитьСтрокиФильтраПоИ(locFltAnd);
   end;
+
 
   --@doc Перемещает фокус на картотеку при непустом запросе картотеки
   --@doc в случае иерархической картотеки - при непустом содержимом текущей группы
@@ -62,6 +81,7 @@ inobject private
     ркТипШаблон.Enabled = not НеИзменятьПростойФильтр;
     ркТипНеШаблон.Enabled = not НеИзменятьПростойФильтр;
   end;
+
 
 --}}
 
@@ -93,6 +113,15 @@ inobject private
   end;
 --}}
 
+--{{ Обработчики событий клеток шаблона
+
+  proc Поле_ПриВыходе(Cell: TemplateCell; Index: Integer);
+    ОбновитьФильтр;
+    ФокусНаКартотеку2;
+  end;
+--}}
+
+
 --{{ Обработчики событий картотеки
 
   func картотека_ПриИзменении (Action: Cardfile.ModifyActions; locRecord: Record; locGroup: Record): Logical;
@@ -111,7 +140,23 @@ inobject private
 --{{ Обработчики событий столбцов картотеки
 
   func КартПоле_ПриВыводе (Column: CardfileColumn; Rec: Record; Action: Template.OutputTypes; var Format: String): Variant;
-    Result = Rec.ТестПП.Count;
+    if Column.FieldName  = 'НаимКласса':
+      if Rec.ЭтоШаблон:
+        Result = '--';
+      else
+        Result = Библио.ОписаниеКлассаПоИмени(Rec.ПолноеИмяКласса);
+      fi;
+    elsif Column.FieldName in ['ИмяПроектаКласса', 'ПолноеИмяКласса']:
+      Result = if(Rec.ЭтоШаблон, '--', Rec.GetField(Column.FieldName));
+    elsif Column.FieldName  = 'КолШагов':
+      Result = Rec.ТестПП.Count;
+    fi;
+  end;
+
+  proc картПоле_ПриРисовании(Column: CardfileColumn; Rec: Record; Selected: Logical; var Color: Integer; Font: Font);
+    if Rec.ЭтоШаблон:
+      Font.Color = СИС2.Константы.clDkGray;
+    fi;
   end;
 --}}
 

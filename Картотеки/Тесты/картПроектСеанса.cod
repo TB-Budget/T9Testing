@@ -28,7 +28,21 @@ inobject private
 --{{ Обработчики событий столбцов картотеки
 
   func КартПоле_ПриВыводе (Column: CardfileColumn; Rec: Record; Action: Template.OutputTypes; var Format: String): Variant;
-    Result = Rec.ТестПланПП.Count;
+    var vStb: Subtable;
+    var i, ii: integer;
+    var vName: string;
+    var aName: string[];
+    if (Column.FieldName = 'КолТестПланов'):
+      vStb = Rec.ТестПланПП.CreateSubtableView('ТестПланКласса<>nil', '');
+      Result = vStb.Count;
+    elsif (Column.FieldName = 'КолКлассов'):
+      ii = Rec.ТестПланПП.Count;
+      for i = 1 .. ii do
+        vName = Rec.ТестПланПП.Items(i).ПолноеИмяКласса;
+        СИС2.Функции.AddInArray(aName, vName, true);
+      od;
+      Result = LengthOfArray(aName);
+    fi;
   end;
 --}}
 

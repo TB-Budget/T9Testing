@@ -62,6 +62,21 @@ inclass public
     fi;
   end;
 
-
+  --@doc Ф-я возвращает описание класса по его имени.
+  --@doc Если класс ПРИСУТСТВУЕТ в инф.базе сессии, то вычисляется его актуальное опиание.
+  --@doc Если класс ОТСУТСТВУЕТ в инф.базе сессии, то описание считывается из записи спецификации.
+  func ОписаниеКлассаПоИмени(locFullName: string): string;
+    var vClass: Class;
+    var vRecord: Т9_Тесты.СпецификацияКласса;
+    vClass = if(locFullName <> nil, FindClass(locFullName), nil);
+    if (vClass <> nil):
+      Result = vClass.ClassInfo.Description;
+    else
+      vRecord = СИС2.ФункцииДокумента.QueryRecord(Т9_Тесты.СпецификацияКласса, 'ПолноеИмяКласса="' + locFullName + '"', 'ПолноеИмяКласса');
+      if (vRecord <> nil):
+        Result = vRecord.НаимКласса;
+      fi;
+    fi;
+  end;
 
 end

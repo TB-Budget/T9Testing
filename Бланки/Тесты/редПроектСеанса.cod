@@ -61,7 +61,6 @@ import СИС2 classes Функции;
 
   func ЕстьГруппаТестПланов(локПолноеИмяКласса: string; var IndexGroup: integer = 0; var LastIndex: integer = 0; локДействие: типДействия): logical;--{ Проверка того, что в программе тестирования уже сформирована запись для описания группы тестов
     var i, Index, p: integer;
-    var локНаимКласса: string;
     for i = 1 .. ТестПланПП.Count do
       if (ТестПланПП[i].ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланКласса = nil):
         Result = true;
@@ -83,10 +82,9 @@ import СИС2 classes Функции;
     else
       if (локДействие = СоздатьЕслиНет):--{
         if ЕстьТестКласса(локПолноеИмяКласса, Index):
-          локНаимКласса = ТестПланПП[Index].ТестПланКласса.НаимКласса;
           with ТестПланПП.Insert(Index) do
             ПолноеИмяКласса = локПолноеИмяКласса;
-            НаимКласса = локНаимКласса;
+            --НаимКласса = локНаимКласса;
             Result = true;
           end;
         fi;
@@ -112,12 +110,52 @@ import СИС2 classes Функции;
     LastIndex = locIndex2;
   end;--}
 
+  proc ПоднятьГруппу(IndexGroup: integer);
+    var локПолноеИмяКласса: string;
+    var pp, Index: integer;
+    var ПрерватьВыполнение: logical;
+    if (IndexGroup > 1):
+      локПолноеИмяКласса = ТестПланПП[IndexGroup].ПолноеИмяКласса;
+      pp = ТестПланПП.Count;
+      Index = IndexGroup;
+      while (not ПрерватьВыполнение) do
+        секцСценарий.FrameUp(Index);
+        Index = Index + 1;
+        ПрерватьВыполнение = (Index > pp);
+        if not ПрерватьВыполнение:
+          ПрерватьВыполнение = (ТестПланПП[Index].ПолноеИмяКласса <> локПолноеИмяКласса);
+        fi;
+      od;
+    fi;
+  end;
+
+  proc ОпуститьГруппу(IndexGroup: integer);
+    var локПолноеИмяКласса: string;
+    var pp, Index, LastIndex: integer;
+    var ПрерватьВыполнение: logical;
+    локПолноеИмяКласса = ТестПланПП[IndexGroup].ПолноеИмяКласса;
+    pp = ТестПланПП.Count;
+    ЕстьТестКласса(ТестПланПП[IndexGroup].ПолноеИмяКласса, , LastIndex);
+    if (LastIndex < pp):
+      Index = LastIndex;
+      while (not ПрерватьВыполнение) do
+        секцСценарий.FrameDown(Index);
+        Index = Index - 1;
+        ПрерватьВыполнение = (Index = 0);
+        if (not ПрерватьВыполнение):
+          ПрерватьВыполнение = (ТестПланПП[Index].ПолноеИмяКласса <> локПолноеИмяКласса);
+        fi;
+      od;
+    fi;
+    
+  end;
+
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var locCrd: CardForm;
-    var Index, IndexGroup, p, LastIndex: integer;
+    var Index, IndexGroup, p, pp, LastIndex: integer;
     var aDocId: integer[];
-    var locFlt: string[];
+    var локПолноеИмяКласса: string;
     var ЕстьГруппа: logical;
     proc ДоУдаления;--{
       if (Cell.Owner.Count >= Cell.Frame):
@@ -134,6 +172,16 @@ import СИС2 classes Функции;
         ExecuteCommand('Kernel.Move.Down', true);
       fi;
     end;--}
+    func Позиция_ОписаниеГруппы(locIndex: integer): logical;--{
+      Return (ТестПланПП[locIndex].ТестПланКласса = nil);
+    end;--}
+    func Позиция_ВходитВГруппу(locIndex: integer): logical;--{
+      Return (ТестПланПП[locIndex].ТестПланКласса <> nil) and (ТестПланПП[locIndex].inGroup);
+    end;--}
+    func Позиция_ВнеГруппы(locIndex: integer): logical;--{
+      Return (ТестПланПП[locIndex].ТестПланКласса <> nil) and (not ТестПланПП[locIndex].inGroup);
+    end;--}
+
     if (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы):--{ добавление тест-плана класса в тест-план из заголовка таблицы
       for p = 1 .. ТестПланПП.Count do
         aDocId[p] = ТестПланПП[p].ТестПланКласса.DocId;
@@ -146,17 +194,20 @@ import СИС2 classes Функции;
           ЕстьГруппа = ЕстьГруппаТестПланов(локЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, СоздатьЕслиНет);
           with ТестПланПП.Insert(LastIndex + 1) do
             ТестПланКласса = локЗаписьТестПлана;
+            ПолноеИмяКласса = локЗаписьТестПлана.ПолноеИмяКласса;
             inGroup = ЕстьГруппа;
           end;
           ПослеДобавления;
         else
           with ТестПланПП.Insert(1) do
             ТестПланКласса = локЗаписьТестПлана;
+            ПолноеИмяКласса = локЗаписьТестПлана.ПолноеИмяКласса;
           end;
           ПослеДобавления;
         fi;
       fi;
       --}
+
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий):--{ добавление тест-плана класса в тест-план из строки таблицы
       Index = Cell.Frame;
       for p = 1 .. ТестПланПП.Count do
@@ -170,6 +221,7 @@ import СИС2 classes Функции;
           ЕстьГруппа = ЕстьГруппаТестПланов(локЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, СоздатьЕслиНет);
           with ТестПланПП.Insert(LastIndex + 1) do
             ТестПланКласса = локЗаписьТестПлана;
+            ПолноеИмяКласса = локЗаписьТестПлана.ПолноеИмяКласса;
             inGroup = ЕстьГруппа;
           end;
           ПослеДобавления;
@@ -177,11 +229,13 @@ import СИС2 classes Функции;
           Index = Cell.Frame;
           with ТестПланПП.Insert(Index + 1) do
             ТестПланКласса = локЗаписьТестПлана;
+            ПолноеИмяКласса = локЗаписьТестПлана.ПолноеИмяКласса;
           end;
           ПослеДобавления;
         fi;
       fi;
       --}
+
     elsif (Cell.Contents = 'x') and (Cell.Owner = секцСценарий):--{ удаление строки из тест-плана (без удаления тест-плана класса из справочника)
       Index = Cell.Frame;
       локЗаписьТестПлана = ТестПланПП[Index].ТестПланКласса;
@@ -190,20 +244,56 @@ import СИС2 classes Функции;
         ТестПланПП.Delete(Index);
         ЕстьГруппаТестПланов(локЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, УдалитьЕслиЕсть);
       else
-        Message('Удаление группы тест-планов не предусмотрено.');
+        if CmOk = EnqOkCancel('Из программы тестирования будут удалены все тест-планы класса <' + Библио.ОписаниеКлассаПоИмени(ТестПланПП[Index].ПолноеИмяКласса) + '>. Продолжить?'):
+          ДоУдаления;
+          локПолноеИмяКласса = ТестПланПП[Index].ПолноеИмяКласса;
+          pp = ТестПланПП.Count;
+          for p = pp .. 1 step -1 do
+            if (ТестПланПП[p].ПолноеИмяКласса = локПолноеИмяКласса):
+              ТестПланПП.Delete(p);
+            fi;
+          od;
+        fi;
       fi;
       --}
+
     -- перемещение строк
     elsif (Cell.Contents = '5') and (Cell.Owner = секцСценарий):--{ вверх
       Cell.SetFocus;
-      if (Cell.Frame > 1):
-        секцСценарий.FrameUp(Cell.Frame);
-      fi;--}
+      Index = Cell.Frame;
+      if (Index > 1):
+        if Позиция_ОписаниеГруппы(Index):
+          ПоднятьГруппу(Index);
+        else
+          if Позиция_ВходитВГруппу(Index) and Позиция_ВходитВГруппу(Index-1):
+            секцСценарий.FrameUp(Index);
+          elsif Позиция_ВнеГруппы(Index) and Позиция_ВходитВГруппу(Index-1):
+            ЕстьТестКласса(ТестПланПП[Index-1].ПолноеИмяКласса, Index,);
+            ОпуститьГруппу(Index-1);
+          elsif Позиция_ВнеГруппы(Index) and not Позиция_ВходитВГруппу(Index-1):
+            секцСценарий.FrameUp(Index);
+          fi;
+        fi;
+      fi;
+      --}
     elsif (Cell.Contents = '6') and (Cell.Owner = секцСценарий):--{ вниз
       Cell.SetFocus;
-      if (Cell.Frame < секцСценарий.FramesCount):
-        секцСценарий.FrameDown(Cell.Frame);
-      fi;--}
+      Index = Cell.Frame;
+      pp = секцСценарий.FramesCount;
+      if (Index < pp):
+        if Позиция_ОписаниеГруппы(Index):
+          ОпуститьГруппу(Index);
+        else
+          if Позиция_ВходитВГруппу(Index) and Позиция_ВходитВГруппу(Index+1):
+            секцСценарий.FrameDown(Index);
+          elsif Позиция_ВнеГруппы(Index) and Позиция_ОписаниеГруппы(Index+1):
+            ПоднятьГруппу(Index+1);
+          elsif Позиция_ВнеГруппы(Index) and not Позиция_ОписаниеГруппы(Index+1):
+            секцСценарий.FrameDown(Index);
+          fi;
+        fi;
+      fi;
+      --}
     -- карточка тест-плана класса
     elsif (Cell.Contents = '...') and (Cell.Owner = секцСценарий):--{
       Index = Cell.Frame;
@@ -211,24 +301,46 @@ import СИС2 classes Функции;
       if (локЗаписьТестПлана <> nil):
         OpenBlankEditor('Тесты.редТестПланКласса', локЗаписьТестПлана,  Window.ModalWindow);
       else
-        Message('Ошибка. Тест-план класса был удален нештатным способом.');
+        Message('Просмотр тест-плана на строке группы невозможен.');
       fi;--}
     fi;
   end;
 
   func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
     var Index: Integer;
+    var locIsGroup: logical;
+    var locDiscription: string;
     Index = Cell.Frame;
-    if ТестПланПП[Index].inGroup:
-      Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланКласса.Наим;
+    locIsGroup = (ТестПланПП[Index].ТестПланКласса = nil) and (ТестПланПП[Index].ПолноеИмяКласса <> nil);
+    locDiscription = Библио.ОписаниеКлассаПоИмени(ТестПланПП[Index].ПолноеИмяКласса);
+    locDiscription = if((locDiscription <> nil), locDiscription, 'НЕВЕРНОЕ ИМЯ КЛАССА');
+    if (locIsGroup):
+      Result = '<b+>' + locDiscription;
     else
-      if (ТестПланПП[Index].ТестПланКласса = nil):
-        Result = '<b+>' + ТестПланПП[Index].НаимКласса;
-      else
-        Result = ТестПланПП[Index].ТестПланКласса.Наим;
+      if (ТестПланПП[Index].inGroup) and (ТестПланПП[Index].ТестПланКласса <> nil):
+        Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланКласса.Наим;
+      elsif (not ТестПланПП[Index].inGroup):
+        Result = locDiscription;
       fi;
     fi;
 
+
+--    if (not locIsGroup) and (ТестПланПП[Index].inGroup) and (ТестПланПП[Index].ТестПланКласса <> nil):
+--      Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланКласса.Наим;
+--
+--    elsif (not locIsGroup) and (not (ТестПланПП[Index].inGroup)) and (ТестПланПП[Index].ТестПланКласса <> nil):
+--      Result = locDiscription;
+--    elsif not (ТестПланПП[Index].inGroup):
+--      if locIsGroup:
+--        Result = '<b+>' + locDiscription;
+--      else
+--      fi;
+----      if (ТестПланПП[Index].ТестПланКласса = nil):
+----        --Result = '<b+>' + ТестПланПП[Index].НаимКласса;
+----      else
+----        Result = ТестПланПП[Index].ТестПланКласса.Наим;
+----      fi;
+--    fi;
   end;
 
   proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);

@@ -104,13 +104,13 @@ import СИС2 classes Функции, СтроковыеФункции;
   end;
 
   proc шаблон_ПриСчитывании;
-    var vClass: Class;
-    if (not ЭтоШаблон) and (ПолноеИмяКласса <> nil) and (НаимКласса = nil):
-      vClass = if(ПолноеИмяКласса <> nil, FindClass(ПолноеИмяКласса), nil);
-      if (vClass <> nil):
-        НаимКласса = vClass.ClassInfo.Description;
-      fi;
-    fi;
+--    var vClass: Class;
+--    if (not ЭтоШаблон) and (ПолноеИмяКласса <> nil) and (НаимКласса = nil):
+--      vClass = if(ПолноеИмяКласса <> nil, FindClass(ПолноеИмяКласса), nil);
+--      if (vClass <> nil):
+--        НаимКласса = vClass.ClassInfo.Description;
+--      fi;
+--    fi;
     inherited шаблон_ПриСчитывании;
     локТранзакция = Transaction.Create([ТестПланКласса,ТестовыйПример]);
     ВидФормы;
@@ -285,7 +285,7 @@ import СИС2 classes Функции, СтроковыеФункции;
     var vClass: Class;
     if (Cell.Contents = 'ПолноеИмяКласса'):
       if (Action = Template.Clear):
-        НаимКласса = nil;
+        --НаимКласса = nil;
         ПолноеИмяКласса = nil;
         ИмяПроектаКласса = nil;
       else
@@ -295,7 +295,7 @@ import СИС2 classes Функции, СтроковыеФункции;
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
             ТипБазовогоКласса = Библио.ТипТестируемогоКласса(vClass);
-            НаимКласса = vClass.ClassInfo.Description;
+            --НаимКласса = vClass.ClassInfo.Description;
             Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
@@ -303,7 +303,7 @@ import СИС2 classes Функции, СтроковыеФункции;
           if CmOk = ChooseClass(Kernel.CardForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
-            НаимКласса = vClass.ClassInfo.Description;
+            --НаимКласса = vClass.ClassInfo.Description;
             Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
@@ -311,7 +311,7 @@ import СИС2 classes Функции, СтроковыеФункции;
           if CmOk = ChooseClass(Kernel.ReportForm, vClass, ''):
             ПолноеИмяКласса = FullClassName(vClass);
             ИмяПроектаКласса = vClass.ClassProject;
-            НаимКласса = vClass.ClassInfo.Description;
+            --НаимКласса = vClass.ClassInfo.Description;
             Наим = vClass.ClassInfo.Description;
             Template.EndEdit(true);
           fi;
@@ -368,9 +368,47 @@ import СИС2 classes Функции, СтроковыеФункции;
   end;
 
   func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+    var локОписаниеКласса: string;
     Window.Caption = if(Self.Record.ЭтоШаблон, 'Тест-план класса Т9 (шаблон)', 'Тест-план класса Т9');
-    Result = if(Self.Record.ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
+    if (ТипБазовогоКласса = nil) or ЭтоШаблон:
+      Result = if(Self.Record.ЭтоШаблон, 'Типовой тест-план класса Т9', 'Тест-план класса Т9');
+    else
+      if (ТипБазовогоКласса = Константы.ТипБланк):
+        Result = '<s->Тест-план бланка';
+      elsif (ТипБазовогоКласса = Константы.ТипБланкРедактор):
+        Result = '<s->Тест-план бланка-редактора';
+      elsif (ТипБазовогоКласса = Константы.ТипКартотека):
+        Result = '<s->Тест-план картотеки';
+      elsif (ТипБазовогоКласса = Константы.ТипОтчет):
+        Result = '<s->Тест-план отчета';
+      fi;
+      локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(ПолноеИмяКласса);
+      if (локОписаниеКласса <> nil):
+        Result = Result + Chr(13) + '<s.>"' + Библио.ОписаниеКлассаПоИмени(ПолноеИмяКласса) + '"';
+      else
+        Result = Result + Chr(13) + '<s.>"НЕВЕРНОЕ ИМЯ КЛАССА"';
+      fi;
+    fi;
   end;
+
+
+--  func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
+--    if (ТипБазовогоКласса = nil):
+--      Result = inherited ПолеЗаголовокОкнаФормы_ПриВыводе (Cell, Value, Action, Format);
+--    else
+--      if (ТипБазовогоКласса = ТипБланк):
+--        Result = '<s->Функциональная спецификация бланка';
+--      elsif (ТипБазовогоКласса = ТипБланкРедактор):
+--        Result = '<s->Функциональная спецификация бланка-редактора';
+--      elsif (ТипБазовогоКласса = ТипКартотека):
+--        Result = '<s->Функциональная спецификация картотеки';
+--      elsif (ТипБазовогоКласса = ТипОтчет):
+--        Result = '<s->Функциональная спецификация отчета';
+--      fi;
+--      Result = Result + Chr(13) + '<s.>"' + НаимКласса + '"';
+--    fi;
+--  end;
+
 
   proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
     var locStyle: TemplateStyle;
