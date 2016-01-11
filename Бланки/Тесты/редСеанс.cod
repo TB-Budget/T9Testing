@@ -14,20 +14,32 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.БазовыйБланкРедактор "Сеанс тестирования", editor СеансТестирования;
+--class inherited СИС2.БазовыйБланкРедактор "Сеанс тестирования", editor СеансТестирования;
+class inherited Тесты.редПроектСеанса "Сеанс тестирования", editor СеансТестирования;
 
-import СИС2 classes Функции;
+import СИС2 classes Функции, СтроковыеФункции;
+
+  inclass private
+
+  type типЭлементаНавигатора = (типПрограммаСеанса = 0, типПрограммаКласса, типТестПлан, типТестПример);
 
   inobject private
 
   var фреймДопСервис: TemplateFrame;
   var тблНавигатор: Grid;
+  var фреймРабЭлемент1: TemplateFrame;
+  var фреймРабЭлемент2: TemplateFrame;
 
-  var секцСценарийЗаголовокТаблицы1: TemplateSection;
-  var секцСценарийЗаголовокТаблицы2: TemplateSection;
-  var секцСценарий: TemplateSection;
+  var секцСценарий1ЗаголовокТаблицы: TemplateSection;
+  var секцСценарий1: TemplateSection;
+  var секцСценарий2ЗаголовокТаблицы: TemplateSection;
+  var секцСценарий2: TemplateSection;
+  var секцСценарий3: TemplateSection;
 
   var NN: integer[] = $;
+  var Тест_: Т9_Тесты.Тест[];
+  var ТекущийТест_: Т9_Тесты.Тест;
+  var ТекущаяВетвь_: GridItem;
 
   var локТранзакция: Transaction;
 
@@ -43,7 +55,82 @@ import СИС2 classes Функции;
     end;
   end;
 
-  proc СоздатьНавигатор;
+  proc АктуализироватьТестПримеры(локТестПланКласса: Т9_Тесты.ТестПланКласса); -- по записи тест-плана создает тесты для текущего сеанса, отсутствующие в базе
+    var t, tt: integer;
+    var локТестовыйПример: Т9_Тесты.ТестовыйПример;
+    var локТест: Т9_Тесты.Тест;
+    var ТестСуществует: logical;
+    func ТребуетсяСозданиеТеста: logical;--{
+      var locFlt: string[];
+      if (локТестовыйПример <> nil):
+        locFlt[1] = 'Сеанс=' + Str(Record);
+        locFlt[2] = 'ТестПлан=' + Str(локТестПланКласса);
+        locFlt[3] = 'Пример=' + Str(локТестовыйПример);
+        with Query.Create([Т9_Тесты.Тест]) do
+          Filter = СложитьСтрокиФильтраПоИ(locFlt);
+          ТестСуществует = RecordsExists;
+          if ТестСуществует:
+            Select;
+            локТест = Current;
+          fi;
+          Result = not ТестСуществует;
+        end;
+      fi;
+    end;--}
+    tt = локТестПланКласса.ТестПП.Count;
+    for t = 1 .. tt do
+      локТестовыйПример = локТестПланКласса.ТестПП[t].Пример;
+      ТестСуществует = false;
+      if ТребуетсяСозданиеТеста:
+        локТест = Т9_Тесты.Тест.Create;
+        локТест.Сеанс = Record;
+        локТест.ТестПлан = локТестПланКласса;
+        локТест.Пример = локТестовыйПример;
+        локТест.НомерПП = t;
+        локТест.Post;
+      elsif (not ТребуетсяСозданиеТеста) and ТестСуществует:
+        локТест.НомерПП = t;
+      fi;
+    od;
+  end;
+
+  proc УдалитьТестПримеры(локТестПланКласса: Т9_Тесты.ТестПланКласса); -- по записи тест-плана удалят тесты для текущего сеанса
+    var locFlt: string[];
+    with Query.Create([Т9_Тесты.Тест]) do
+      locFlt[1] = 'Сеанс=' + Str(Record);
+      locFlt[2] = 'ТестПлан=' + Str(локТестПланКласса);
+      Filter = СложитьСтрокиФильтраПоИ(locFlt);
+      IncludeDeleted = true;
+      Select;
+      while not Eof do
+        if (not Current.Deleted):
+          try Current.Delete;
+          except end;
+        fi;
+        Next;
+      od;
+    end;
+  end;
+
+  proc ПрочитатьТестПримеры(локТестПланКласса: Т9_Тесты.ТестПланКласса);
+    var locFlt: string[];
+    var t: integer;
+    Тест_ = nil;
+    with Query.Create([Т9_Тесты.Тест]) do
+      locFlt[1] = 'Сеанс=' + Str(Record);
+      locFlt[2] = 'ТестПлан=' + Str(локТестПланКласса);
+      Filter = СложитьСтрокиФильтраПоИ(locFlt);
+      Order = 'НомерПП';
+      Select;
+      while not Eof do
+        t = t + 1;
+        Тест_[t] = Current;
+        Next;
+      od;
+    end;
+  end;
+
+  proc ИнициализироватьНавигатор;
     var i, ii: integer;
     --{ очистка навигатора
     тблНавигатор.BeginModify;
@@ -76,175 +163,94 @@ import СИС2 classes Функции;
       ShowZebra  = false;
     end;
     --}
-
---    --собственно заполнение
---    Q                   = Query.Create([Справочники.КодВФО]);
---    if    КазенноеУчреждение then
---      Q.Filter          = ФильтрСпрВФО1('КУ');
---    elsif БюджетноеУчреждение then
---      Q.Filter          = ФильтрСпрВФО1('БУ');
---    elsif АвтономноеУчреждение then
---      Q.Filter          = ФильтрСпрВФО1('АУ');
---    end;
---    --Q.LoadingFields     = '';
---    Q.Order             = 'Код';
---    Q.Select;
---    ЭлементНавигатора[1]= тблВФО.Root;
---    for k = 1..Q.Count do
---      if Q.Current.Код in аВидыФО then
---        ЭлементНавигатора[1].Add([true, Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
---      else
---        ЭлементНавигатора[1].Add([false,Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
---      end;
---      j                 = ЭлементНавигатора[1].Count;
---      ЭлементНавигатора[1].Items[j].isGroup=false;
---      Q.Next;
---    end;
   end;
 
   proc ЗаполнитьНавигатор;
-    var ImageProject: Image;
-    var ImageClassGray: Image;
-    var ImageCheckBoxes: Image;
-    var ImageUnCheck: Image;
-    var локПозицииКлассов: Subtable;
-    var локПозицииТестПланов: Subtable;
-    --var локПозиции2: Subtable;
-    var locRoot: GridItem;
-    var ЭлементНавигатора: GridItem[];
-    var локЭлементНавигатора: GridItem;
-    var ItemsCount, c, cc, p, pp, n, t, tt: integer;
-    var vClass: Class;
-    var локНаимЭлемента: string;
-    var локЗаписьТеста: Т9_Тесты.Тест;
-    var locFlt: string[];
-    var локПолноеИмяКласса: string;
-    var локОписаниеКласса: string;
-    var локТестПланКласса: Т9_Тесты.ТестПланКласса;
-    var локОписаниеТестПлана: string;
-    var локТест: Т9_Тесты.Тест;
-
-    func Позиция_ОписаниеГруппы(locIndex: integer): logical;--{
-      if (локПозицииКлассов <> nil):
-        Return (локПозицииКлассов.ItemsByNumber[locIndex].ТестПланКласса = nil);
-      fi;
+    var ImageProject, ImageClassGray, ImageUnCheck, ImageCheckGreen, ImageCheckRed: Image;
+    var locItem: GridItem;
+    var локПозицииПрограммы: Subtable;
+    var c, cc: integer;
+    proc ИнициализироватьИконки;--{
+      ImageProject = Image.Create;    ImageProject.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
+      ImageClassGray = Image.Create;  ImageClassGray.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
+      ImageUnCheck = Image.Create;    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_uncheck.ico");
+      ImageCheckGreen = Image.Create; ImageCheckGreen.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_green.ico");
+      ImageCheckRed = Image.Create;   ImageCheckRed.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_red.ico");
     end;--}
-    func Позиция_ВходитВГруппу(locIndex: integer): logical;--{
-      if (локПозицииКлассов <> nil):
-        Return (локПозицииКлассов.ItemsByNumber[locIndex].ТестПланКласса <> nil) and (локПозицииКлассов.ItemsByNumber[locIndex].inGroup);
-      fi;
+    func ДобавитьГлавнуюВетвь: GridItem;--{
+      тблНавигатор.Root.Add(['Классы', nil, типПрограммаСеанса]);
+      Result = тблНавигатор.Root[1];
+      Result.Image = ImageProject;
+      Result.isGroup = true;
+      Result.Opened = true;
     end;--}
-    func Позиция_ВнеГруппы(locIndex: integer): logical;--{
-      if (локПозицииКлассов <> nil):
-        Return (локПозицииКлассов.ItemsByNumber[locIndex].ТестПланКласса <> nil) and (not локПозицииКлассов.ItemsByNumber[locIndex].inGroup);
-      fi;
-    end;--}
-
-
-    --{
-    ImageProject = Image.Create;
-    ImageProject.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
-    ImageClassGray = Image.Create;
-    ImageClassGray.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
-    ImageUnCheck = Image.Create;
-    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_uncheck.ico");
-    --}
-    СоздатьНавигатор;
-    локПозицииКлассов = ТестПланПП.CreateSubtableView('not inGroup','');
-    cc = локПозицииКлассов.Count;
-    тблНавигатор.Root.Add(['Классы']);
-    тблНавигатор.Root[1].Image = ImageProject;
-    тблНавигатор.Root[1].isGroup = true;
-    тблНавигатор.Root[1].Opened = true;
-    locRoot = тблНавигатор.Root[1];
-    for c = 1 .. cc do
-      --vClass = FindClass(локПозиции.ItemsByNumber[p].ПолноеИмяКласса);
-      --локНаимЭлемента = if((vClass <> nil), vClass.ClassInfo.Description, локПозиции.ItemsByNumber[p].НаимКласса);
-      локПолноеИмяКласса = локПозицииКлассов.ItemsByNumber[c].ПолноеИмяКласса;
-      локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
-      локТестПланКласса = локПозицииКлассов.ItemsByNumber[c].ТестПланКласса;
-      локОписаниеТестПлана = if((локТестПланКласса <> nil), локТестПланКласса.Наим, nil);
-      if Позиция_ОписаниеГруппы(c):
-        locRoot.Add([локОписаниеКласса, локПозицииКлассов.IndexByNumber[c]]);
-        n = locRoot.Count;
-        locRoot[n].Image = ImageClassGray;
-        locRoot[n].isGroup = true;
-        locRoot[n].Opened = true;
-        локЭлементНавигатора = locRoot[n];
-        локПозицииТестПланов = ТестПланПП.CreateSubtableView('inGroup and ПолноеИмяКласса="' + локПолноеИмяКласса + '"','');
-        pp = локПозицииТестПланов.Count;
-        for p = 1 .. pp do
-          локТестПланКласса = локПозицииТестПланов.ItemsByNumber[p].ТестПланКласса;
-          локОписаниеТестПлана = if((локТестПланКласса <> nil), локТестПланКласса.Наим, nil);
-          локЭлементНавигатора.Add([локОписаниеТестПлана, локПозицииТестПланов.IndexByNumber[p]]);
-          локЭлементНавигатора[p].Image = ImageClassGray;
-          локЭлементНавигатора[p].isGroup = false;
-          локЭлементНавигатора[p].Opened = false;
-          tt = локПозицииТестПланов.ItemsByNumber[p].ТестПланКласса.ТестПП.Count;
-
+    proc ДобавитьВетвиТестов(locRootItem: GridItem; locIndex: integer);--{
+      var locFlt: string[];
+      var локОписаниеТеста: string;
+      with Query.Create([Т9_Тесты.Тест]) do
+        locFlt[1] = 'Сеанс=' + Str(Record);
+        locFlt[2] = 'ТестПлан=' + Str(ТестПланПП[locIndex].ТестПланКласса);
+        Filter = СложитьСтрокиФильтраПоИ(locFlt);
+        Order = 'НомерПП';
+        Select;
+        while not Eof do
+          локОписаниеТеста = Current.Пример.Наим;
+          locRootItem.Add([локОписаниеТеста, Current, типТестПример]);
+          if (Current.Результат = 0):
+            locRootItem[locRootItem.Count].Image = ImageUnCheck;
+          elsif (Current.Результат = 1):
+            locRootItem[locRootItem.Count].Image = ImageCheckGreen;
+          elsif (Current.Результат = 2):
+            locRootItem[locRootItem.Count].Image = ImageCheckRed;
+          fi;
+          Next;
         od;
-
---        tt = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП.Count;
---        for t = 1 .. tt do
-----          локТест = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП.ItemsByNumber[t];
-----          локНаимЭлемента = if((локТест <> nil), локТест.Пример.Наим, nil);
-----          --локЗаписьТеста = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП[t].Наим;
-------          with Query.Create[Т9_Тесты.Тест] do
-------            locFlt[1] = 'Сеанс =' + Str(Record);
-------            locFlt[1] = 'Пример =' + Str(Record);
-------          end;
-----          локЭлементНавигатора.Add([локНаимЭлемента]);
-----          локЭлементНавигатора.Items[t].Image = ImageUnCheck;
---        od;
-      elsif Позиция_ВнеГруппы(c):
-        locRoot.Add([локОписаниеТестПлана, локПозицииКлассов.IndexByNumber[c]]);
-        n = locRoot.Count;
-        locRoot[n].Image = ImageClassGray;
-        locRoot[n].isGroup = false;
-        locRoot[n].Opened = false;
+      end;
+    end;--}
+    func ДобавитьВетвьТестПлана(locRootItem: GridItem; locIndex: integer): GridItem;--{
+      var локТестПланКласса: Т9_Тесты.ТестПланКласса;
+      var локПолноеИмяКласса, локОписаниеКласса, локОписаниеТестПлана: string;
+      var j, p, pp: integer;
+      var vPosition: Subtable;
+      if Позиция_ОписаниеГруппы(nil, locIndex):
+        локПолноеИмяКласса = ТестПланПП[locIndex].ПолноеИмяКласса;
+        локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
+        locRootItem.Add([локОписаниеКласса, locIndex, типПрограммаКласса, локПолноеИмяКласса]);
+        j = locRootItem.Count;
+        Result = locRootItem[j];
+        Result.Image = ImageClassGray;
+        Result.isGroup = true;
+        Result.Opened = true;
+        vPosition = ТестПланПП.CreateSubtableView('inGroup and ПолноеИмяКласса="' + локПолноеИмяКласса + '"','');
+        pp = vPosition.Count;
+        for p = 1 .. pp do
+          ДобавитьВетвьТестПлана(Result, vPosition.IndexByNumber[p]+1);
+        od;
+      else
+        локПолноеИмяКласса = ТестПланПП[locIndex].ПолноеИмяКласса;
+        локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
+        локТестПланКласса = ТестПланПП[locIndex].ТестПланКласса;
+        локОписаниеТестПлана = if((локТестПланКласса <> nil), локТестПланКласса.Наим, nil);
+        if Позиция_ВходитВГруппу(nil, locIndex):
+          locRootItem.Add([локОписаниеТестПлана, locIndex, типТестПлан, локТестПланКласса]);
+        elsif Позиция_ВнеГруппы(nil, locIndex):
+          locRootItem.Add([локОписаниеКласса, locIndex, типТестПлан, локТестПланКласса]);
+        fi;
+        j = locRootItem.Count;
+        Result = locRootItem[j];
+        Result.Image = ImageClassGray;
+        Result.isGroup = true;
+        Result.Opened = true;
+        ДобавитьВетвиТестов(Result, locIndex);
       fi;
-
-
---      if (локПозиции.ItemsByNumber[p].ТестПланКласса = nil): -- это заголовок группы тест-планов (тест-планы класса)
---        locRoot.Add([локНаимЭлемента,локПозиции.IndexByNumber[p]]);
---        n = locRoot.Count;
---        locRoot[n].isGroup = true;
---        locRoot[n].Opened = false;
---        locRoot[n].Image = ImageClassGray;
---        локЭлементНавигатора = locRoot[n];
---      else -- это заголовок тест-плана (тест-план единственный для класса)
---        locRoot.Add([локНаимЭлемента,локПозиции.IndexByNumber[p]]);
---        n = locRoot.Count;
---        locRoot[n].isGroup = true;
---        locRoot[n].Opened = false;
---        locRoot[n].Image = ImageClassGray;
---        локЭлементНавигатора = locRoot[n];
---        tt = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП.Count;
---        for t = 1 .. tt do
---          локНаимЭлемента = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП.ItemsByNumber[t].Пример.Наим;
---          --локЗаписьТеста = локПозиции.ItemsByNumber[p].ТестПланКласса.ТестПП[t].Наим;
-----          with Query.Create[Т9_Тесты.Тест] do
-----            locFlt[1] = 'Сеанс =' + Str(Record);
-----            locFlt[1] = 'Пример =' + Str(Record);
-----          end;
---          локЭлементНавигатора.Add([локНаимЭлемента]);
---          локЭлементНавигатора.Items[t].Image = ImageUnCheck;
---
---        od;
-----        with Query.Create[Т9_Тесты.Тест] do
-----          locFlt[1] = 'Сеанс =' + Str(Record);
-----          locFlt[1] = 'ПримерСеанс =' + Str(Record);
-------          Filter = 'Сеан =' + Str(Record);
-------
-------
-------
-----        end;
---
---
---
---      fi;
---      --локЭлементНавигатора[1].Add([true, Q.Current.Код,Q.Current.Наим,'...',Q.Current]);
---
+    end;--}
+    ИнициализироватьИконки;
+    ИнициализироватьНавигатор;
+    locItem = ДобавитьГлавнуюВетвь;
+    локПозицииПрограммы = ТестПланПП.CreateSubtableView('not inGroup','');
+    cc = локПозицииПрограммы.Count;
+    for c = 1 .. cc do
+      ДобавитьВетвьТестПлана(locItem, локПозицииПрограммы.IndexByNumber[c]+1);
     od;
   end;
 
@@ -266,25 +272,33 @@ import СИС2 classes Функции;
     end;
   end;
 
-
 --}}
 
 --{{ Обработчики событий шаблона
 
   proc шаблон_ПриСоздании(Context: Variant);
     inherited шаблон_ПриСоздании(Context);
-    СоздатьНавигатор;
   end;
 
   proc шаблон_ПриОткрытии(Create :Logical);
     inherited шаблон_ПриОткрытии(Create);
     тблНавигатор.Align = true;
+    with фреймРабЭлемент1 do
+      ShowTabs = false;
+      AutoSize = true;
+    end;
+    with фреймРабЭлемент2 do
+      ShowTabs = false;
+      AutoSize = false;
+    end;
+    ПоказыватьЗебру = true;
   end;
 
   proc шаблон_ПриСчитывании;
     inherited шаблон_ПриСчитывании;
     ЗаполнитьНавигатор;
     локТранзакция = Transaction.Create([Т9_Тесты.СеансТестирования,Т9_Тесты.Тест]);
+    тблНавигатор.SetFocus;
   end;
 
   func шаблон_ПриЗаписи :Logical;
@@ -309,15 +323,105 @@ import СИС2 classes Функции;
 --{{ Обработчики событий клеток шаблона
 
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
+    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
+    if (Cell.Contents = '+') and (Cell.Owner = секцСценарий1ЗаголовокТаблицы):--добавление тест-плана класса в тест-план из заголовка таблицы
+      if CmOk = ДобавитьТестПлан(Cell, локЗаписьТестПлана, true):
+        АктуализироватьТестПримеры(локЗаписьТестПлана);
+        ЗаполнитьНавигатор;
+      fi;
+    elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий1): --добавление тест-плана класса в тест-план из строки таблицы
+      if CmOk = ДобавитьТестПлан(Cell, локЗаписьТестПлана, false):
+        АктуализироватьТестПримеры(локЗаписьТестПлана);
+        ЗаполнитьНавигатор;
+      fi;
+    elsif (Cell.Contents = 'x') and (Cell.Owner = секцСценарий1): --удаление строки из тест-плана (без удаления тест-плана класса из справочника)
+      УдалитьТестПримеры(ТестПланПП[Cell.Frame].ТестПланКласса);
+      УдалитьТестПлан(Cell);
+      ЗаполнитьНавигатор;
+    elsif (Cell.Contents = '5') and (Cell.Owner in [секцСценарий1,секцСценарий2]):--перемещение строк вверх
+      ПоднятьТестПлан(Cell);
+      ЗаполнитьНавигатор;
+    elsif (Cell.Contents = '6') and (Cell.Owner in [секцСценарий1,секцСценарий2]):--перемещение строк вниз
+      ОпуститьТестПлан(Cell);
+      ЗаполнитьНавигатор;
+    elsif (Cell.Contents = '...') and (Cell.Owner in [секцСценарий1,секцСценарий2]): --карточка тест-плана класса
+      ПоказатьТестПлан(Cell);
+      ЗаполнитьНавигатор;
+    elsif (Cell.Contents = 'ТестПройден') and (ТекущийТест_ <> nil):
+      if (ТекущийТест_.Результат  = 1):
+        ТекущийТест_.Результат = 0;
+      else
+        ТекущийТест_.Результат = 1;
+      fi;
+      ИзменитьСостояниеЗаписи;
+    elsif (Cell.Contents = 'ТестНеПройден') and (ТекущийТест_ <> nil):
+      if (ТекущийТест_.Результат  = 2):
+        ТекущийТест_.Результат = 0;
+      else
+        ТекущийТест_.Результат = 2;
+      fi;
+      ИзменитьСостояниеЗаписи;
+    fi;
+  end;
+
+  func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
+    var Index: Integer;
+    var locIsGroup: logical;
+    var locDiscription: string;
+    var локПозицииПрограммы: Subtable;
+    if (Cell.Contents = 'ТестПланКласса.Наим'):
+      локПозицииПрограммы = ТестПланПП.CreateSubtableView(Cell.Owner.SubtableFilter, '');
+      Index = локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1;
+      locIsGroup = (ТестПланПП[Index].ТестПланКласса = nil) and (ТестПланПП[Index].ПолноеИмяКласса <> nil);
+      locDiscription = Библио.ОписаниеКлассаПоИмени(ТестПланПП[Index].ПолноеИмяКласса);
+      locDiscription = if((locDiscription <> nil), locDiscription, 'НЕВЕРНОЕ ИМЯ КЛАССА');
+      if (locIsGroup):
+        Result = '<b+>' + locDiscription;
+      else
+        if (ТестПланПП[Index].inGroup) and (ТестПланПП[Index].ТестПланКласса <> nil):
+          Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланКласса.Наим;
+        elsif (not ТестПланПП[Index].inGroup):
+          Result = locDiscription;
+        fi;
+      fi;
+    elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий2):
+      локПозицииПрограммы = ТестПланПП.CreateSubtableView(Cell.Owner.SubtableFilter, '');
+      Result = (локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1);
+    elsif (Cell.Contents = 'Пример.Наим'):
+      Index = Cell.Frame;
+      Result = Тест_[Index].Пример.Наим;
+    elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий3):
+      Index = Cell.Frame;
+      Result = Тест_[Index].НомерПП;
+    elsif (Cell.Contents = 'Наим'):
+      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.Наим, '');
+    elsif (Cell.Contents = 'СценарийТеста'):
+      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.СценарийТеста, '');
+    elsif (Cell.Contents = 'ОжидаемыйРезультат'):
+      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.ОжидаемыйРезультат, '');
+    elsif (Cell.Contents = 'ТестПройден'):
+      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 1), false);
+    elsif (Cell.Contents = 'ТестНеПройден'):
+      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 2), false);
+    fi;
   end;
 
   func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
     Window.Caption = 'Сеанс тестирования';
--- type типСтадияТестрования = (СтадияСозданиеПрограммы = 0, СтадияВыполнениеПрограммы, СтадияСеансЗавершен, СтадияСеансВозобновлен);
     if (Стадия = Константы.СтадияСозданиеПрограммы): Result = 'Сеанс' + Chr(13) + '<s-><s-><cf:GrayText>(создание программы тестирования)';
     elsif (Стадия = Константы.СтадияВыполнениеПрограммы): Result = 'Сеанс' + Chr(13) + '<s-><s->(выполнение программы тестирования)';
     elsif (Стадия = Константы.СтадияСеансВозобновлен): Result = 'Сеанс' + Chr(13) + '<s-><s->(выполнение программы тестирования возобновлено)';
     elsif (Стадия = Константы.СтадияСеансЗавершен): Result = 'Сеанс' + Chr(13) + '<s-><s->(выполнение программы тестирования завершено)';
+    fi;
+  end;
+
+  proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    if ПоказыватьЗебру and (Cell.Owner = секцСценарий1):
+      Поле_ПриРисованииЭффектЗебры(Cell, Selected, Color, FieldColor, Font);
+    elsif ПоказыватьЗебру and (Cell.Owner = секцСценарий2):
+      Поле_ПриРисованииЭффектЗебры(Cell, Selected, Color, FieldColor, Font);
+    elsif ПоказыватьЗебру and (Cell.Owner = секцСценарий3):
+      Поле_ПриРисованииЭффектЗебры(Cell, Selected, Color, FieldColor, Font);
     fi;
   end;
 --}}
@@ -325,25 +429,24 @@ import СИС2 classes Функции;
 --{{ Обработчики событий прочих объектов шаблона
 
   proc кнПриНажатии (Sender: Button);
-    var locCrd: Тесты.картПроектСеанса;
+    var locPrjCrd: Тесты.картПроектСеанса;
+    var locSesCrd: Тесты.картСеанс;
     var локЗаписьПроектаСеанса: Т9_Тесты.ПроектСеанса;
+    var локЗаписьСеанса: Т9_Тесты.СеансТестирования;
     var локПолноеИмяКласса: string;
     var локТестПланКласса: Т9_Тесты.ТестПланКласса;
-    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var locInGroup: logical;
     var локРешение: integer;
     var p, pp: integer;
-    var t, tt: integer;
-    var vClass: Class;
-    var локИмяТестируемогоКласса: string;
-    var локНаимТестируемогоКласса: string;
-    var локТест: Т9_Тесты.Тест;
-    if Sender.Name = 'кнСоздатьПрограмму':
+    --var t, tt: integer;
+    --var локИмяТестируемогоКласса: string;
+    --var локТест: Т9_Тесты.Тест;
+    if (Sender.Name = 'кнСоздатьПрограмму'): --{
       if (ТестПланПП.Count = 0): -- загрузка проекта сеанса допускается только при пустой подтаблице тест-планов
         локРешение = Enquiry (,'Загрузка базовой программы тестирования:',['По шаблону','По образцу','Отмена'],);
-        if (локРешение = 1): -- По шаблону
-          locCrd = Тесты.картПроектСеанса.Create;
-          if CmOk = locCrd.ShowEx(локЗаписьПроектаСеанса, '', Window.ModalWindow):
+        if (локРешение = 1): --{ По шаблону
+          locPrjCrd = Тесты.картПроектСеанса.Create;
+          if CmOk = locPrjCrd.ShowEx(локЗаписьПроектаСеанса, '', Window.ModalWindow):
             Наим = локЗаписьПроектаСеанса.Наим;
             pp = локЗаписьПроектаСеанса.ТестПланПП.Count;
             for p = 1 .. pp do
@@ -357,109 +460,94 @@ import СИС2 classes Функции;
                   ПолноеИмяКласса = локПолноеИмяКласса;
                   ТестПланКласса = локТестПланКласса;
                   inGroup = locInGroup;
-                  tt = локТестПланКласса.ТестПП.Count;
-                  for t = 1 .. tt do
-                    локТест = Т9_Тесты.Тест.Create;
-                    локТест.Пример = локТестПланКласса.ТестПП[t].Пример;
-                    локТест.Сеанс = Record;
-                    локТест.Post;
-                  od;
-                fi;
-
---                ТестПланКласса = локЗаписьТестПлана; -- stb
---                локИмяТестируемогоКласса = if(локЗаписьТестПлана <> nil, локЗаписьТестПлана.ПолноеИмяКласса, локЗаписьПроектаСеанса.ТестПланПП[p].ПолноеИмяКласса);  --{ служебные действия
---                УдалениеСлучайныхЗаписейТестов(локИмяТестируемогоКласса);
---                vClass = FindClass(локИмяТестируемогоКласса);
---                if (vClass <> nil):
---                  локНаимТестируемогоКласса = vClass.ClassInfo.Description;
---                else
---                  if (локЗаписьТестПлана <> nil):
---                    --локНаимТестируемогоКласса = локЗаписьТестПлана.НаимКласса;
---                    локНаимТестируемогоКласса = Библио.ОписаниеКлассаПоИмени(локЗаписьТестПлана.ИмяКласса);
---                  else
---                    --локНаимТестируемогоКласса = локЗаписьПроектаСеанса.ТестПланПП[p].НаимКласса;
---                  fi;
---                fi;
---                --}
---                ПолноеИмяКласса = локИмяТестируемогоКласса; -- stb
---                --НаимКласса = локНаимТестируемогоКласса; -- stb
---                --inGroup = локЗаписьПроектаСеанса.ТестПланПП[p].inGroup; -- stb
---                if (локЗаписьТестПлана <> nil):
---                  tt = локЗаписьТестПлана.ТестПП.Count;
+                  АктуализироватьТестПримеры(локТестПланКласса);
+--                  tt = локТестПланКласса.ТестПП.Count;
 --                  for t = 1 .. tt do
 --                    локТест = Т9_Тесты.Тест.Create;
---                    локТест.Пример = локЗаписьТестПлана.ТестПП[t].Пример;
 --                    локТест.Сеанс = Record;
+--                    локТест.ТестПлан = локТестПланКласса;
+--                    локТест.Пример = локТестПланКласса.ТестПП[t].Пример;
+--                    локТест.НомерПП = t;
 --                    локТест.Post;
 --                  od;
---                fi;
+                fi;
               end;
             od;
             ЗаполнитьНавигатор;
-          fi;
-        elsif (локРешение = 2): -- По образцу
-          locCrd = Тесты.картПроектСеанса.Create;
-          if CmOk = locCrd.ShowEx(локЗаписьПроектаСеанса, 'DocId<>' + Str(DocId), Window.ModalWindow):
-            Наим = локЗаписьПроектаСеанса.Наим;
-            pp = локЗаписьПроектаСеанса.ТестПланПП.Count;
+            ИзменитьСостояниеЗаписи;
+          fi;--}
+        elsif (локРешение = 2): --{ По образцу
+          locSesCrd = Тесты.картСеанс.Create;
+          if CmOk = locSesCrd.ShowEx(локЗаписьСеанса, 'Стадия=' + Str(Константы.СтадияСеансЗавершен), Window.ModalWindow):
+            Наим = локЗаписьСеанса.Наим;
+            pp = локЗаписьСеанса.ТестПланПП.Count;
             for p = 1 .. pp do
+              локПолноеИмяКласса = локЗаписьСеанса.ТестПланПП[p].ПолноеИмяКласса;
+              локТестПланКласса = локЗаписьСеанса.ТестПланПП[p].ТестПланКласса;
+              locInGroup = локЗаписьСеанса.ТестПланПП[p].InGroup;
               with ТестПланПП.Insert(p) do
-                ТестПланКласса = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса; -- stb
-                локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;  --{ служебные действия
-                локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;  --{ служебные действия
-                УдалениеСлучайныхЗаписейТестов(локИмяТестируемогоКласса);
-                vClass = FindClass(локИмяТестируемогоКласса);
-                локНаимТестируемогоКласса = if((vClass <> nil), vClass.ClassInfo.Description, локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса.Наим);
-                --}
-                ПолноеИмяКласса = локИмяТестируемогоКласса; -- stb
-                --НаимКласса = локНаимТестируемогоКласса; -- stb
-                --inGroup = локЗаписьПроектаСеанса.ТестПланПП[p].inGroup; -- stb
-                tt = ТестПланКласса.ТестПП.Count;
-                for t = 1 .. tt do
-                  локТест = Т9_Тесты.Тест.Create;
-                  локТест.Пример = ТестПланКласса.ТестПП[t].Пример;
-                  локТест.Сеанс = Record;
-                  локТест.Post;
-                od;
+                if (локТестПланКласса = nil): -- это группа тест-планов
+                  ПолноеИмяКласса = локПолноеИмяКласса;
+                else -- это тест-план
+                  ПолноеИмяКласса = локПолноеИмяКласса;
+                  ТестПланКласса = локТестПланКласса;
+                  inGroup = locInGroup;
+                  АктуализироватьТестПримеры(локТестПланКласса);
+--                  tt = локТестПланКласса.ТестПП.Count;
+--                  for t = 1 .. tt do
+--                    локТест = Т9_Тесты.Тест.Create;
+--                    локТест.Сеанс = Record;
+--                    локТест.ТестПлан = локТестПланКласса;
+--                    локТест.Пример = локТестПланКласса.ТестПП[t].Пример;
+--                    локТест.НомерПП = t;
+--                    локТест.Post;
+--                  od;
+                fi;
               end;
             od;
             ЗаполнитьНавигатор;
-          fi;
+            ИзменитьСостояниеЗаписи;
+          fi;--}
         fi;
       fi;
+    --}
     fi;
-
---    if Sender.Name = 'кнЗагрузитьПроектСеанса':
---      if not (Record.State = Record.Normal):--{ сохранение записи до модификации
---        EditorPost;
---      fi;--}
---      if (ТестПланПП.Count = 0): -- загрузка проекта сеанса допускается только при пустой подтаблице тест-планов
---        locCrd = Тесты.картПроектСеанса.Create;
---        if CmOk = locCrd.ShowEx(локЗаписьПроектаСеанса, '', Window.ModalWindow):
---          Наим = локЗаписьПроектаСеанса.Наим;
---          pp = локЗаписьПроектаСеанса.ТестПланПП.Count;
---          for p = 1 .. pp do
---            with ТестПланПП.Insert(p) do
---              ТестПланКласса = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланКласса;
---              локИмяТестируемогоКласса = ТестПланКласса.ПолноеИмяКласса;
---              УдалениеСлучайныхЗаписейТестов(локИмяТестируемогоКласса);
---              tt = ТестПланКласса.ТестПП.Count;
---              for t = 1 .. tt do
---                локТест = Т9_Тесты.Тест.Create;
---                локТест.Пример = ТестПланКласса.ТестПП[t].Пример;
---                локТест.Сеанс = Record;
---                локТест.Post;
---              od;
---            end;
---          od;
---        fi;
---      fi;
---      if not (Record.State = Record.Normal):--{ сохранение записи после модификации
---        EditorPost;
---      fi;--}
---    ---
---    fi;
   end;
+  --type типЭлементаНавигатора = (типПрограммаСеанса = 0, типПрограммаКласса, типТестПлан, типТестПример);
+
+  proc тблНавигатор_ПриПеремещении(Sender: Grid);
+    var локЭлемент: variant[];
+    локЭлемент = Sender.Current.Value as variant[];
+    if (локЭлемент[3] = типПрограммаСеанса):
+      фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[1];
+      фреймРабЭлемент1.CurrentFrame.Visible = true;
+      фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[1];
+      фреймРабЭлемент2.CurrentFrame.Visible = true;
+    elsif (локЭлемент[3] = типПрограммаКласса):
+      секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (локЭлемент[4] as string) + '"';
+      фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[2];
+      фреймРабЭлемент1.CurrentFrame.Visible = true;
+      фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[2];
+      фреймРабЭлемент2.CurrentFrame.Visible = true;
+    elsif (локЭлемент[3] = типТестПлан):
+      ПрочитатьТестПримеры(локЭлемент[4] as Т9_Тесты.ТестПланКласса);
+      секцСценарий3.Count = LengthOfArray(Тест_);
+      фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[3];
+      фреймРабЭлемент1.CurrentFrame.Visible = true;
+      фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[3];
+      фреймРабЭлемент2.CurrentFrame.Visible = true;
+    elsif (локЭлемент[3] = типТестПример):
+      ТекущаяВетвь_ = Sender.Current;
+      ТекущийТест_ = локЭлемент[2] as Т9_Тесты.Тест;
+      фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4];
+      фреймРабЭлемент1.CurrentFrame.Visible = true;
+      фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
+      фреймРабЭлемент2.CurrentFrame.Visible = true;
+    --фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4]; фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
+    end;
+      
+  end;
+
 --}}
 
 end

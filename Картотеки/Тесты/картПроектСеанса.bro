@@ -114,10 +114,29 @@ CanDelete=1
 CanMove=1
 CanCopy=0
 ShowRecords=0
-ColumnCount=3
-Column:0=inGroup
-Column:1=ѕолное»м€ ласса
-Column:2=“естѕлан ласса
+ColumnCount=4
+Column:0=Index
+Column:1=inGroup
+Column:2=ѕолное»м€ ласса
+Column:3=“естѕлан ласса
+
+[“естѕланѕѕ.Column.Index]
+Caption=Index
+Width=100
+MinWidth=0
+Visible=1
+Editable=0
+Sortable=1
+Summary=0
+Designated=0
+Lookup=0
+Alignment=2
+ColumnType=0
+ColumnFormat=0
+FindMaskFormat=0
+FieldSize=0
+ManualEdit=0
+UseFont=0
 
 [“естѕланѕѕ.Column.inGroup]
 Caption=inGroup
