@@ -173,9 +173,12 @@ import СИС2 classes Функции, СтроковыеФункции;
     proc ИнициализироватьИконки;--{
       ImageProject = Image.Create;    ImageProject.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
       ImageClassGray = Image.Create;  ImageClassGray.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
-      ImageUnCheck = Image.Create;    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_uncheck.ico");
-      ImageCheckGreen = Image.Create; ImageCheckGreen.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_green.ico");
-      ImageCheckRed = Image.Create;   ImageCheckRed.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_red.ico");
+      --ImageUnCheck = Image.Create;    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_uncheck.ico");
+      --ImageCheckGreen = Image.Create; ImageCheckGreen.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_green.ico");
+      --ImageCheckRed = Image.Create;   ImageCheckRed.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_red.ico");
+      ImageUnCheck = Image.Create;    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_white.ico");
+      ImageCheckGreen = Image.Create; ImageCheckGreen.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_green.ico");
+      ImageCheckRed = Image.Create;   ImageCheckRed.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_red.ico");
     end;--}
     func ДобавитьГлавнуюВетвь: GridItem;--{
       тблНавигатор.Root.Add(['Классы', nil, типПрограммаСеанса]);
@@ -270,6 +273,11 @@ import СИС2 classes Функции, СтроковыеФункции;
         end;
       fi;
     end;
+  end;
+
+  func ВычислитьКодВетви(ТекущаяВетвь: GridItem): string;
+    
+    --Result = ;
   end;
 
 --}}
