@@ -283,7 +283,7 @@ import СИС2 classes Функции, СтроковыеФункции;
 
   func Поле_ПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
     var vClass: Class;
-    if (Cell.Contents = 'ПолноеИмяКласса'):
+    if (Cell.Contents = 'ПолноеИмяКласса'):--{
       if (Action = Template.Clear):
         --НаимКласса = nil;
         ПолноеИмяКласса = nil;
@@ -320,7 +320,17 @@ import СИС2 classes Функции, СтроковыеФункции;
           Self.Template.CellByField['ТипБазовогоКласса'].SetFocus;
         fi;
       fi;
-      ВидФормы;
+      ВидФормы;--}
+    elsif (Cell.Contents = 'ТипБазовогоКласса'):--{
+      if (Action = Template.Clear):
+        ПолноеИмяКласса = nil;
+        ИмяПроектаКласса = nil;
+        Наим = nil;
+        Комментарий = nil;
+      else
+        Result = true;
+      fi;
+    --}
     fi;
   end;
 
@@ -432,7 +442,7 @@ import СИС2 classes Функции, СтроковыеФункции;
 
 --{{ Обработчики событий прочих объектов шаблона
 
-  proc кнПриНажатии (Sender: Button);
+  proc кнПриНажатии (Sender: Button); var locFlt: string[];
     var локЗаписьСпецификации: Т9_Тесты.СпецификацияКласса;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var локЗаписьПримера: Т9_Тесты.ТестовыйПример;
@@ -503,7 +513,9 @@ import СИС2 classes Функции, СтроковыеФункции;
           aId[t] = ТестПП[t].Пример.ПоШаблону.DocId;
         fi;
       od;
-      if CmOk = OpenCardfile('Тесты.картТестовыйПример', локЗаписьПримераШбл, 'ЭтоШаблон and not DocId in ' + ToStr(aId), Window.ModalWindow):
+      locFlt[1] = 'ЭтоШаблон';
+      locFlt[2] = if((aId <> nil), 'not DocId in ' + ToStr(aId), nil);
+      if CmOk = OpenCardfile('Тесты.картТестовыйПример', локЗаписьПримераШбл, СложитьСтрокиФильтраПоИ(locFlt), Window.ModalWindow):
         with ТестПП.Insert(1) do
           локЗаписьПримера = Т9_Тесты.ТестовыйПример.Create;
           локЗаписьПримера.ТипБазовогоКласса  = ТипБазовогоКласса;
