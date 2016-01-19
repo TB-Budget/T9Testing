@@ -510,7 +510,7 @@ import СИС2 classes Функции, СтроковыеФункции;
       tt = ТестПП.Count;
       for t = 1 .. tt do
         if (ТестПП[t].Пример.ПоШаблону <> nil):
-          aId[t] = ТестПП[t].Пример.ПоШаблону.DocId;
+          AddInArray(aId, ТестПП[t].Пример.ПоШаблону.DocId, true);
         fi;
       od;
       locFlt[1] = 'ЭтоШаблон';
