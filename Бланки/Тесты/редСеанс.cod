@@ -43,10 +43,24 @@ import СИС2 classes Функции, СтроковыеФункции;
 
   var локТранзакция: Transaction;
 
+  type ImageType = (iProject = 1, iClassGray, iClassGreen, iClassYellow, iUnCheck, iCheckGreen, iCheckRed);
+  var ImageOfObject: Image[];
+
 --{{ Вспомогательные методы
   proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
     ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
   end;
+
+  proc ИнициализироватьИконки;--{
+    ImageOfObject = nil;
+    ImageOfObject[iProject]     = Image.Create; ImageOfObject[iProject].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
+    ImageOfObject[iClassGray]   = Image.Create; ImageOfObject[iClassGray].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
+    ImageOfObject[iClassYellow] = Image.Create; ImageOfObject[iClassYellow].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Yellow.ico");
+    ImageOfObject[iClassGreen]  = Image.Create; ImageOfObject[iClassGreen].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Green.ico");
+    ImageOfObject[iUnCheck]     = Image.Create; ImageOfObject[iUnCheck].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_white.ico");
+    ImageOfObject[iCheckGreen]  = Image.Create; ImageOfObject[iCheckGreen].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_green.ico");
+    ImageOfObject[iCheckRed]    = Image.Create; ImageOfObject[iCheckRed].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_red.ico");
+  end;--}
 
   proc ИзменитьСостояниеЗаписи;
     СИС2.ФункцииДокумента.RecordEdit(Record);
@@ -166,30 +180,21 @@ import СИС2 classes Функции, СтроковыеФункции;
   end;
 
   proc ЗаполнитьНавигатор;
-    var ImageProject, ImageClassGray, ImageUnCheck, ImageCheckGreen, ImageCheckRed: Image;
+    --var ImageProject, ImageClassGray, ImageUnCheck, ImageCheckGreen, ImageCheckRed: Image;
     var locItem: GridItem;
     var локПозицииПрограммы: Subtable;
     var c, cc: integer;
-    proc ИнициализироватьИконки;--{
-      ImageProject = Image.Create;    ImageProject.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
-      ImageClassGray = Image.Create;  ImageClassGray.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
-      --ImageUnCheck = Image.Create;    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_uncheck.ico");
-      --ImageCheckGreen = Image.Create; ImageCheckGreen.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_green.ico");
-      --ImageCheckRed = Image.Create;   ImageCheckRed.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\check_box_red.ico");
-      ImageUnCheck = Image.Create;    ImageUnCheck.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_white.ico");
-      ImageCheckGreen = Image.Create; ImageCheckGreen.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_green.ico");
-      ImageCheckRed = Image.Create;   ImageCheckRed.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_red.ico");
-    end;--}
     func ДобавитьГлавнуюВетвь: GridItem;--{
       тблНавигатор.Root.Add(['Классы', nil, типПрограммаСеанса]);
       Result = тблНавигатор.Root[1];
-      Result.Image = ImageProject;
+      Result.Image = ImageOfObject[iProject];
       Result.isGroup = true;
       Result.Opened = true;
     end;--}
     proc ДобавитьВетвиТестов(locRootItem: GridItem; locIndex: integer);--{
       var locFlt: string[];
       var локОписаниеТеста: string;
+      var t: integer;
       with Query.Create([Т9_Тесты.Тест]) do
         locFlt[1] = 'Сеанс=' + Str(Record);
         locFlt[2] = 'ТестПлан=' + Str(ТестПланПП[locIndex].ТестПланКласса);
@@ -197,17 +202,19 @@ import СИС2 classes Функции, СтроковыеФункции;
         Order = 'НомерПП';
         Select;
         while not Eof do
+          t = t + 1;
           локОписаниеТеста = Current.Пример.Наим;
-          locRootItem.Add([локОписаниеТеста, Current, типТестПример]);
+          locRootItem.Add([локОписаниеТеста, Current, типТестПример, t]);
           if (Current.Результат = 0):
-            locRootItem[locRootItem.Count].Image = ImageUnCheck;
+            locRootItem[locRootItem.Count].Image = ImageOfObject[iUnCheck];
           elsif (Current.Результат = 1):
-            locRootItem[locRootItem.Count].Image = ImageCheckGreen;
+            locRootItem[locRootItem.Count].Image = ImageOfObject[iCheckGreen];
           elsif (Current.Результат = 2):
-            locRootItem[locRootItem.Count].Image = ImageCheckRed;
+            locRootItem[locRootItem.Count].Image = ImageOfObject[iCheckRed];
           fi;
           Next;
         od;
+        ИндикацияСтатусаТестПлана(locRootItem);
       end;
     end;--}
     func ДобавитьВетвьТестПлана(locRootItem: GridItem; locIndex: integer): GridItem;--{
@@ -221,7 +228,7 @@ import СИС2 classes Функции, СтроковыеФункции;
         locRootItem.Add([локОписаниеКласса, locIndex, типПрограммаКласса, локПолноеИмяКласса]);
         j = locRootItem.Count;
         Result = locRootItem[j];
-        Result.Image = ImageClassGray;
+        Result.Image = ImageOfObject[iClassGray];
         Result.isGroup = true;
         Result.Opened = true;
         vPosition = ТестПланПП.CreateSubtableView('inGroup and ПолноеИмяКласса="' + локПолноеИмяКласса + '"','');
@@ -229,6 +236,7 @@ import СИС2 classes Функции, СтроковыеФункции;
         for p = 1 .. pp do
           ДобавитьВетвьТестПлана(Result, vPosition.IndexByNumber[p]+1);
         od;
+        ИндикацияСтатусаТестПлана(Result);
       else
         локПолноеИмяКласса = ТестПланПП[locIndex].ПолноеИмяКласса;
         локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
@@ -241,19 +249,19 @@ import СИС2 classes Функции, СтроковыеФункции;
         fi;
         j = locRootItem.Count;
         Result = locRootItem[j];
-        Result.Image = ImageClassGray;
+        Result.Image = ImageOfObject[iClassGray];
         Result.isGroup = true;
-        Result.Opened = true;
+        Result.Opened = false;
         ДобавитьВетвиТестов(Result, locIndex);
       fi;
     end;--}
-    ИнициализироватьИконки;
     ИнициализироватьНавигатор;
     locItem = ДобавитьГлавнуюВетвь;
     локПозицииПрограммы = ТестПланПП.CreateSubtableView('not inGroup','');
     cc = локПозицииПрограммы.Count;
     for c = 1 .. cc do
       ДобавитьВетвьТестПлана(locItem, локПозицииПрограммы.IndexByNumber[c]+1);
+      --locItem.Opened = false;
     od;
   end;
 
@@ -275,9 +283,57 @@ import СИС2 classes Функции, СтроковыеФункции;
     end;
   end;
 
-  func ВычислитьКодВетви(ТекущаяВетвь: GridItem): string;
-    
-    --Result = ;
+--  func ВычислитьКодВетви(ТекущаяВетвь: GridItem): string;
+--
+--    --Result = ;
+--  end;
+
+  proc ИндикацияСтатусаТестПлана(locBranch: GridItem);
+    var локЭлемент: variant[];
+    var t,tt: integer;
+    var UnCount, GreenCount, RedCount, YellowCount: integer;
+    локЭлемент = locBranch.Value as variant[];
+    if (локЭлемент[3] = типТестПлан): --{
+      tt = locBranch.Count;
+      for t = 1 .. tt do
+        if (locBranch.Items[t].Image = ImageOfObject[iUnCheck]):
+          UnCount = UnCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckGreen]):
+          GreenCount = GreenCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckRed]):
+          RedCount = RedCount + 1;
+        fi;
+      od;
+      if (tt = UnCount):
+        locBranch.Image = ImageOfObject[iClassGray];
+      elsif  (tt = GreenCount):
+        locBranch.Image = ImageOfObject[iClassGreen];
+      else
+        locBranch.Image = ImageOfObject[iClassYellow];
+      fi;--}
+      локЭлемент = locBranch.Parent.Value as variant[];
+      if (локЭлемент[3] = типПрограммаКласса):
+        ИндикацияСтатусаТестПлана(locBranch.Parent);
+      fi;
+    elsif (локЭлемент[3] = типПрограммаКласса):--{
+      tt = locBranch.Count;
+      for t = 1 .. tt do
+        if (locBranch.Items[t].Image = ImageOfObject[iClassGray]):
+          UnCount = UnCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iClassGreen]):
+          GreenCount = GreenCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iClassYellow]):
+          YellowCount = YellowCount + 1;
+        fi;
+      od;
+      if (tt = UnCount):
+        locBranch.Image = ImageOfObject[iClassGray];
+      elsif  (tt = GreenCount):
+        locBranch.Image = ImageOfObject[iClassGreen];
+      else
+        locBranch.Image = ImageOfObject[iClassYellow];
+      fi;--}
+    fi;
   end;
 
 --}}
@@ -286,6 +342,7 @@ import СИС2 classes Функции, СтроковыеФункции;
 
   proc шаблон_ПриСоздании(Context: Variant);
     inherited шаблон_ПриСоздании(Context);
+    ИнициализироватьИконки;
   end;
 
   proc шаблон_ПриОткрытии(Create :Logical);
@@ -332,6 +389,8 @@ import СИС2 classes Функции, СтроковыеФункции;
 
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
+    var локЭлемент: variant[];
+    var локНаимТестПлана: string;
     if (Cell.Contents = '+') and (Cell.Owner = секцСценарий1ЗаголовокТаблицы):--добавление тест-плана класса в тест-план из заголовка таблицы
       if CmOk = ДобавитьТестПлан(Cell, локЗаписьТестПлана, true):
         АктуализироватьТестПримеры(локЗаписьТестПлана);
@@ -355,19 +414,45 @@ import СИС2 classes Функции, СтроковыеФункции;
     elsif (Cell.Contents = '...') and (Cell.Owner in [секцСценарий1,секцСценарий2]): --карточка тест-плана класса
       ПоказатьТестПлан(Cell);
       ЗаполнитьНавигатор;
+    elsif (Cell.Owner.Name = 'секцПредТест'):
+      тблНавигатор.SetFocus;
+      Self.Template.BeginModify;
+      тблНавигатор.Current = ТекущаяВетвь_;
+      ExecuteCommand('Kernel.Move.Up', false);
+      Sleep(0.5);
+      Self.Template.EndModify;
+    elsif (Cell.Owner.Name = 'секцСледТест'):
+      тблНавигатор.SetFocus;
+      Self.Template.BeginModify;
+      локЭлемент = ТекущаяВетвь_.Parent.Value as variant[];
+      локНаимТестПлана = локЭлемент[1] as string;
+      тблНавигатор.Current = ТекущаяВетвь_;
+      ExecuteCommand('Kernel.Move.Down', false);
+      Sleep(0.5);
+      локЭлемент = тблНавигатор.Current.Value as variant[];
+      if (локЭлемент[3] <> типТестПример):
+        Message('В тест-плане <' + локНаимТестПлана + '> выполнены все тесты.');
+      fi;
+      Self.Template.EndModify;
     elsif (Cell.Contents = 'ТестПройден') and (ТекущийТест_ <> nil):
       if (ТекущийТест_.Результат  = 1):
         ТекущийТест_.Результат = 0;
+        ТекущаяВетвь_.Image = ImageOfObject[iUnCheck];
       else
         ТекущийТест_.Результат = 1;
+        ТекущаяВетвь_.Image = ImageOfObject[iCheckGreen];
       fi;
+      ИндикацияСтатусаТестПлана(ТекущаяВетвь_.Parent);
       ИзменитьСостояниеЗаписи;
     elsif (Cell.Contents = 'ТестНеПройден') and (ТекущийТест_ <> nil):
       if (ТекущийТест_.Результат  = 2):
         ТекущийТест_.Результат = 0;
+        ТекущаяВетвь_.Image = ImageOfObject[iUnCheck];
       else
         ТекущийТест_.Результат = 2;
+        ТекущаяВетвь_.Image = ImageOfObject[iCheckRed];
       fi;
+      ИндикацияСтатусаТестПлана(ТекущаяВетвь_.Parent);
       ИзменитьСостояниеЗаписи;
     fi;
   end;
@@ -521,23 +606,26 @@ import СИС2 classes Функции, СтроковыеФункции;
     --}
     fi;
   end;
-  --type типЭлементаНавигатора = (типПрограммаСеанса = 0, типПрограммаКласса, типТестПлан, типТестПример);
 
   proc тблНавигатор_ПриПеремещении(Sender: Grid);
     var локЭлемент: variant[];
+    ТекущаяВетвь_ = Sender.Current;
     локЭлемент = Sender.Current.Value as variant[];
     if (локЭлемент[3] = типПрограммаСеанса):
+      ТекущийТест_ = nil;
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[1];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[1];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
     elsif (локЭлемент[3] = типПрограммаКласса):
+      ТекущийТест_ = nil;
       секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (локЭлемент[4] as string) + '"';
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[2];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[2];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
     elsif (локЭлемент[3] = типТестПлан):
+      ТекущийТест_ = nil;
       ПрочитатьТестПримеры(локЭлемент[4] as Т9_Тесты.ТестПланКласса);
       секцСценарий3.Count = LengthOfArray(Тест_);
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[3];
@@ -545,14 +633,13 @@ import СИС2 classes Функции, СтроковыеФункции;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[3];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
     elsif (локЭлемент[3] = типТестПример):
-      ТекущаяВетвь_ = Sender.Current;
       ТекущийТест_ = локЭлемент[2] as Т9_Тесты.Тест;
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
     --фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4]; фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
-    end;
+    fi;
       
   end;
 
