@@ -531,6 +531,7 @@ import СИС2 classes Функции, СтроковыеФункции;
     var locInGroup: logical;
     var локРешение: integer;
     var p, pp: integer;
+    var locProjectName: string[];
     --var t, tt: integer;
     --var локИмяТестируемогоКласса: string;
     --var локТест: Т9_Тесты.Тест;
@@ -604,6 +605,20 @@ import СИС2 classes Функции, СтроковыеФункции;
         fi;
       fi;
     --}
+    elsif (Sender.Name = 'кнСоставПроектов'):
+      Record.Проект.Clear;
+      pp = ТестПланПП.Count;
+      for p = 1 .. pp do
+        if (ТестПланПП[p].ТестПланКласса <> nil):
+          СИС2.Функции.AddInArray(locProjectName, ТестПланПП[p].ТестПланКласса.ИмяПроектаКласса, true);
+        fi;
+      od;
+      for p = 1 .. LengthOfArray(locProjectName) do
+        with Record.Проект.AddEx do
+          Имя = locProjectName[p];
+        end;
+      od;
+      ИзменитьСостояниеЗаписи;
     fi;
   end;
 

@@ -310,7 +310,7 @@ import СИС2 classes Функции;
     --var Index, IndexGroup, p, pp, LastIndex: integer;
     --var aDocId: integer[];
     --var локПолноеИмяКласса: string;
-    var ЕстьГруппа: logical;
+    --var ЕстьГруппа: logical;
     if (Cell.Contents = '+') and (Cell.Owner = секцСценарийЗаголовокТаблицы):--добавление тест-плана класса в тест-план из заголовка таблицы
       ДобавитьТестПлан(Cell, локЗаписьТестПлана, true);
     elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий):--добавление тест-плана класса в тест-план из строки таблицы
