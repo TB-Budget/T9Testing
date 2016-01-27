@@ -18,6 +18,7 @@
 class inherited Тесты.редПроектСеанса "Сеанс тестирования", editor СеансТестирования;
 
 import СИС2 classes Функции, СтроковыеФункции;
+import classes Константы;
 
   inclass private
 
@@ -29,6 +30,8 @@ import СИС2 classes Функции, СтроковыеФункции;
   var тблНавигатор: Grid;
   var фреймРабЭлемент1: TemplateFrame;
   var фреймРабЭлемент2: TemplateFrame;
+
+  var кнНачатьСменаСтадииСеанса: Button;
 
   var секцСценарий1ЗаголовокТаблицы: TemplateSection;
   var секцСценарий1: TemplateSection;
@@ -336,6 +339,24 @@ import СИС2 classes Функции, СтроковыеФункции;
     fi;
   end;
 
+  proc ПонизитьЦветФрейма(locFrame: TemplateFrame; locDelta: integer = 40);
+    var locColor, locR, locG, locB, newR, newG, newB: Integer;
+      locColor = locFrame.Color;
+      SplitColor(locColor, locR, locG, locB);
+      newR = if(((locR - locDelta) > 0), Min([255, (locR - locDelta)]), 0);
+      newG = if(((locG - locDelta) > 0), Min([255, (locG - locDelta)]), 0);
+      newB = if(((locB - locDelta) > 0), Min([255, (locB - locDelta)]), 0);
+      locColor = newR + (newG * 256) + (newB * 256 * 256);
+      locFrame.Color = locColor;
+  end;
+
+  proc ВидФормы;
+    if (Стадия = СтадияСозданиеПрограммы as integer):      кнНачатьСменаСтадииСеанса.Caption = 'Начать сеанс';
+    elsif (Стадия = СтадияВыполнениеПрограммы as integer): кнНачатьСменаСтадииСеанса.Caption = 'Завершить сеанс';
+    elsif (Стадия = СтадияСеансЗавершен as integer):       кнНачатьСменаСтадииСеанса.Caption = 'Возобновить сеанс';
+    elsif (Стадия = СтадияСеансВозобновлен as integer):    кнНачатьСменаСтадииСеанса.Caption = 'Завершить сеанс';
+    fi;
+  end;
 --}}
 
 --{{ Обработчики событий шаблона
@@ -357,6 +378,11 @@ import СИС2 classes Функции, СтроковыеФункции;
       AutoSize = false;
     end;
     ПоказыватьЗебру = true;
+    ПонизитьЦветФрейма(Template.FrameByName['фреймНавигатор1']);
+    ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент11']);
+    ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент12']);
+    ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент13']);
+    ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент14']);
   end;
 
   proc шаблон_ПриСчитывании;
@@ -364,6 +390,7 @@ import СИС2 classes Функции, СтроковыеФункции;
     ЗаполнитьНавигатор;
     локТранзакция = Transaction.Create([Т9_Тесты.СеансТестирования,Т9_Тесты.Тест]);
     тблНавигатор.SetFocus;
+    ВидФормы;
   end;
 
   func шаблон_ПриЗаписи :Logical;
@@ -462,7 +489,8 @@ import СИС2 classes Функции, СтроковыеФункции;
     var locIsGroup: logical;
     var locDiscription: string;
     var локПозицииПрограммы: Subtable;
-    if (Cell.Contents = 'ТестПланКласса.Наим'):
+    var локНаим: string;
+    if (Cell.Contents = 'ТестПланКласса.Наим'):--{
       локПозицииПрограммы = ТестПланПП.CreateSubtableView(Cell.Owner.SubtableFilter, '');
       Index = локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1;
       locIsGroup = (ТестПланПП[Index].ТестПланКласса = nil) and (ТестПланПП[Index].ПолноеИмяКласса <> nil);
@@ -476,7 +504,10 @@ import СИС2 classes Функции, СтроковыеФункции;
         elsif (not ТестПланПП[Index].inGroup):
           Result = locDiscription;
         fi;
-      fi;
+      fi;--}
+    elsif (Cell.Contents = 'Имя') and (Cell.Owner.Name = 'секцИнфОпроектах'):
+      локНаим = Record.Проект[Cell.Frame].Наим;
+      Result = if((локНаим = nil), Value, Value + ' <cf:GrayText>(' + локНаим + ')');
     elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий2):
       локПозицииПрограммы = ТестПланПП.CreateSubtableView(Cell.Owner.SubtableFilter, '');
       Result = (локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1);
@@ -502,9 +533,9 @@ import СИС2 classes Функции, СтроковыеФункции;
   func ПолеЗаголовокОкнаФормы_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
     Window.Caption = 'Сеанс тестирования';
     if (Стадия = Константы.СтадияСозданиеПрограммы): Result = 'Сеанс' + Chr(13) + '<s-><s-><cf:GrayText>(создание программы тестирования)';
-    elsif (Стадия = Константы.СтадияВыполнениеПрограммы): Result = 'Сеанс' + Chr(13) + '<s-><s->(выполнение программы тестирования)';
-    elsif (Стадия = Константы.СтадияСеансВозобновлен): Result = 'Сеанс' + Chr(13) + '<s-><s->(выполнение программы тестирования возобновлено)';
-    elsif (Стадия = Константы.СтадияСеансЗавершен): Result = 'Сеанс' + Chr(13) + '<s-><s->(выполнение программы тестирования завершено)';
+    elsif (Стадия = Константы.СтадияВыполнениеПрограммы): Result = 'Сеанс' + Chr(13) + '<s-><s-><cf:GrayText>(выполнение программы тестирования)';
+    elsif (Стадия = Константы.СтадияСеансВозобновлен): Result = 'Сеанс' + Chr(13) + '<s-><s-><cf:GrayText>(выполнение программы тестирования возобновлено)';
+    elsif (Стадия = Константы.СтадияСеансЗавершен): Result = 'Сеанс' + Chr(13) + '<s-><s-><cf:GrayText>(выполнение программы тестирования завершено)';
     fi;
   end;
 
@@ -532,9 +563,7 @@ import СИС2 classes Функции, СтроковыеФункции;
     var локРешение: integer;
     var p, pp: integer;
     var locProjectName: string[];
-    --var t, tt: integer;
-    --var локИмяТестируемогоКласса: string;
-    --var локТест: Т9_Тесты.Тест;
+    var locProjectInfo: ProjectInfo;
     if (Sender.Name = 'кнСоздатьПрограмму'): --{
       if (ТестПланПП.Count = 0): -- загрузка проекта сеанса допускается только при пустой подтаблице тест-планов
         локРешение = Enquiry (,'Загрузка базовой программы тестирования:',['По шаблону','По образцу','Отмена'],);
@@ -605,7 +634,7 @@ import СИС2 classes Функции, СтроковыеФункции;
         fi;
       fi;
     --}
-    elsif (Sender.Name = 'кнСоставПроектов'):
+    elsif (Sender.Name = 'кнСоставПроектов'): --{
       Record.Проект.Clear;
       pp = ТестПланПП.Count;
       for p = 1 .. pp do
@@ -616,9 +645,33 @@ import СИС2 classes Функции, СтроковыеФункции;
       for p = 1 .. LengthOfArray(locProjectName) do
         with Record.Проект.AddEx do
           Имя = locProjectName[p];
+          locProjectInfo = BaseInfo.ProjectByName[Имя];
+          if (locProjectInfo <> nil):
+            Наим = locProjectInfo.Title;
+            Версия = locProjectInfo.Version;
+          fi;
         end;
       od;
+      ИзменитьСостояниеЗаписи;--}
+    elsif (Sender.Name = 'кнНачатьСменаСтадииСеанса'): --{
+      if (Стадия = СтадияСозданиеПрограммы as integer):
+        if CmOk = EnqOkCancel('После начала выполнения программы тестирования добавление/удаление тест-планов и тестовых примеров будет невозможно. Продолжить?'):
+          Стадия = СтадияВыполнениеПрограммы as integer;
+          ДатаНачала = Now;
+        fi;
+      elsif (Стадия = СтадияВыполнениеПрограммы as integer):
+        Стадия = СтадияСеансЗавершен as integer;
+        ДатаОкончания = Now;
+      elsif (Стадия = СтадияСеансЗавершен as integer):
+        Стадия = СтадияСеансВозобновлен as integer;
+        ДатаОкончания = nil as date;
+      elsif (Стадия = СтадияСеансВозобновлен as integer):
+        Стадия = СтадияСеансЗавершен as integer;
+        ДатаОкончания = Now;
+      fi;
       ИзменитьСостояниеЗаписи;
+      ВидФормы;
+      --}
     fi;
   end;
 

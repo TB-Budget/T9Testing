@@ -32,7 +32,6 @@ inclass public
     var локВерсияПроектаИзИнфБазы: Numeric;
     var общИнтСхема: String;
     var сисКнфСхема: String;
-
     --{ регистрация в системной таблице
     with Константы do
       if НоваяИнформационнаяБазаДляПроекта(ClassProject, ИмяВерсииПроекта, ПолучитьВерсиюПроекта, локВерсияПроектаИзИнфБазы):
@@ -53,6 +52,7 @@ inclass public
         locStart = Старт.CreateEx;
       fi;
     end;--}
+    LoadAppIcon("%Projects%\Т9_Тесты\Приложения\Иконки\work_green.ico");
   end;
 
 
