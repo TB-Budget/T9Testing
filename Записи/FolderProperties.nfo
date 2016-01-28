@@ -7,5 +7,6 @@
   <Item Name="ТестПланКласса"/>
   <Item Name="ПроектСеанса"/>
   <Item Name="СеансТестирования"/>
-  <Item Name="Тест"/>
+  <Item Name="ТестОтчет"/>
+  <Item Name="Служебные"/>
 </Items>

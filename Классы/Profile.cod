@@ -52,7 +52,7 @@ inclass public
         locStart = Старт.CreateEx;
       fi;
     end;--}
-    LoadAppIcon("%Projects%\Т9_Тесты\Приложения\Иконки\work_green.ico");
+    LoadAppIcon("%Projects%\Т9_Тесты\Приложения\Иконки\BugT9_48_32b.ico");
   end;
 
 

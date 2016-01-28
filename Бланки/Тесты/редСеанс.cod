@@ -24,6 +24,8 @@ import classes Константы;
 
   type типЭлементаНавигатора = (типПрограммаСеанса = 0, типПрограммаКласса, типТестПлан, типТестПример);
 
+  stored var фреймРеквизитыДопСкрыт: logical;
+
   inobject private
 
   var фреймДопСервис: TemplateFrame;
@@ -31,6 +33,7 @@ import classes Константы;
   var фреймРабЭлемент1: TemplateFrame;
   var фреймРабЭлемент2: TemplateFrame;
 
+  var кнТестоваяБаза: Button;
   var кнНачатьСменаСтадииСеанса: Button;
 
   var секцСценарий1ЗаголовокТаблицы: TemplateSection;
@@ -40,14 +43,16 @@ import classes Константы;
   var секцСценарий3: TemplateSection;
 
   var NN: integer[] = $;
-  var Тест_: Т9_Тесты.Тест[];
-  var ТекущийТест_: Т9_Тесты.Тест;
+  var Тест_: Т9_Тесты.ТестОтчет[];
+  var ТекущийТест_: Т9_Тесты.ТестОтчет;
   var ТекущаяВетвь_: GridItem;
 
   var локТранзакция: Transaction;
 
   type ImageType = (iProject = 1, iClassGray, iClassGreen, iClassYellow, iUnCheck, iCheckGreen, iCheckRed);
   var ImageOfObject: Image[];
+
+  --var текстЗаключениеТестировщика: string = 'Заключение тестировщика';
 
 --{{ Вспомогательные методы
   proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
@@ -75,7 +80,7 @@ import classes Константы;
   proc АктуализироватьТестПримеры(локТестПланКласса: Т9_Тесты.ТестПланКласса); -- по записи тест-плана создает тесты для текущего сеанса, отсутствующие в базе
     var t, tt: integer;
     var локТестовыйПример: Т9_Тесты.ТестовыйПример;
-    var локТест: Т9_Тесты.Тест;
+    var локТест: Т9_Тесты.ТестОтчет;
     var ТестСуществует: logical;
     func ТребуетсяСозданиеТеста: logical;--{
       var locFlt: string[];
@@ -83,7 +88,7 @@ import classes Константы;
         locFlt[1] = 'Сеанс=' + Str(Record);
         locFlt[2] = 'ТестПлан=' + Str(локТестПланКласса);
         locFlt[3] = 'Пример=' + Str(локТестовыйПример);
-        with Query.Create([Т9_Тесты.Тест]) do
+        with Query.Create([Т9_Тесты.ТестОтчет]) do
           Filter = СложитьСтрокиФильтраПоИ(locFlt);
           ТестСуществует = RecordsExists;
           if ТестСуществует:
@@ -99,7 +104,7 @@ import classes Константы;
       локТестовыйПример = локТестПланКласса.ТестПП[t].Пример;
       ТестСуществует = false;
       if ТребуетсяСозданиеТеста:
-        локТест = Т9_Тесты.Тест.Create;
+        локТест = Т9_Тесты.ТестОтчет.Create;
         локТест.Сеанс = Record;
         локТест.ТестПлан = локТестПланКласса;
         локТест.Пример = локТестовыйПример;
@@ -113,7 +118,7 @@ import classes Константы;
 
   proc УдалитьТестПримеры(локТестПланКласса: Т9_Тесты.ТестПланКласса); -- по записи тест-плана удалят тесты для текущего сеанса
     var locFlt: string[];
-    with Query.Create([Т9_Тесты.Тест]) do
+    with Query.Create([Т9_Тесты.ТестОтчет]) do
       locFlt[1] = 'Сеанс=' + Str(Record);
       locFlt[2] = 'ТестПлан=' + Str(локТестПланКласса);
       Filter = СложитьСтрокиФильтраПоИ(locFlt);
@@ -133,7 +138,7 @@ import classes Константы;
     var locFlt: string[];
     var t: integer;
     Тест_ = nil;
-    with Query.Create([Т9_Тесты.Тест]) do
+    with Query.Create([Т9_Тесты.ТестОтчет]) do
       locFlt[1] = 'Сеанс=' + Str(Record);
       locFlt[2] = 'ТестПлан=' + Str(локТестПланКласса);
       Filter = СложитьСтрокиФильтраПоИ(locFlt);
@@ -198,7 +203,7 @@ import classes Константы;
       var locFlt: string[];
       var локОписаниеТеста: string;
       var t: integer;
-      with Query.Create([Т9_Тесты.Тест]) do
+      with Query.Create([Т9_Тесты.ТестОтчет]) do
         locFlt[1] = 'Сеанс=' + Str(Record);
         locFlt[2] = 'ТестПлан=' + Str(ТестПланПП[locIndex].ТестПланКласса);
         Filter = СложитьСтрокиФильтраПоИ(locFlt);
@@ -218,6 +223,7 @@ import classes Константы;
           Next;
         od;
         ИндикацияСтатусаТестПлана(locRootItem);
+        ПересчетСтатистики(locRootItem, false);
       end;
     end;--}
     func ДобавитьВетвьТестПлана(locRootItem: GridItem; locIndex: integer): GridItem;--{
@@ -240,6 +246,7 @@ import classes Константы;
           ДобавитьВетвьТестПлана(Result, vPosition.IndexByNumber[p]+1);
         od;
         ИндикацияСтатусаТестПлана(Result);
+        ПересчетСтатистики(Result, false);
       else
         локПолноеИмяКласса = ТестПланПП[locIndex].ПолноеИмяКласса;
         локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
@@ -270,7 +277,7 @@ import classes Константы;
 
   --@doc удаление лишних записей, случано сохранившихся в результате непредвиденных действий
   proc УдалениеСлучайныхЗаписейТестов(var локИмяТестируемогоКласса: string);
-    with Query.Create([Т9_Тесты.Тест]) do
+    with Query.Create([Т9_Тесты.ТестОтчет]) do
       Filter = 'Сеанс=' + Str(Record) + ' and Пример.ПолноеИмяКласса="' + локИмяТестируемогоКласса + '"';
       if RecordsExists:
         IncludeDeleted = true;
@@ -339,6 +346,62 @@ import classes Константы;
     fi;
   end;
 
+  var ТекущаяСтатистика: numeric[2];
+
+  proc ПересчетСтатистики(locBranch: GridItem; locRecurs: logical);
+    var локЭлемент: variant[];
+    var t,tt: integer;
+    var AllCount, UnCount, GreenCount, RedCount, YellowCount: integer;
+    if not locRecurs:
+      ТекущаяСтатистика = nil;
+    fi;
+    локЭлемент = locBranch.Value as variant[];
+    if (локЭлемент[3] = типТестПлан): --{
+      tt = locBranch.Count;
+      for t = 1 .. tt do
+        if (locBranch.Items[t].Image = ImageOfObject[iUnCheck]):
+          UnCount = UnCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckGreen]):
+          GreenCount = GreenCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckRed]):
+          RedCount = RedCount + 1;
+        fi;
+        AllCount = AllCount + 1;
+      od;
+      if (tt = UnCount):
+        locBranch.Image = ImageOfObject[iClassGray];
+      elsif  (tt = GreenCount):
+        locBranch.Image = ImageOfObject[iClassGreen];
+      else
+        locBranch.Image = ImageOfObject[iClassYellow];
+      fi;--}
+      локЭлемент = locBranch.Parent.Value as variant[];
+      if (локЭлемент[3] = типПрограммаКласса):
+        ИндикацияСтатусаТестПлана(locBranch.Parent);
+      fi;
+    elsif (локЭлемент[3] = типПрограммаКласса):--{
+      tt = locBranch.Count;
+      for t = 1 .. tt do
+        if (locBranch.Items[t].Image = ImageOfObject[iClassGray]):
+          UnCount = UnCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iClassGreen]):
+          GreenCount = GreenCount + 1;
+        elsif (locBranch.Items[t].Image = ImageOfObject[iClassYellow]):
+          YellowCount = YellowCount + 1;
+        fi;
+      od;
+      if (tt = UnCount):
+        locBranch.Image = ImageOfObject[iClassGray];
+      elsif  (tt = GreenCount):
+        locBranch.Image = ImageOfObject[iClassGreen];
+      else
+        locBranch.Image = ImageOfObject[iClassYellow];
+      fi;--}
+    fi;
+
+  end;
+
+
   proc ПонизитьЦветФрейма(locFrame: TemplateFrame; locDelta: integer = 40);
     var locColor, locR, locG, locB, newR, newG, newB: Integer;
       locColor = locFrame.Color;
@@ -351,12 +414,58 @@ import classes Константы;
   end;
 
   proc ВидФормы;
+    var locStyle: TemplateStyle;
+    var locSection: TemplateSection;
+    --var locCell: TemplateCell;
+    if ТестовыеДанные.ВсоставеИБ:
+      locStyle = СИС2.Функции.ПолучитьСтильПоИмени(Self.Template, 'Поле вывода');
+    else
+      locStyle = СИС2.Функции.ПолучитьСтильПоИмени(Self.Template, 'Поле ввода');
+    fi;
+    with Template.CellByField['ТестовыеДанные.ИмяИБ'] do
+      Style = locStyle;
+      Button = not ТестовыеДанные.ВсоставеИБ;
+    end;
+    with Template.CellByField['ТестовыеДанные.ИмяФБ'] do
+      Style = locStyle;
+      Button = not ТестовыеДанные.ВсоставеИБ;
+    end;
+    with Template.CellByField['ТестовыеДанные.ИмяСервера'] do
+      Style = locStyle;
+    end;
     if (Стадия = СтадияСозданиеПрограммы as integer):      кнНачатьСменаСтадииСеанса.Caption = 'Начать сеанс';
     elsif (Стадия = СтадияВыполнениеПрограммы as integer): кнНачатьСменаСтадииСеанса.Caption = 'Завершить сеанс';
     elsif (Стадия = СтадияСеансЗавершен as integer):       кнНачатьСменаСтадииСеанса.Caption = 'Возобновить сеанс';
     elsif (Стадия = СтадияСеансВозобновлен as integer):    кнНачатьСменаСтадииСеанса.Caption = 'Завершить сеанс';
     fi;
+    кнТестоваяБаза.Enabled = ТестовыеДанные.ВсоставеИБ and (Стадия = СтадияСозданиеПрограммы as integer);
+    with Template.FrameByName['фреймРабЭлемент11'] do--{
+      locSection = Section[1];
+      locSection.Cell[3,2].Enabled = (Стадия = СтадияСозданиеПрограммы as integer);
+    end;--}
+    with Template.FrameByName['фреймРабЭлемент21'] do--{
+      locSection = CellByField['NN'].Owner;
+      locSection.Cell[2,1].Enabled = (Стадия = СтадияСозданиеПрограммы as integer);
+      locSection.Cell[5,1].Enabled = not (Стадия = СтадияСеансЗавершен as integer);
+      locSection.Cell[6,1].Enabled = not (Стадия = СтадияСеансЗавершен as integer);
+      locSection.Cell[7,1].Enabled = (Стадия = СтадияСозданиеПрограммы as integer);
+    end;--}
+    with Template.FrameByName['фреймРабЭлемент24'] do--{
+      CellByField['ТестНеПройден'].Enabled = (Стадия in [СтадияСеансЗавершен as integer,СтадияСеансВозобновлен as integer]);
+      CellByField['ТестПройден'].Enabled = (Стадия in [СтадияСеансЗавершен as integer,СтадияСеансВозобновлен as integer]);
+      CellByField['Комментарий'].Enabled = not (Стадия = СтадияСозданиеПрограммы as integer);
+      --CellByField['текстЗаключениеТестировщика'].Enabled = not (Стадия = СтадияСозданиеПрограммы as integer);
+    end;--}
   end;
+
+
+  proc ВычислитьСведенияОДанных;
+    ТестовыеДанные.ИмяИБ = SessionInfo.Infobase.Name;
+    ТестовыеДанные.ИмяФБ = Kernel.Settings.CommonFile.ClassInfo.DataBaseName;
+    ТестовыеДанные.ИмяСервера = SessionInfo.ServerName;
+    ТестовыеДанные.ИмяСервера = if((ТестовыеДанные.ИмяСервера = ''), 'localhost', ТестовыеДанные.ИмяСервера);
+  end;
+
 --}}
 
 --{{ Обработчики событий шаблона
@@ -383,12 +492,13 @@ import classes Константы;
     ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент12']);
     ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент13']);
     ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент14']);
+    Template.FrameByName['фреймРеквизитыДоп'].Visible = not фреймРеквизитыДопСкрыт;
   end;
 
   proc шаблон_ПриСчитывании;
     inherited шаблон_ПриСчитывании;
     ЗаполнитьНавигатор;
-    локТранзакция = Transaction.Create([Т9_Тесты.СеансТестирования,Т9_Тесты.Тест]);
+    локТранзакция = Transaction.Create([Т9_Тесты.СеансТестирования,Т9_Тесты.ТестОтчет]);
     тблНавигатор.SetFocus;
     ВидФормы;
   end;
@@ -418,7 +528,13 @@ import classes Константы;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var локЭлемент: variant[];
     var локНаимТестПлана: string;
-    if (Cell.Contents = '+') and (Cell.Owner = секцСценарий1ЗаголовокТаблицы):--добавление тест-плана класса в тест-план из заголовка таблицы
+    if (Cell.Contents = 'ТестовыеДанные.ВсоставеИБ'):
+      ТестовыеДанные.ВсоставеИБ = not ТестовыеДанные.ВсоставеИБ;
+      if ТестовыеДанные.ВсоставеИБ:
+        ВычислитьСведенияОДанных;
+      fi;
+      ВидФормы;
+    elsif (Cell.Contents = '+') and (Cell.Owner = секцСценарий1ЗаголовокТаблицы):--добавление тест-плана класса в тест-план из заголовка таблицы
       if CmOk = ДобавитьТестПлан(Cell, локЗаписьТестПлана, true):
         АктуализироватьТестПримеры(локЗаписьТестПлана);
         ЗаполнитьНавигатор;
@@ -441,14 +557,14 @@ import classes Константы;
     elsif (Cell.Contents = '...') and (Cell.Owner in [секцСценарий1,секцСценарий2]): --карточка тест-плана класса
       ПоказатьТестПлан(Cell);
       ЗаполнитьНавигатор;
-    elsif (Cell.Owner.Name = 'секцПредТест'):
+    elsif (Cell.Contents = 'Предыдущий тест'):
       тблНавигатор.SetFocus;
       Self.Template.BeginModify;
       тблНавигатор.Current = ТекущаяВетвь_;
       ExecuteCommand('Kernel.Move.Up', false);
       Sleep(0.5);
       Self.Template.EndModify;
-    elsif (Cell.Owner.Name = 'секцСледТест'):
+    elsif (Cell.Contents = 'Следующий тест'):
       тблНавигатор.SetFocus;
       Self.Template.BeginModify;
       локЭлемент = ТекущаяВетвь_.Parent.Value as variant[];
@@ -470,6 +586,7 @@ import classes Константы;
         ТекущаяВетвь_.Image = ImageOfObject[iCheckGreen];
       fi;
       ИндикацияСтатусаТестПлана(ТекущаяВетвь_.Parent);
+      ПересчетСтатистики(ТекущаяВетвь_.Parent, false);
       ИзменитьСостояниеЗаписи;
     elsif (Cell.Contents = 'ТестНеПройден') and (ТекущийТест_ <> nil):
       if (ТекущийТест_.Результат  = 2):
@@ -480,9 +597,28 @@ import classes Константы;
         ТекущаяВетвь_.Image = ImageOfObject[iCheckRed];
       fi;
       ИндикацияСтатусаТестПлана(ТекущаяВетвь_.Parent);
+      ПересчетСтатистики(ТекущаяВетвь_.Parent, false);
       ИзменитьСостояниеЗаписи;
     fi;
   end;
+
+  func Поле_ПриОбзоре(Cell: TemplateCell; Value: Variant; var NewValue: Variant): Logical;
+    var locFilePath: string;
+    var locExtensions: string;
+    if (Cell.Contents = 'ТестовыеДанные.ИмяИБ'):
+      locExtensions = 'Файлы инф.б.|*.idb|Все файлы|*.*';
+      if cmOk = ChooseFile(locFilePath, '', locExtensions):
+        ТестовыеДанные.ИмяИБ = locFilePath;
+        Template.EndEdit;
+      fi;
+    elsif (Cell.Contents = 'ТестовыеДанные.ИмяФБ'):
+      if cmOk = ChooseFolder(locFilePath, ''):
+        ТестовыеДанные.ИмяФБ = locFilePath;
+        Template.EndEdit;
+      fi;
+    fi;
+  end;
+
 
   func Поле_ПриВыводе (Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): Variant;
     var Index: Integer;
@@ -505,28 +641,33 @@ import classes Константы;
           Result = locDiscription;
         fi;
       fi;--}
-    elsif (Cell.Contents = 'Имя') and (Cell.Owner.Name = 'секцИнфОпроектах'):
+    elsif (Cell.Contents = 'Имя') and (Cell.Owner.Name = 'секцИнфОпроектах'):--{
       локНаим = Record.Проект[Cell.Frame].Наим;
-      Result = if((локНаим = nil), Value, Value + ' <cf:GrayText>(' + локНаим + ')');
-    elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий2):
+      Result = if((локНаим = nil), Value, Value + ' <cf:GrayText>(' + локНаим + ')');--}
+    elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий2):--{
       локПозицииПрограммы = ТестПланПП.CreateSubtableView(Cell.Owner.SubtableFilter, '');
-      Result = (локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1);
-    elsif (Cell.Contents = 'Пример.Наим'):
+      Result = (локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1);--}
+    elsif (Cell.Contents = 'Пример.Наим'):--{
       Index = Cell.Frame;
-      Result = Тест_[Index].Пример.Наим;
-    elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий3):
+      Result = Тест_[Index].Пример.Наим;--}
+    elsif (Cell.Contents = 'NN') and (Cell.Owner = секцСценарий3):--{
       Index = Cell.Frame;
-      Result = Тест_[Index].НомерПП;
-    elsif (Cell.Contents = 'Наим'):
-      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.Наим, '');
-    elsif (Cell.Contents = 'СценарийТеста'):
-      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.СценарийТеста, '');
-    elsif (Cell.Contents = 'ОжидаемыйРезультат'):
-      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.ОжидаемыйРезультат, '');
-    elsif (Cell.Contents = 'ТестПройден'):
-      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 1), false);
-    elsif (Cell.Contents = 'ТестНеПройден'):
-      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 2), false);
+      Result = Тест_[Index].НомерПП;--}
+    elsif (Cell.Contents = 'Наим'):--{
+      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.Наим, '');--}
+    elsif (Cell.Contents = 'СценарийТеста'):--{
+      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.СценарийТеста, '');--}
+    elsif (Cell.Contents = 'ОжидаемыйРезультат'):--{
+      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.ОжидаемыйРезультат, '');--}
+    elsif (Cell.Contents = 'ТестПройден'):--{
+      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 1), false);--}
+    elsif (Cell.Contents = 'ТестНеПройден'):--{
+      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 2), false);--}
+    --Статистика
+    elsif (Cell.Contents = 'AllCount_cs'):--{
+      Result = ТекущаяСтатистика[1,1];
+      --}
+
     fi;
   end;
 
@@ -564,6 +705,7 @@ import classes Константы;
     var p, pp: integer;
     var locProjectName: string[];
     var locProjectInfo: ProjectInfo;
+
     if (Sender.Name = 'кнСоздатьПрограмму'): --{
       if (ТестПланПП.Count = 0): -- загрузка проекта сеанса допускается только при пустой подтаблице тест-планов
         локРешение = Enquiry (,'Загрузка базовой программы тестирования:',['По шаблону','По образцу','Отмена'],);
@@ -653,6 +795,8 @@ import classes Константы;
         end;
       od;
       ИзменитьСостояниеЗаписи;--}
+    elsif (Sender.Name = 'кнТестоваяБаза'):
+      ВычислитьСведенияОДанных;
     elsif (Sender.Name = 'кнНачатьСменаСтадииСеанса'): --{
       if (Стадия = СтадияСозданиеПрограммы as integer):
         if CmOk = EnqOkCancel('После начала выполнения программы тестирования добавление/удаление тест-планов и тестовых примеров будет невозможно. Продолжить?'):
@@ -701,7 +845,7 @@ import classes Константы;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[3];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
     elsif (локЭлемент[3] = типТестПример):
-      ТекущийТест_ = локЭлемент[2] as Т9_Тесты.Тест;
+      ТекущийТест_ = локЭлемент[2] as Т9_Тесты.ТестОтчет;
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
@@ -709,6 +853,13 @@ import classes Константы;
     --фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4]; фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
     fi;
       
+  end;
+
+  func фреймПриСкрытии(locFrame: TemplateFrame): Logical;
+    if (locFrame.Name = 'фреймРеквизитыДоп'):
+      фреймРеквизитыДопСкрыт = locFrame.Visible;
+      Result = true;
+    fi;
   end;
 
 --}}
