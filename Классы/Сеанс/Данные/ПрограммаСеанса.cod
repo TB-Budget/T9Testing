@@ -1,0 +1,24 @@
+﻿class inherited Сеанс.Данные.Элемент "Элемент <Программа сеанса>";
+
+import classes Константы;
+
+inclass public
+
+  func CreateEx(локИсходныеДанные: variant[] = nil): Сеанс.Данные.ПрограммаСеанса;
+    Result = inherited Create;
+    Result.ИконкаЭлемента_ = ImageOfGrid[iProject];
+    Result.ОписаниеЭлемента_ = 'Модули';
+  end;
+
+  --ObjectsCount
+  proc ОбновитьСтатистику;
+    var i, ii: integer;
+
+
+
+  end;
+
+
+inobject
+
+end

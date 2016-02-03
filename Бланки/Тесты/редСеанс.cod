@@ -12,18 +12,18 @@
 --Вместе с данным проектом вы должны были получить экземпляр Стандартной Общественной Лицензии
 --Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
---}
+--}}
 
 --class inherited СИС2.БазовыйБланкРедактор "Сеанс тестирования", editor СеансТестирования;
 class inherited Тесты.редПроектСеанса "Сеанс тестирования", editor СеансТестирования;
 
 import СИС2 classes Функции, СтроковыеФункции;
 import classes Константы;
+import classes Сеанс.Данные.Элемент;
 
   inclass private
 
-  type типЭлементаНавигатора = (типПрограммаСеанса = 0, типПрограммаКласса, типТестПлан, типТестПример);
-  type типДанныхЭлементаНавигатора = (типОписание = 1, типТипЭлемента, типНомерПп, типИдентификатор, типКлючЭлемента);
+  type типДанныхЭлементаНавигатора = (типОписание = 1, типИнтерфейсЭлемента);
 
   stored var фреймРеквизитыДопСкрыт: logical;
 
@@ -44,30 +44,128 @@ import classes Константы;
   var секцСценарий3: TemplateSection;
 
   var NN: integer[] = $;
+
   var Тест_: Т9_Тесты.ТестОтчет[];
   var ТекущийТест_: Т9_Тесты.ТестОтчет;
-  var ТекущаяВетвь_: GridItem;
+
+  var АктивныйЭлементНавигатора: GridItem;
+  var АктивныйЭлементДанных: Сеанс.Данные.Элемент;
 
   var локТранзакция: Transaction;
 
-  type ImageType = (iProject = 1, iClassGray, iClassGreen, iClassYellow, iUnCheck, iCheckGreen, iCheckRed);
-  var ImageOfObject: Image[];
+  var ДеревоДанных: СИС2.Дерево;
 
 --{{ Вспомогательные методы
+
+  proc ОбновитьДеревоДанных;
+    var локПозицииПрограммы: Subtable;
+    var локПозицияПрограммы: Т9_Тесты.СеансТестирования.ТестПланПП;
+    var c, cc, elm: integer;
+    var локПрограммаСеанса: СИС2.Дерево;
+    var локТестПланы: СИС2.Дерево; -- группа тест-планов (в рамках класса)
+    var локТестПлан: СИС2.Дерево; -- 1 тест-план на весь класс
+    var локОбъектПрограммаСеанса: Сеанс.Данные.Элемент;
+    var CreateParam: variant[];
+    proc ДобавитьТестОтчеты(const locItem: integer; const locParentPlan: Сеанс.Данные.Элемент); --{
+      var locFlt: string[];
+      var t: integer;
+      with Query.Create([Т9_Тесты.ТестОтчет]) do
+        locFlt[1] = 'Сеанс=' + Str(Record);
+        locFlt[2] = 'ТестПлан=' + Str(Record.ТестПланПП[locItem].ТестПланКласса);
+        Filter = СложитьСтрокиФильтраПоИ(locFlt);
+        Order = 'НомерПП';
+        Select;
+        while not Eof do
+          t = t + 1;
+          CreateParam = nil;
+          CreateParam[индОписаниеЭлемента] = nil;
+          CreateParam[индНомерПП] = t;
+          CreateParam[индДанныеВЗаписи] = Current;
+          CreateParam[индРодЭлемент] = locParentPlan;
+          локТестПлан.ДобавитьЗначение(Сеанс.Данные.ТестОтчет.CreateEx(CreateParam));
+          Next;
+        od;
+      end;
+    end;--}
+    proc ДобавитьДанные(var locItem: integer); --{
+      var locIsGroup, locOutGroup: logical;
+      var локОбъектТестПланы: Сеанс.Данные.Элемент;
+      var локОбъектТестПлан: Сеанс.Данные.Элемент;
+      var локПолноеИмяКласса: string;
+      var locDiscription: string;
+      with Record.ТестПланПП.Items[locItem] do
+        locIsGroup = (ТестПланКласса = nil);
+        locOutGroup = (ТестПланКласса <> nil) and (not inGroup);
+        if locOutGroup: --{ тест-план вне группы
+          CreateParam = nil;
+          CreateParam[индОписаниеЭлемента] = nil;
+          CreateParam[индНомерПП] = locItem;
+          CreateParam[индПолноеИмяКласса] = ПолноеИмяКласса;
+          CreateParam[индДанныеВЗаписи] = ТестПланКласса;
+          CreateParam[индРодЭлемент] = локОбъектПрограммаСеанса;
+          локОбъектТестПлан = Сеанс.Данные.ТестПлан.CreateEx(CreateParam);
+          локПрограммаСеанса.ДобавитьЗначение(локОбъектТестПлан);
+          elm = локПрограммаСеанса.ЧислоЗначений;
+          локПрограммаСеанса.УстановитьПризнакУзла(elm, true);
+          локТестПлан = локПрограммаСеанса.ВернутьУзел(elm, true);
+          ДобавитьТестОтчеты(locItem, локОбъектТестПлан);--}
+        elsif locIsGroup:
+          --{ группа тест-планов
+          locDiscription = Библио.ОписаниеКлассаПоИмени(ПолноеИмяКласса);
+          locDiscription = if((locDiscription <> nil), locDiscription, 'НЕВЕРНОЕ ИМЯ КЛАССА');
+          CreateParam = nil;
+          CreateParam[индОписаниеЭлемента] = locDiscription;
+          CreateParam[индНомерПП] = locItem;
+          CreateParam[индПолноеИмяКласса] = ПолноеИмяКласса;
+          CreateParam[индДанныеВЗаписи] = nil;
+          CreateParam[индРодЭлемент] = локОбъектПрограммаСеанса;
+          локОбъектТестПланы = Сеанс.Данные.ТестПланы.CreateEx(CreateParam);
+          локПрограммаСеанса.ДобавитьЗначение(локОбъектТестПланы);
+          elm = локПрограммаСеанса.ЧислоЗначений;
+          локПрограммаСеанса.УстановитьПризнакУзла(elm, true);
+          локТестПланы = локПрограммаСеанса.ВернутьУзел(elm, true);
+          локПолноеИмяКласса = ПолноеИмяКласса;
+          locItem = locItem + 1; --}
+          --{ тест-планы в группе
+          while (locItem <= Record.ТестПланПП.Count) and (Record.ТестПланПП.Items[locItem].ПолноеИмяКласса = локПолноеИмяКласса) do
+            CreateParam = nil;
+            CreateParam[индОписаниеЭлемента] = nil;
+            CreateParam[индНомерПП] = locItem;
+            CreateParam[индПолноеИмяКласса] = Record.ТестПланПП.Items[locItem].ПолноеИмяКласса;
+            CreateParam[индДанныеВЗаписи] = Record.ТестПланПП.Items[locItem].ТестПланКласса;
+            CreateParam[индРодЭлемент] = локОбъектТестПланы;
+            локОбъектТестПлан = Сеанс.Данные.ТестПлан.CreateEx(CreateParam);
+            локТестПланы.ДобавитьЗначение(локОбъектТестПлан);
+            elm = локТестПланы.ЧислоЗначений;
+            локТестПланы.УстановитьПризнакУзла(elm, true);
+            локТестПлан = локТестПланы.ВернутьУзел(elm, true);
+            ДобавитьТестОтчеты(locItem, локОбъектТестПлан);
+            locItem = locItem + 1;
+          end;
+          locItem = locItem - 1;--}
+        fi;
+        
+      end;
+    end; --}
+    ДеревоДанных = СИС2.Дерево.Create;
+    CreateParam = nil;
+    CreateParam[индОписаниеЭлемента] = nil;
+    CreateParam[индПолноеИмяКласса] = nil;
+    CreateParam[индДанныеВЗаписи] = Record;
+    CreateParam[индРодЭлемент] = nil;
+    локОбъектПрограммаСеанса = Сеанс.Данные.ПрограммаСеанса.CreateEx(CreateParam);
+    ДеревоДанных.ДобавитьЗначение(локОбъектПрограммаСеанса);
+    ДеревоДанных.УстановитьПризнакУзла(1, true);
+    локПрограммаСеанса = ДеревоДанных.ВернутьУзел(1, true);
+    cc = Record.ТестПланПП.Count;
+    for c = 1 .. cc do
+      ДобавитьДанные(c);
+    od;
+  end;
+
   proc ИнициализироватьЭлементыЦветаКоторыхМожноМенять;
     ЭлементыЦветаКоторыхМожноМенять = [[Self.Template,фреймДопСервис],[ОсновнойФрейм]];
   end;
-
-  proc ИнициализироватьИконки;--{
-    ImageOfObject = nil;
-    ImageOfObject[iProject]     = Image.Create; ImageOfObject[iProject].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
-    ImageOfObject[iClassGray]   = Image.Create; ImageOfObject[iClassGray].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
-    ImageOfObject[iClassYellow] = Image.Create; ImageOfObject[iClassYellow].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Yellow.ico");
-    ImageOfObject[iClassGreen]  = Image.Create; ImageOfObject[iClassGreen].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Green.ico");
-    ImageOfObject[iUnCheck]     = Image.Create; ImageOfObject[iUnCheck].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_white.ico");
-    ImageOfObject[iCheckGreen]  = Image.Create; ImageOfObject[iCheckGreen].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_green.ico");
-    ImageOfObject[iCheckRed]    = Image.Create; ImageOfObject[iCheckRed].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_red.ico");
-  end;--}
 
   proc ИзменитьСостояниеЗаписи;
     СИС2.ФункцииДокумента.RecordEdit(Record);
@@ -173,8 +271,6 @@ import classes Константы;
       ColumnFormat = Kernel.Cardfile.StringFormat;
     end;
     --}
-    --{ заполнение навигатора строками в соотв. с подтаблицей СеансПП
-    --}
     --{ оформление навигатора
     with тблНавигатор do
       ShowHeader = false;
@@ -187,121 +283,35 @@ import classes Константы;
   end;
 
   proc ЗаполнитьНавигатор;
-    var locItem: GridItem;
-    var локПозицииПрограммы: Subtable;
-    var c, cc: integer;
-    var локЭлемент: variant[];
-    func ДобавитьГлавнуюВетвь: GridItem;--{
-      локЭлемент = nil;
-      локЭлемент[типОписание] = 'Классы';
-      локЭлемент[типТипЭлемента] = типПрограммаСеанса;
-      локЭлемент[типНомерПп] = 0;
-      локЭлемент[типИдентификатор] = nil;
-      локЭлемент[типКлючЭлемента] = Record.ExtId;
-      тблНавигатор.Root.Add(локЭлемент);--тблНавигатор.Root.Add(['Классы', nil, типПрограммаСеанса]);
-      Result = тблНавигатор.Root[1];
-      Result.Image = ImageOfObject[iProject];
-      Result.isGroup = true;
-      Result.Opened = true;
-    end;--}
-    proc ДобавитьВетвиТестов(locRootItem: GridItem; locIndex: integer);--{
-      var locFlt: string[];
-      var локОписаниеТеста: string;
-      var t: integer;
-      with Query.Create([Т9_Тесты.ТестОтчет]) do
-        locFlt[1] = 'Сеанс=' + Str(Record);
-        locFlt[2] = 'ТестПлан=' + Str(ТестПланПП[locIndex].ТестПланКласса);
-        Filter = СложитьСтрокиФильтраПоИ(locFlt);
-        Order = 'НомерПП';
-        Select;
-        while not Eof do
-          t = t + 1;
-          локОписаниеТеста = Current.Пример.Наим;
-          локЭлемент = nil;
-          локЭлемент[типОписание] = локОписаниеТеста;
-          локЭлемент[типТипЭлемента] = типТестПример;
-          локЭлемент[типНомерПп] = t;
-          локЭлемент[типИдентификатор] = Current;
-          локЭлемент[типКлючЭлемента] = Current.ExtId;
-          locRootItem.Add(локЭлемент);--locRootItem.Add([локОписаниеТеста, Current, типТестПример, t]);
-          if (Current.Результат = 0):
-            locRootItem[locRootItem.Count].Image = ImageOfObject[iUnCheck];
-          elsif (Current.Результат = 1):
-            locRootItem[locRootItem.Count].Image = ImageOfObject[iCheckGreen];
-          elsif (Current.Результат = 2):
-            locRootItem[locRootItem.Count].Image = ImageOfObject[iCheckRed];
-          fi;
-          Next;
-        od;
-        ИндикацияСтатусаТестПлана(locRootItem);
-        ВычислитьСтатистику(locRootItem, false);
-      end;
-    end;--}
-    func ДобавитьВетвьТестПлана(locRootItem: GridItem; locIndex: integer): GridItem;--{
-      var локТестПланКласса: Т9_Тесты.ТестПланКласса;
-      var локПолноеИмяКласса, локОписаниеКласса, локОписаниеТестПлана: string;
-      var j, p, pp: integer;
-      var vPosition: Subtable;
-      if Позиция_ОписаниеГруппы(nil, locIndex):--{
-        локПолноеИмяКласса = ТестПланПП[locIndex].ПолноеИмяКласса;
-        локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
-        локЭлемент = nil;
-        локЭлемент[типОписание] = локОписаниеКласса;
-        локЭлемент[типТипЭлемента] = типПрограммаКласса;
-        локЭлемент[типНомерПп] = locIndex;
-        локЭлемент[типИдентификатор] = локПолноеИмяКласса;
-        локЭлемент[типКлючЭлемента] = PadL(Str(locIndex), 14, '0');
-        locRootItem.Add(локЭлемент);--locRootItem.Add([локОписаниеКласса, locIndex, типПрограммаКласса, локПолноеИмяКласса]);
-        j = locRootItem.Count;
-        Result = locRootItem[j];
-        Result.Image = ImageOfObject[iClassGray];
-        Result.isGroup = true;
-        Result.Opened = true;
-        vPosition = ТестПланПП.CreateSubtableView('inGroup and ПолноеИмяКласса="' + локПолноеИмяКласса + '"','');
-        pp = vPosition.Count;
-        for p = 1 .. pp do
-          ДобавитьВетвьТестПлана(Result, vPosition.IndexByNumber[p]+1);
-        od;
-        ИндикацияСтатусаТестПлана(Result);
-        ВычислитьСтатистику(Result, false);--}
-      else --{
-        локПолноеИмяКласса = ТестПланПП[locIndex].ПолноеИмяКласса;
-        локОписаниеКласса = Библио.ОписаниеКлассаПоИмени(локПолноеИмяКласса);
-        локТестПланКласса = ТестПланПП[locIndex].ТестПланКласса;
-        локОписаниеТестПлана = if((локТестПланКласса <> nil), локТестПланКласса.Наим, nil);
-        if Позиция_ВходитВГруппу(nil, locIndex):
-          локЭлемент = nil;
-          локЭлемент[типОписание] = локОписаниеТестПлана;
-          локЭлемент[типТипЭлемента] = типТестПлан;
-          локЭлемент[типНомерПп] = locIndex;
-          локЭлемент[типИдентификатор] = локТестПланКласса;
-          локЭлемент[типКлючЭлемента] = PadL(Str(locIndex), 14, '0');
-          locRootItem.Add(локЭлемент);--locRootItem.Add([локОписаниеТестПлана, locIndex, типТестПлан, локТестПланКласса]);
-        elsif Позиция_ВнеГруппы(nil, locIndex):
-          локЭлемент = nil;
-          локЭлемент[типОписание] = локОписаниеКласса;
-          локЭлемент[типТипЭлемента] = типТестПлан;
-          локЭлемент[типНомерПп] = locIndex;
-          локЭлемент[типИдентификатор] = локТестПланКласса;
-          локЭлемент[типКлючЭлемента] = PadL(Str(locIndex), 14, '0');
-          locRootItem.Add(локЭлемент);--locRootItem.Add([локОписаниеКласса, locIndex, типТестПлан, локТестПланКласса]);
+    var MainDateCount: integer;
+    proc ДобавитьВетвь(locRoot: GridItem; locDate: СИС2.Дерево); --{
+      var t, tt: integer;
+      var локЭлементДанных: Сеанс.Данные.Элемент;
+      var локЭлементНавигатора: variant[];
+      var locRoot_: GridItem;
+      var locDate_: СИС2.Дерево;
+      tt = locDate.ЧислоЗначений;
+      for t = 1 .. tt do
+        locRoot.isGroup = true;
+        locRoot.Opened = true;
+        локЭлементДанных = locDate.ПолучитьЗначение(t);
+        локЭлементНавигатора[типОписание] = локЭлементДанных.ОписаниеЭлемента;
+        локЭлементНавигатора[типИнтерфейсЭлемента] = локЭлементДанных;
+        locRoot.Add(локЭлементНавигатора);
+        locRoot_ =  locRoot[t];
+        locDate_ = locDate.ВернутьУзел(t, false);
+        locRoot_.Image = локЭлементДанных.ИконкаЭлемента;
+        if (locDate_ <> nil):
+          ДобавитьВетвь(locRoot_,locDate_);
         fi;
-        j = locRootItem.Count;
-        Result = locRootItem[j];
-        Result.Image = ImageOfObject[iClassGray];
-        Result.isGroup = true;
-        Result.Opened = false;
-        ДобавитьВетвиТестов(Result, locIndex);--}
-      fi;
-    end;--}
+        locRoot_.Opened = (локЭлементДанных.ClassInfo.ClassRef = Т9_Тесты.Сеанс.Данные.ПрограммаСеанса);
+      od;
+    end; --}
     ИнициализироватьНавигатор;
-    locItem = ДобавитьГлавнуюВетвь;
-    локПозицииПрограммы = ТестПланПП.CreateSubtableView('not inGroup','');
-    cc = локПозицииПрограммы.Count;
-    for c = 1 .. cc do
-      ДобавитьВетвьТестПлана(locItem, локПозицииПрограммы.IndexByNumber[c]+1);
-      --locItem.Opened = false;
-    od;
+    MainDateCount = ДеревоДанных.ЧислоЗначений;
+    if (MainDateCount = 1):
+      ДобавитьВетвь(тблНавигатор.Root, ДеревоДанных);
+    fi;
   end;
 
   --@doc удаление лишних записей, случано сохранившихся в результате непредвиденных действий
@@ -322,55 +332,50 @@ import classes Константы;
     end;
   end;
 
---  func ВычислитьКодВетви(ТекущаяВетвь: GridItem): string;
---
---    --Result = ;
---  end;
-
   proc ИндикацияСтатусаТестПлана(locBranch: GridItem);
     var локЭлемент: variant[];
     var t,tt: integer;
     var UnCount, GreenCount, RedCount, YellowCount: integer;
     локЭлемент = locBranch.Value as variant[];
-    if (локЭлемент[типТипЭлемента] = типТестПлан): --{
+    if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПлан): --{
       tt = locBranch.Count;
       for t = 1 .. tt do
-        if (locBranch.Items[t].Image = ImageOfObject[iUnCheck]):
+        if (locBranch.Items[t].Image = ImageOfGrid[iUnCheck]):
           UnCount = UnCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckGreen]):
+        elsif (locBranch.Items[t].Image = ImageOfGrid[iCheckGreen]):
           GreenCount = GreenCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckRed]):
+        elsif (locBranch.Items[t].Image = ImageOfGrid[iCheckRed]):
           RedCount = RedCount + 1;
         fi;
       od;
       if (tt = UnCount):
-        locBranch.Image = ImageOfObject[iClassGray];
+        locBranch.Image = ImageOfGrid[iClassGray];
       elsif  (tt = GreenCount):
-        locBranch.Image = ImageOfObject[iClassGreen];
+        locBranch.Image = ImageOfGrid[iClassGreen];
       else
-        locBranch.Image = ImageOfObject[iClassYellow];
+        locBranch.Image = ImageOfGrid[iClassYellow];
       fi;--}
       локЭлемент = locBranch.Parent.Value as variant[];
-      if (локЭлемент[типТипЭлемента] = типПрограммаКласса):
+      if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):
         ИндикацияСтатусаТестПлана(locBranch.Parent);
       fi;
-    elsif (локЭлемент[типТипЭлемента] = типПрограммаКласса):--{
+    elsif (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):--{
       tt = locBranch.Count;
       for t = 1 .. tt do
-        if (locBranch.Items[t].Image = ImageOfObject[iClassGray]):
+        if (locBranch.Items[t].Image = ImageOfGrid[iClassGray]):
           UnCount = UnCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfObject[iClassGreen]):
+        elsif (locBranch.Items[t].Image = ImageOfGrid[iClassGreen]):
           GreenCount = GreenCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfObject[iClassYellow]):
+        elsif (locBranch.Items[t].Image = ImageOfGrid[iClassYellow]):
           YellowCount = YellowCount + 1;
         fi;
       od;
       if (tt = UnCount):
-        locBranch.Image = ImageOfObject[iClassGray];
+        locBranch.Image = ImageOfGrid[iClassGray];
       elsif  (tt = GreenCount):
-        locBranch.Image = ImageOfObject[iClassGreen];
+        locBranch.Image = ImageOfGrid[iClassGreen];
       else
-        locBranch.Image = ImageOfObject[iClassYellow];
+        locBranch.Image = ImageOfGrid[iClassYellow];
       fi;--}
     fi;
   end;
@@ -461,122 +466,6 @@ import classes Константы;
     ТестовыеДанные.ИмяСервера = if((ТестовыеДанные.ИмяСервера = ''), 'localhost', ТестовыеДанные.ИмяСервера);
   end;
 
-  var ТекущаяСтатистика: storage;
-
-  --type типЭлементаНавигатора = (типПрограммаСеанса = 0, типПрограммаКласса, типТестПлан, типТестПример);
-  --type типДанныхЭлементаНавигатора = (типОписание = 1, типТипЭлемента, типНомерПп, типИдентификатор, типКлючЭлемента);
-  proc ВычислитьСтатистику(locBranch: GridItem; locRecurs: logical);
-    var locGridItem: GridItem;
-    var локЭлемент: variant[];
-    var t,tt: integer;
-
-    proc ВычислитьОбщуюСтатистику(locBranch_: GridItem; locRecurs_: logical);
-      var b_, bb_: integer;
-      var s_, ss_: integer;
-      var локЭлемент_: variant[];
-      if (locBranch_ = тблНавигатор.Root) and (not locRecurs_):
-        ТекущаяСтатистика = nil;
-        ТекущаяСтатистика = Storage.Create;
-        ТекущаяСтатистика.AllCount_csn = 0;
-        ТекущаяСтатистика.Plus_csn = 0;
-        ТекущаяСтатистика.Minus_csn = 0;
-        ТекущаяСтатистика.Nil_csn = 0;
-        ТекущаяСтатистика.AllCount_psn = 100;
-        ТекущаяСтатистика.Plus_psn = 0;
-        ТекущаяСтатистика.Minus_psn = 0;
-        ТекущаяСтатистика.Nil_psn = 0;
-        bb_ = locBranch_.Count;
-        for b_ = 1 .. bb_ do
-          ВычислитьОбщуюСтатистику(locBranch_.Items[b_], true);
-        od;
-      else
-        локЭлемент_ = locBranch_.Value as variant[];
-        if (локЭлемент_[типТипЭлемента] = типТестПлан):
-          bb_ = locBranch_.Count;
-          for b_ = 1 .. bb_ do
-            ТекущаяСтатистика.AllCount_csn = ТекущаяСтатистика.AllCount_csn + 1;
-            locGridItem = locBranch_.Items[b_];
-            if (locGridItem.Image = ImageOfObject[iCheckGreen]):
-              ТекущаяСтатистика.Plus_csn = ТекущаяСтатистика.Plus_csn + 1;
-            elsif (locGridItem.Image = ImageOfObject[iCheckRed]):
-              ТекущаяСтатистика.Minus_csn = ТекущаяСтатистика.Minus_csn + 1;
-            fi;
-            ТекущаяСтатистика.Nil_csn = ТекущаяСтатистика.AllCount_csn - (ТекущаяСтатистика.Plus_csn + ТекущаяСтатистика.Minus_csn);
-            ТекущаяСтатистика.Plus_psn = (ТекущаяСтатистика.Plus_csn / ТекущаяСтатистика.AllCount_csn) * 100;
-            ТекущаяСтатистика.Minus_psn = (ТекущаяСтатистика.Minus_csn / ТекущаяСтатистика.AllCount_csn) * 100;
-            ТекущаяСтатистика.Nil_psn = (ТекущаяСтатистика.Nil_csn / ТекущаяСтатистика.AllCount_csn) * 100;
-          od;
-        else
-          bb_ = locBranch_.Count;
-          for b_ = 1 .. bb_ do
-            ВычислитьОбщуюСтатистику(locBranch_.Items[b_], true);
-          od;
-        fi;
-      fi;
-    end;
-
---    var AllCount, UnCount, GreenCount, RedCount, YellowCount: integer;
-    if not locRecurs:
-      ТекущаяСтатистика = nil;
-      ВычислитьОбщуюСтатистику(тблНавигатор.Root,  false);
-
---      --#AllCount_csn = nil;
---      tt = тблНавигатор.Root.Count;
---      for t = 1 .. tt do
---        ВычислитьСтатистику(тблНавигатор.Root.Items[t], true);
---      od;
---    else
---      локЭлемент = locBranch.Value as variant[];
---      tt = locBranch.Count;
---
-    fi;
-
-
---    локЭлемент = locBranch.Value as variant[];
---    if (локЭлемент[3] = типТестПлан): --{
---      tt = locBranch.Count;
---      for t = 1 .. tt do
---        if (locBranch.Items[t].Image = ImageOfObject[iUnCheck]):
---          UnCount = UnCount + 1;
---        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckGreen]):
---          GreenCount = GreenCount + 1;
---        elsif (locBranch.Items[t].Image = ImageOfObject[iCheckRed]):
---          RedCount = RedCount + 1;
---        fi;
---        AllCount = AllCount + 1;
---      od;
---      if (tt = UnCount):
---        locBranch.Image = ImageOfObject[iClassGray];
---      elsif  (tt = GreenCount):
---        locBranch.Image = ImageOfObject[iClassGreen];
---      else
---        locBranch.Image = ImageOfObject[iClassYellow];
---      fi;--}
---      локЭлемент = locBranch.Parent.Value as variant[];
---      if (локЭлемент[3] = типПрограммаКласса):
---        ИндикацияСтатусаТестПлана(locBranch.Parent);
---      fi;
---    elsif (локЭлемент[3] = типПрограммаКласса):--{
---      tt = locBranch.Count;
---      for t = 1 .. tt do
---        if (locBranch.Items[t].Image = ImageOfObject[iClassGray]):
---          UnCount = UnCount + 1;
---        elsif (locBranch.Items[t].Image = ImageOfObject[iClassGreen]):
---          GreenCount = GreenCount + 1;
---        elsif (locBranch.Items[t].Image = ImageOfObject[iClassYellow]):
---          YellowCount = YellowCount + 1;
---        fi;
---      od;
---      if (tt = UnCount):
---        locBranch.Image = ImageOfObject[iClassGray];
---      elsif  (tt = GreenCount):
---        locBranch.Image = ImageOfObject[iClassGreen];
---      else
---        locBranch.Image = ImageOfObject[iClassYellow];
---      fi;--}
---    fi;
-
-  end;
 --}}
 
 --{{ Обработчики событий шаблона
@@ -587,7 +476,7 @@ import classes Константы;
   end;
 
   proc шаблон_ПриОткрытии(Create :Logical);
-    inherited шаблон_ПриОткрытии(Create);
+    inherited шаблон_ПриОткрытии(Create); --
     тблНавигатор.Align = true;
     with фреймРабЭлемент1 do
       ShowTabs = false;
@@ -597,7 +486,7 @@ import classes Константы;
       ShowTabs = false;
       AutoSize = false;
     end;
-    ПоказыватьЗебру = true;
+    ПоказыватьЗебру = true; --
     ПонизитьЦветФрейма(Template.FrameByName['фреймНавигатор1']);
     ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент11']);
     ПонизитьЦветФрейма(Template.FrameByName['фреймРабЭлемент12']);
@@ -608,6 +497,7 @@ import classes Константы;
 
   proc шаблон_ПриСчитывании;
     inherited шаблон_ПриСчитывании;
+    ОбновитьДеревоДанных;
     ЗаполнитьНавигатор;
     локТранзакция = Transaction.Create([Т9_Тесты.СеансТестирования,Т9_Тесты.ТестОтчет]);
     тблНавигатор.SetFocus;
@@ -639,6 +529,7 @@ import classes Константы;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
     var локЭлемент: variant[];
     var локНаимТестПлана: string;
+    var locValueL: logical;
     if (Cell.Contents = 'ТестовыеДанные.ВсоставеИБ'):
       ТестовыеДанные.ВсоставеИБ = not ТестовыеДанные.ВсоставеИБ;
       if ТестовыеДанные.ВсоставеИБ:
@@ -659,10 +550,10 @@ import classes Константы;
       УдалитьТестПримеры(ТестПланПП[Cell.Frame].ТестПланКласса);
       УдалитьТестПлан(Cell);
       ЗаполнитьНавигатор;
-    elsif (Cell.Contents = '5') and (Cell.Owner in [секцСценарий1,секцСценарий2]):--перемещение строк вверх
+    elsif (Cell.Contents = '5') and (Cell.Owner in [секцСценарий1,секцСценарий2]): --перемещение строк вверх
       ПоднятьТестПлан(Cell);
       ЗаполнитьНавигатор;
-    elsif (Cell.Contents = '6') and (Cell.Owner in [секцСценарий1,секцСценарий2]):--перемещение строк вниз
+    elsif (Cell.Contents = '6') and (Cell.Owner in [секцСценарий1,секцСценарий2]): --перемещение строк вниз
       ОпуститьТестПлан(Cell);
       ЗаполнитьНавигатор;
     elsif (Cell.Contents = '...') and (Cell.Owner in [секцСценарий1,секцСценарий2]): --карточка тест-плана класса
@@ -671,45 +562,51 @@ import classes Константы;
     elsif (Cell.Contents = 'Предыдущий тест'):
       тблНавигатор.SetFocus;
       Self.Template.BeginModify;
-      тблНавигатор.Current = ТекущаяВетвь_;
+      тблНавигатор.Current = АктивныйЭлементНавигатора;
       ExecuteCommand('Kernel.Move.Up', false);
       Sleep(0.5);
       Self.Template.EndModify;
     elsif (Cell.Contents = 'Следующий тест'):
       тблНавигатор.SetFocus;
       Self.Template.BeginModify;
-      локЭлемент = ТекущаяВетвь_.Parent.Value as variant[];
+      локЭлемент = АктивныйЭлементНавигатора.Parent.Value as variant[];
       локНаимТестПлана = локЭлемент[типОписание] as string;
-      тблНавигатор.Current = ТекущаяВетвь_;
+      тблНавигатор.Current = АктивныйЭлементНавигатора;
       ExecuteCommand('Kernel.Move.Down', false);
       Sleep(0.5);
       локЭлемент = тблНавигатор.Current.Value as variant[];
-      if (локЭлемент[типТипЭлемента] <> типТестПример):
+      if not (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестОтчет):
         Message('В тест-плане <' + локНаимТестПлана + '> выполнены все тесты.');
       fi;
       Self.Template.EndModify;
-    elsif (Cell.Contents = 'ТестПройден') and (ТекущийТест_ <> nil):
-      if (ТекущийТест_.Результат  = 1):
-        ТекущийТест_.Результат = 0;
-        ТекущаяВетвь_.Image = ImageOfObject[iUnCheck];
-      else
-        ТекущийТест_.Результат = 1;
-        ТекущаяВетвь_.Image = ImageOfObject[iCheckGreen];
+    elsif (Cell.Contents = 'ТестПройден'):
+      if (АктивныйЭлементДанных <> nil):
+        locValueL = (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).ТестПройден;
+        (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).УстТестПройден(not locValueL);
+        АктивныйЭлементНавигатора.Image = АктивныйЭлементДанных.ИконкаЭлемента;
       fi;
-      ИндикацияСтатусаТестПлана(ТекущаяВетвь_.Parent);
-      ВычислитьСтатистику(ТекущаяВетвь_.Parent, false);
+      ИндикацияСтатусаТестПлана(АктивныйЭлементНавигатора.Parent);
+      --ВычислитьСтатистику(АктивныйЭлементНавигатора.Parent, false);
       ИзменитьСостояниеЗаписи;
-    elsif (Cell.Contents = 'ТестНеПройден') and (ТекущийТест_ <> nil):
-      if (ТекущийТест_.Результат  = 2):
-        ТекущийТест_.Результат = 0;
-        ТекущаяВетвь_.Image = ImageOfObject[iUnCheck];
-      else
-        ТекущийТест_.Результат = 2;
-        ТекущаяВетвь_.Image = ImageOfObject[iCheckRed];
+    elsif (Cell.Contents = 'ТестНеПройден'):
+      if (АктивныйЭлементДанных <> nil):
+        locValueL = (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).ТестПровален;
+        (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).УстТестПровален(not locValueL);
+        АктивныйЭлементНавигатора.Image = АктивныйЭлементДанных.ИконкаЭлемента;
       fi;
-      ИндикацияСтатусаТестПлана(ТекущаяВетвь_.Parent);
-      ВычислитьСтатистику(ТекущаяВетвь_.Parent, false);
+      ИндикацияСтатусаТестПлана(АктивныйЭлементНавигатора.Parent);
+      --ВычислитьСтатистику(АктивныйЭлементНавигатора.Parent, false);
       ИзменитьСостояниеЗаписи;
+    fi;
+  end;
+
+  func Поле_ПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+    if (Cell.Contents = 'Комментарий') and (Action = Template.Clear):
+      if (АктивныйЭлементДанных <> nil):
+        (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).УстЗаключение(nil);
+      fi;
+    else
+      Result = true;
     fi;
   end;
 
@@ -726,6 +623,15 @@ import classes Константы;
       if cmOk = ChooseFolder(locFilePath, ''):
         ТестовыеДанные.ИмяФБ = locFilePath;
         Template.EndEdit;
+      fi;
+    fi;
+  end;
+
+
+  func Поле_ПриВводе(Cell: TemplateCell; Value: Variant): Logical;
+    if (Cell.Contents = 'Комментарий'):
+      if (АктивныйЭлементДанных <> nil):
+        (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).УстЗаключение(Value);
       fi;
     fi;
   end;
@@ -765,25 +671,26 @@ import classes Константы;
       Index = Cell.Frame;
       Result = Тест_[Index].НомерПП;--}
     elsif (Cell.Contents = 'Наим'):--{
-      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.Наим, '');--}
+      Result = if((АктивныйЭлементДанных <> nil), (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).Наим, '');--}
     elsif (Cell.Contents = 'СценарийТеста'):--{
-      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.СценарийТеста, '');--}
+      Result = if((АктивныйЭлементДанных <> nil), (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).СценарийТеста, '');--}
     elsif (Cell.Contents = 'ОжидаемыйРезультат'):--{
-      Result = if((ТекущийТест_ <> nil), ТекущийТест_.Пример.ОжидаемыйРезультат, '');--}
+      Result = if((АктивныйЭлементДанных <> nil), (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).ОжидаемыйРезультат, '');--}
     elsif (Cell.Contents = 'ТестПройден'):--{
-      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 1), false);--}
+      Result = if((АктивныйЭлементДанных <> nil), ((АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).Результат = 1), false);--}
     elsif (Cell.Contents = 'ТестНеПройден'):--{
-      Result = if((ТекущийТест_ <> nil), (ТекущийТест_.Результат = 2), false);--}
+      Result = if((АктивныйЭлементДанных <> nil), ((АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).Результат = -1), false);--}
+    elsif (Cell.Contents = 'Комментарий'):--{
+      Result = if((АктивныйЭлементДанных <> nil), (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).Заключение, '');--}
     --Статистика
-    elsif (Cell.Contents = 'AllCount_csn'): Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'Plus_csn'):     Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'Minus_csn'):    Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'Nil_csn'):      Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'AllCount_psn'): Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'Plus_psn'):     Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'Minus_psn'):    Result = ТекущаяСтатистика.GetField(Cell.Contents);
-    elsif (Cell.Contents = 'Nil_psn'):      Result = ТекущаяСтатистика.GetField(Cell.Contents);
-
+--    elsif (Cell.Contents = 'AllCount_csn'): Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'Plus_csn'):     Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'Minus_csn'):    Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'Nil_csn'):      Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'AllCount_psn'): Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'Plus_psn'):     Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'Minus_psn'):    Result = ТекущаяСтатистика.GetField(Cell.Contents);
+--    elsif (Cell.Contents = 'Nil_psn'):      Result = ТекущаяСтатистика.GetField(Cell.Contents);
     fi;
   end;
 
@@ -842,7 +749,7 @@ import classes Константы;
       fi;--}
       --{ проверка раздела <Сведения о тестовых данных>
       if Result:
-        Result = not(nil in [ТестовыеДанные.ИмяИБ,ТестовыеДанные.ИмяФБ,ТестовыеДанные.ИмяСервера]);
+        Result = not(nil in [ТестовыеДанные.ИмяИБ, ТестовыеДанные.ИмяФБ, ТестовыеДанные.ИмяСервера]);
         if not Result:
           Message('Пожалуйста, проверьте полноту данных раздела <Сведения о тестовых данных>!');
           ВычислитьСведенияОДанных;
@@ -951,38 +858,33 @@ import classes Константы;
 
   proc тблНавигатор_ПриПеремещении(Sender: Grid);
     var локЭлемент: variant[];
-    ТекущаяВетвь_ = Sender.Current;
-    локЭлемент = Sender.Current.Value as variant[];
-    if (локЭлемент[типТипЭлемента] = типПрограммаСеанса):
-      ТекущийТест_ = nil;
+    АктивныйЭлементНавигатора = Sender.Current;
+    локЭлемент = if((АктивныйЭлементНавигатора <> nil), АктивныйЭлементНавигатора.Value, nil);
+    АктивныйЭлементДанных = if((локЭлемент <> nil), локЭлемент[типИнтерфейсЭлемента] as Сеанс.Данные.Элемент, nil);
+    if (АктивныйЭлементДанных is Сеанс.Данные.ПрограммаСеанса): --{
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[1];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[1];
-      фреймРабЭлемент2.CurrentFrame.Visible = true;
-    elsif (локЭлемент[типТипЭлемента] = типПрограммаКласса):
-      ТекущийТест_ = nil;
-      секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (локЭлемент[типИдентификатор] as string) + '"';
+      фреймРабЭлемент2.CurrentFrame.Visible = true; --}
+    elsif (АктивныйЭлементДанных is Сеанс.Данные.ТестПланы):
+      секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (АктивныйЭлементДанных.ПолноеИмяКласса) + '"'; --секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (локЭлемент[типИдентификатор] as string) + '"';
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[2];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[2];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
-    elsif (локЭлемент[типТипЭлемента] = типТестПлан):
-      ТекущийТест_ = nil;
-      ПрочитатьТестПримеры(локЭлемент[типИдентификатор] as Т9_Тесты.ТестПланКласса);
+    elsif (АктивныйЭлементДанных is Сеанс.Данные.ТестПлан):
+      ПрочитатьТестПримеры(АктивныйЭлементДанных.ДанныеВЗаписи as Т9_Тесты.ТестПланКласса);   --ПрочитатьТестПримеры(локЭлемент[типИдентификатор] as Т9_Тесты.ТестПланКласса);
       секцСценарий3.Count = LengthOfArray(Тест_);
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[3];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[3];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
-    elsif (локЭлемент[типТипЭлемента] = типТестПример):
-      ТекущийТест_ = локЭлемент[типИдентификатор] as Т9_Тесты.ТестОтчет;
+    elsif (АктивныйЭлементДанных is Сеанс.Данные.ТестОтчет):
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
-    --фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4]; фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
     fi;
-      
   end;
 
   func фреймПриСкрытии(locFrame: TemplateFrame): Logical;

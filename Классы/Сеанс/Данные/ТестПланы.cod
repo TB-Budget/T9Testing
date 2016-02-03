@@ -1,0 +1,30 @@
+﻿class inherited Сеанс.Данные.Элемент "Элемент <набор тест-планов>";
+
+import classes Константы;
+
+inclass public
+
+  func CreateEx(локИсходныеДанные: variant[] = nil): Сеанс.Данные.ТестПланы;
+    Result = inherited CreateEx(локИсходныеДанные);
+    Result.ИконкаЭлемента_ = ImageOfGrid[iClassGray];
+    if (локИсходныеДанные[индОписаниеЭлемента] <> nil):
+      Result.ОписаниеЭлемента_ = локИсходныеДанные[индОписаниеЭлемента];
+    else
+      Result.ОписаниеЭлемента_ = 'Набор тест-планов';
+    fi;
+  end;
+
+inobject public
+
+  func ИконкаЭлемента: Image;
+    var локПрцТестовУспех: numeric;
+    локПрцТестовУспех = ПрцТестовУспех;
+    if (локПрцТестовУспех = 100):
+      Result = ImageOfGrid[iClassGreen];
+    elsif (локПрцТестовУспех > 0) and (локПрцТестовУспех < 100):
+      Result = ImageOfGrid[iClassYellow];
+    else
+      Result = ИконкаЭлемента_;
+    fi;
+  end;
+end
