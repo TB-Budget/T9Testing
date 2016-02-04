@@ -1,19 +1,17 @@
 [Options]
 Version=7
-Query=.ТестПланКласса
-MBlank=.Тесты.редТестПланКласса
+Query=.СпецификацияМодуля
+MBlank=.Тесты.редСпецификацияМодуля
 ShowDeleted=0
 CanEdit=1
 ActionOnType=0
-Hierarchical=0
+Hierarchical=1
 CanHGroupModify=0
 AutoOpen=1
 CanAcceptAnyRecord=0
 CanDropOnRecord=0
 OnMove=картотека_ПриПеремещении
 OnOpenBlank=картотека_ПриОткрытииБланка
-OnCreateRecord=картотека_ПриСозданииЗаписи
-OnModify=картотека_ПриИзменении
 CaptionRows=1
 ShowSummary=0
 ShowCount=1
@@ -21,18 +19,16 @@ CanInplace=0
 CanInsert=1
 CanDelete=1
 CanMove=1
-CanCopy=0
+CanCopy=1
 ShowRecords=0
 OnClick=картотека_ПриНажатии
 OnRearrange=картотека_ПриОформлении
-ColumnCount=6
+ColumnCount=4
 Column:0=ИмяПроектаКласса
 Column:1=ТипБазовогоКласса
 Column:2=ПолноеИмяКласса
 Column:3=НаимКласса
-Column:4=Наим
-Column:5=КолШагов
-TreeVisible=0
+TreeVisible=1
 TreeWidth=120
 SubTableVisible=0
 SubTableWidth=0
@@ -47,7 +43,7 @@ CanResizeTemplate=0
 SubTableCount=0
 
 [.Column.ИмяПроектаКласса]
-Caption=Проект Т9
+Caption=Проект
 Width=100
 MinWidth=0
 Visible=1
@@ -63,8 +59,6 @@ FindMaskFormat=0
 FieldSize=0
 ManualEdit=0
 UseFont=0
-OnOutput=КартПоле_ПриВыводе
-OnDraw=картПоле_ПриРисовании
 
 [.Column.ТипБазовогоКласса]
 Caption=Тип базового класса
@@ -83,10 +77,9 @@ FindMaskFormat=0
 FieldSize=0
 ManualEdit=0
 UseFont=0
-OnDraw=картПоле_ПриРисовании
 
 [.Column.ПолноеИмяКласса]
-Caption=Имя тестируемого класса
+Caption=Имя основного класса модуля
 Width=0
 MinWidth=0
 Visible=1
@@ -102,31 +95,9 @@ FindMaskFormat=0
 FieldSize=0
 ManualEdit=0
 UseFont=0
-OnOutput=КартПоле_ПриВыводе
-OnDraw=картПоле_ПриРисовании
 
 [.Column.НаимКласса]
-Caption=Наименование класса
-Width=0
-MinWidth=0
-Visible=1
-Editable=1
-Sortable=0
-Summary=0
-Designated=0
-Lookup=0
-Alignment=0
-ColumnType=1
-ColumnFormat=0
-FindMaskFormat=0
-FieldSize=0
-ManualEdit=0
-UseFont=0
-OnOutput=КартПоле_ПриВыводе
-OnDraw=картПоле_ПриРисовании
-
-[.Column.Наим]
-Caption=Наименование тест-плана
+Caption=Наименование модуля
 Width=0
 MinWidth=0
 Visible=1
@@ -142,25 +113,3 @@ FindMaskFormat=0
 FieldSize=0
 ManualEdit=0
 UseFont=0
-OnDraw=картПоле_ПриРисовании
-
-[.Column.КолШагов]
-Caption=Кол-во тестов
-Width=100
-MinWidth=100
-Visible=1
-Editable=0
-Sortable=1
-Summary=0
-Designated=0
-Lookup=0
-Alignment=2
-ColumnType=1
-ColumnFormat=2
-FindMaskFormat=0
-FieldSize=0
-Format="##0;;0"
-ManualEdit=0
-UseFont=0
-OnOutput=КартПоле_ПриВыводе
-OnDraw=картПоле_ПриРисовании

@@ -67,12 +67,12 @@ inclass public
   --@doc Если класс ОТСУТСТВУЕТ в инф.базе сессии, то описание считывается из записи спецификации.
   func ОписаниеКлассаПоИмени(locFullName: string): string;
     var vClass: Class;
-    var vRecord: Т9_Тесты.СпецификацияКласса;
+    var vRecord: Т9_Тесты.СпецификацияМодуля;
     vClass = if(locFullName <> nil, FindClass(locFullName), nil);
     if (vClass <> nil):
       Result = vClass.ClassInfo.Description;
     else
-      vRecord = СИС2.ФункцииДокумента.QueryRecord(Т9_Тесты.СпецификацияКласса, 'ПолноеИмяКласса="' + locFullName + '"', 'ПолноеИмяКласса');
+      vRecord = СИС2.ФункцииДокумента.QueryRecord(Т9_Тесты.СпецификацияМодуля, 'ПолноеИмяКласса="' + locFullName + '"', 'ПолноеИмяКласса');
       if (vRecord <> nil):
         Result = vRecord.НаимКласса;
       fi;

@@ -84,7 +84,7 @@ ManualEdit=0
 UseFont=0
 
 [.Column.ИмяПроектаКласса]
-Caption=Проект Т9
+Caption=Проект
 Width=100
 MinWidth=0
 Visible=1
@@ -120,7 +120,7 @@ ManualEdit=0
 UseFont=0
 
 [.Column.ПолноеИмяКласса]
-Caption=Имя тестируемого класса
+Caption=Имя основного класса тестируемого модуля
 Width=0
 MinWidth=0
 Visible=1

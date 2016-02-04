@@ -19,11 +19,13 @@ inobject public
   func ИконкаЭлемента: Image;
     var локПрцТестовРезультата: numeric;
     var локПрцТестовУспех: numeric;
+    var локКолТестовВсего: integer;
     локПрцТестовРезультата = ПрцТестовБезРезультата;
     локПрцТестовУспех = ПрцТестовУспех;
+    локКолТестовВсего = КолТестовВсего;
     if (локПрцТестовУспех = 100):
       Result = ImageOfGrid[iClassGreen];
-    elsif (локПрцТестовРезультата = 100):
+    elsif (локПрцТестовРезультата = 100) or (локКолТестовВсего = 0):
       Result = ImageOfGrid[iClassGray];
     else
       Result = ImageOfGrid[iClassYellow];

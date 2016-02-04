@@ -1,9 +1,0 @@
-﻿extends СИС2.Дерево;
-
-inobject public
-
-  func ПолучитьМасиив: variant;
-    Result = Self.Массив;
-  end;
-
-end

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <Properties Version="1"/>
 <Items>
-  <Item Name="редСпецификацияКласса"/>
+  <Item Name="редСпецификацияМодуля"/>
   <Item Name="редТестовыйПример"/>
   <Item Name="редТестПланКласса"/>
   <Item Name="редПроектСеанса"/>
   <Item Name="редСеанс"/>
   <Item Name="ColorTest"/>
+  <Item Name="ObjectTreeTest"/>
 </Items>

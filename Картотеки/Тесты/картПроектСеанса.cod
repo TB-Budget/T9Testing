@@ -33,7 +33,7 @@ inobject private
     var vName: string;
     var aName: string[];
     if (Column.FieldName = 'КолТестПланов'):
-      vStb = Rec.ТестПланПП.CreateSubtableView('ТестПланКласса<>nil', '');
+      vStb = Rec.ТестПланПП.CreateSubtableView('ТестПланМодуля<>nil', '');
       Result = vStb.Count;
     elsif (Column.FieldName = 'КолКлассов'):
       ii = Rec.ТестПланПП.Count;

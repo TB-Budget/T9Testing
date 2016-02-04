@@ -1,6 +1,6 @@
-record ПозицияНавигатора title "Позиция навигатора формы";
-  field CreateUser: String(40) title "Создал";
-  field ЗаписьФормы: inherited record;
-  field ФормаРедактора: String;
-  field КодВетви: String;
+п»їrecord РџРѕР·РёС†РёСЏРќР°РІРёРіР°С‚РѕСЂР° title "РџРѕР·РёС†РёСЏ РЅР°РІРёРіР°С‚РѕСЂР° С„РѕСЂРјС‹";
+  field CreateUser: String(40) title "РЎРѕР·РґР°Р»";
+  field Р—Р°РїРёСЃСЊР¤РѕСЂРјС‹: inherited record;
+  field Р¤РѕСЂРјР°Р РµРґР°РєС‚РѕСЂР°: String;
+  field РљРѕРґР’РµС‚РІРё: String;
 end;

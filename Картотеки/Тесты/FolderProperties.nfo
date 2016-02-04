@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Properties Version="1"/>
+<Items>
+  <Item Name="картСпецификацияМодуля"/>
+  <Item Name="картПроектСеанса"/>
+  <Item Name="картСеанс"/>
+  <Item Name="картТестовыйПример"/>
+  <Item Name="картТестПланКласса"/>
+</Items>
