@@ -27,4 +27,8 @@ inobject public
       Result = ИконкаЭлемента_;
     fi;
   end;
+
+  proc ОбновитьСтатистику;
+  end;
+
 end

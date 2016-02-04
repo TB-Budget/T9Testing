@@ -28,4 +28,7 @@ inobject public
     fi;
   end;
 
+  proc ОбновитьСтатистику;
+  end;
+
 end

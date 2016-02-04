@@ -81,7 +81,6 @@ import classes Сеанс.Данные.Элемент;
           CreateParam[индОписаниеЭлемента] = nil;
           CreateParam[индНомерПП] = t;
           CreateParam[индДанныеВЗаписи] = Current;
-          CreateParam[индРодЭлемент] = locParentPlan;
           локТестПлан.ДобавитьЗначение(Сеанс.Данные.ТестОтчет.CreateEx(CreateParam));
           Next;
         od;
@@ -102,7 +101,6 @@ import classes Сеанс.Данные.Элемент;
           CreateParam[индНомерПП] = locItem;
           CreateParam[индПолноеИмяКласса] = ПолноеИмяКласса;
           CreateParam[индДанныеВЗаписи] = ТестПланКласса;
-          CreateParam[индРодЭлемент] = локОбъектПрограммаСеанса;
           локОбъектТестПлан = Сеанс.Данные.ТестПлан.CreateEx(CreateParam);
           локПрограммаСеанса.ДобавитьЗначение(локОбъектТестПлан);
           elm = локПрограммаСеанса.ЧислоЗначений;
@@ -118,7 +116,6 @@ import classes Сеанс.Данные.Элемент;
           CreateParam[индНомерПП] = locItem;
           CreateParam[индПолноеИмяКласса] = ПолноеИмяКласса;
           CreateParam[индДанныеВЗаписи] = nil;
-          CreateParam[индРодЭлемент] = локОбъектПрограммаСеанса;
           локОбъектТестПланы = Сеанс.Данные.ТестПланы.CreateEx(CreateParam);
           локПрограммаСеанса.ДобавитьЗначение(локОбъектТестПланы);
           elm = локПрограммаСеанса.ЧислоЗначений;
@@ -133,7 +130,6 @@ import classes Сеанс.Данные.Элемент;
             CreateParam[индНомерПП] = locItem;
             CreateParam[индПолноеИмяКласса] = Record.ТестПланПП.Items[locItem].ПолноеИмяКласса;
             CreateParam[индДанныеВЗаписи] = Record.ТестПланПП.Items[locItem].ТестПланКласса;
-            CreateParam[индРодЭлемент] = локОбъектТестПланы;
             локОбъектТестПлан = Сеанс.Данные.ТестПлан.CreateEx(CreateParam);
             локТестПланы.ДобавитьЗначение(локОбъектТестПлан);
             elm = локТестПланы.ЧислоЗначений;
@@ -152,7 +148,6 @@ import classes Сеанс.Данные.Элемент;
     CreateParam[индОписаниеЭлемента] = nil;
     CreateParam[индПолноеИмяКласса] = nil;
     CreateParam[индДанныеВЗаписи] = Record;
-    CreateParam[индРодЭлемент] = nil;
     локОбъектПрограммаСеанса = Сеанс.Данные.ПрограммаСеанса.CreateEx(CreateParam);
     ДеревоДанных.ДобавитьЗначение(локОбъектПрограммаСеанса);
     ДеревоДанных.УстановитьПризнакУзла(1, true);
@@ -815,7 +810,7 @@ import classes Сеанс.Данные.Элемент;
 --                    локТест = Т9_Тесты.Тест.Create;
 --                    локТест.Сеанс = Record;
 --                    локТест.ТестПлан = локТестПланКласса;
---                    локТест.Пример = локТестПланКласса.ТестПП[t].Пример;
+--                    локТест.Пример = локТестПланКласса.ТестПП[t].Приме??;
 --                    локТест.НомерПП = t;
 --                    локТест.Post;
 --                  od;
@@ -893,6 +888,53 @@ import classes Сеанс.Данные.Элемент;
       Result = true;
     fi;
   end;
+
+  proc Button1OnClick(Sender: Button);
+    --Message(Str(ОбновитьСтатистику(тблНавигатор.Root)) + ' , ' + Str(ОбновитьСтатистику(АктивныйЭлементНавигатора)));
+  end;
+
+  proc ОбновитьСтатистику;
+    var r: integer;
+    var locGridItem: GridItem;
+    var locValue: variant[];
+    var locElm: Сеанс.Данные.Элемент;
+    for r = 1 .. тблНавигатор.Root.Count do
+      locGridItem = тблНавигатор.Root.Items[r];
+      locValue = locGridItem.Value;
+      locElm = locValue[типИнтерфейсЭлемента];
+      if (locElm is Сеанс.Данные.ПрограммаСеанса):
+
+      fi;
+    od;
+  end;
+
+--  func ОбновитьСтатистику(locBranch: GridItem; SignRecursion: logical = false; var locResult: storage): integer[];
+--    var t, tt: integer;
+--    var locValue: variant[];
+--    var locElm: Сеанс.Данные.Элемент;
+--    --if АктивныйЭлементДанных <> nil:
+--    --  АктивныйЭлементДанных.ОбновитьСтатистику;
+--    --fi;
+--    if (not SignRecursion):
+--      locResult = Storage.Create;
+--      locResult.КолТестовВсего = 0;
+--      locResult.КолТестовУспех = 0;
+--      locResult.КолТестовПровал = 0;
+--    fi;
+--    tt = locBranch.Count;
+--    for t = 1 .. tt do
+--      locValue = locBranch.Value;
+--      locElm = locValue[типИнтерфейсЭлемента];
+----      if  then
+----
+----      end;
+--
+----      locResult.КолТестовВсего =
+----      ХранилищеСтатДанных.КолТестовВсего = locElm
+--    end;
+--  end;
+--
+--  --var ХранилищеСтатДанныхСеанса: storage;
 
 --}}
 
