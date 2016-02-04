@@ -17,14 +17,17 @@ inclass public
 inobject public
 
   func ИконкаЭлемента: Image;
+    var локПрцТестовРезультата: numeric;
     var локПрцТестовУспех: numeric;
+    локПрцТестовРезультата = ПрцТестовБезРезультата;
     локПрцТестовУспех = ПрцТестовУспех;
     if (локПрцТестовУспех = 100):
       Result = ImageOfGrid[iClassGreen];
-    elsif (локПрцТестовУспех > 0) and (локПрцТестовУспех < 100):
-      Result = ImageOfGrid[iClassYellow];
+    elsif (локПрцТестовРезультата = 100):
+      ИконкаЭлемента_;
+      Result = ImageOfGrid[iClassGray];
     else
-      Result = ИконкаЭлемента_;
+      Result = ImageOfGrid[iClassYellow];
     fi;
   end;
 
