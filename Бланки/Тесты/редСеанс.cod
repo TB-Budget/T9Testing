@@ -50,6 +50,7 @@ import classes Сеанс.Данные.Элемент;
 
   var АктивныйЭлементНавигатора: GridItem;
   var АктивныйЭлементДанных: Сеанс.Данные.Элемент;
+  var АктивныйЭлементКласс: Сеанс.Данные.Элемент;
 
   var локТранзакция: Transaction;
 
@@ -58,8 +59,6 @@ import classes Сеанс.Данные.Элемент;
 --{{ Вспомогательные методы
 
   proc ОбновитьДеревоДанных;
-    var локПозицииПрограммы: Subtable;
-    var локПозицияПрограммы: Т9_Тесты.СеансТестирования.ТестПланПП;
     var c, cc, elm: integer;
     var локПрограммаСеанса: СИС2.Дерево;
     var локТестПланы: СИС2.Дерево; -- группа тест-планов (в рамках класса)
@@ -307,6 +306,8 @@ import classes Сеанс.Данные.Элемент;
     if (MainDateCount = 1):
       ДобавитьВетвь(тблНавигатор.Root, ДеревоДанных);
     fi;
+    ОбновитьСтатистикуСеанса;
+    ОбновитьИконкиТестПлана;
   end;
 
   --@doc удаление лишних записей, случано сохранившихся в результате непредвиденных действий
@@ -327,53 +328,144 @@ import classes Сеанс.Данные.Элемент;
     end;
   end;
 
-  proc ИндикацияСтатусаТестПлана(locBranch: GridItem);
-    var локЭлемент: variant[];
-    var t,tt: integer;
-    var UnCount, GreenCount, RedCount, YellowCount: integer;
-    локЭлемент = locBranch.Value as variant[];
-    if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПлан): --{
-      tt = locBranch.Count;
-      for t = 1 .. tt do
-        if (locBranch.Items[t].Image = ImageOfGrid[iUnCheck]):
-          UnCount = UnCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfGrid[iCheckGreen]):
-          GreenCount = GreenCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfGrid[iCheckRed]):
-          RedCount = RedCount + 1;
-        fi;
-      od;
-      if (tt = UnCount):
-        locBranch.Image = ImageOfGrid[iClassGray];
-      elsif  (tt = GreenCount):
-        locBranch.Image = ImageOfGrid[iClassGreen];
-      else
-        locBranch.Image = ImageOfGrid[iClassYellow];
-      fi;--}
-      локЭлемент = locBranch.Parent.Value as variant[];
-      if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):
-        ИндикацияСтатусаТестПлана(locBranch.Parent);
+  proc ВычислитьСведенияОПроектах;
+    var p, pp: integer;
+    var locProjectName: string[];
+    var locProjectInfo: ProjectInfo;
+    Record.Проект.Clear;
+    pp = ТестПланПП.Count;
+    for p = 1 .. pp do
+      if (ТестПланПП[p].ТестПланКласса <> nil):
+        СИС2.Функции.AddInArray(locProjectName, ТестПланПП[p].ТестПланКласса.ИмяПроектаКласса, true);
       fi;
-    elsif (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):--{
-      tt = locBranch.Count;
-      for t = 1 .. tt do
-        if (locBranch.Items[t].Image = ImageOfGrid[iClassGray]):
-          UnCount = UnCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfGrid[iClassGreen]):
-          GreenCount = GreenCount + 1;
-        elsif (locBranch.Items[t].Image = ImageOfGrid[iClassYellow]):
-          YellowCount = YellowCount + 1;
+    od;
+    for p = 1 .. LengthOfArray(locProjectName) do
+      with Record.Проект.AddEx do
+        Имя = locProjectName[p];
+        locProjectInfo = BaseInfo.ProjectByName[Имя];
+        if (locProjectInfo <> nil):
+          Наим = locProjectInfo.Title;
+          Версия = locProjectInfo.Version;
         fi;
+      end;
+    od;
+    ИзменитьСостояниеЗаписи;
+  end;
+
+  proc ВычислитьСведенияОДанных;
+    ТестовыеДанные.ИмяИБ = SessionInfo.Infobase.Name;
+    ТестовыеДанные.ИмяФБ = Kernel.Settings.CommonFile.ClassInfo.DataBaseName;
+    ТестовыеДанные.ИмяСервера = SessionInfo.ServerName;
+    ТестовыеДанные.ИмяСервера = if((ТестовыеДанные.ИмяСервера = ''), 'localhost', ТестовыеДанные.ИмяСервера);
+  end;
+
+  proc ОбновитьСтатистикуСеанса;
+    var s, p, cp, t: integer;
+    var locElm: Сеанс.Данные.Элемент;
+    var locStorageS,locStorageC,locStorageP: Storage;
+    var ItemS,ItemCP,ItemC,ItemP: GridItem;
+    func Элемент(GridItem_: GridItem): Сеанс.Данные.Элемент; --{
+      var locValue: variant[];
+      locValue = GridItem_.Value as variant[];
+      Result = locValue[типИнтерфейсЭлемента];
+    end; --}
+    for s = 1 .. тблНавигатор.Root.Count do
+      ItemS = тблНавигатор.Root.Items[s];
+      locElm = Элемент(ItemS);
+      if (locElm is Сеанс.Данные.ПрограммаСеанса):
+        locStorageS = Storage.Create;
+        locStorageS.КолТестовВсего = 0;
+        locStorageS.КолТестовУспех = 0;
+        locStorageS.КолТестовПровал = 0;
+        for cp = 1 .. ItemS.Count do
+          ItemCP = ItemS.Items[cp];
+          locElm = Элемент(ItemCP);
+          if (locElm is Сеанс.Данные.ТестПланы):
+            ItemC = ItemCP;
+            locStorageC = Storage.Create;
+            locStorageC.КолТестовВсего = 0;
+            locStorageC.КолТестовУспех = 0;
+            locStorageC.КолТестовПровал = 0;
+            for p = 1 .. ItemC.Count do
+              ItemP = ItemC.Items[p];
+              locElm = Элемент(ItemP);
+              locStorageP = Storage.Create;
+              locStorageP.КолТестовВсего = 0;
+              locStorageP.КолТестовУспех = 0;
+              locStorageP.КолТестовПровал = 0;
+              for t = 1 .. ItemP.Count do
+                locElm = Элемент(ItemP.Items[t]);
+                if (locElm is Сеанс.Данные.ТестОтчет):
+                  locStorageP.КолТестовВсего = locStorageP.КолТестовВсего + locElm.КолТестовВсего;
+                  locStorageP.КолТестовУспех = locStorageP.КолТестовУспех + locElm.КолТестовУспех;
+                  locStorageP.КолТестовПровал = locStorageP.КолТестовПровал + locElm.КолТестовПровал;
+                fi;
+              od;
+              locElm = Элемент(ItemP);
+              locElm.УстСтатистику([locStorageP.КолТестовВсего,locStorageP.КолТестовУспех,locStorageP.КолТестовПровал] as integer[]);
+              locStorageC.КолТестовВсего = locStorageC.КолТестовВсего + locElm.КолТестовВсего;
+              locStorageC.КолТестовУспех = locStorageC.КолТестовУспех + locElm.КолТестовУспех;
+              locStorageC.КолТестовПровал = locStorageC.КолТестовПровал + locElm.КолТестовПровал;
+            od;
+            locElm = Элемент(ItemCP);
+            locElm.УстСтатистику([locStorageC.КолТестовВсего,locStorageC.КолТестовУспех,locStorageC.КолТестовПровал] as integer[]);
+          elsif (locElm is Сеанс.Данные.ТестПлан):
+            ItemP = ItemCP;
+            locElm = Элемент(ItemP);
+            locStorageP = Storage.Create;
+            locStorageP.КолТестовВсего = 0;
+            locStorageP.КолТестовУспех = 0;
+            locStorageP.КолТестовПровал = 0;
+            for t = 1 .. ItemP.Count do
+              locElm = Элемент(ItemP.Items[t]);
+              if (locElm is Сеанс.Данные.ТестОтчет):
+                locStorageP.КолТестовВсего = locStorageP.КолТестовВсего + locElm.КолТестовВсего;
+                locStorageP.КолТестовУспех = locStorageP.КолТестовУспех + locElm.КолТестовУспех;
+                locStorageP.КолТестовПровал = locStorageP.КолТестовПровал + locElm.КолТестовПровал;
+              fi;
+            od;
+            locElm = Элемент(ItemP);
+            locElm.УстСтатистику([locStorageP.КолТестовВсего,locStorageP.КолТестовУспех,locStorageP.КолТестовПровал] as integer[]);
+            locElm = Элемент(ItemCP);
+            locElm.УстСтатистику([locStorageP.КолТестовВсего,locStorageP.КолТестовУспех,locStorageP.КолТестовПровал] as integer[]);
+          fi;
+          locStorageS.КолТестовВсего = locStorageS.КолТестовВсего + locElm.КолТестовВсего;
+          locStorageS.КолТестовУспех = locStorageS.КолТестовУспех + locElm.КолТестовУспех;
+          locStorageS.КолТестовПровал = locStorageS.КолТестовПровал + locElm.КолТестовПровал;
+        od;
+        locElm = Элемент(ItemS);
+        locElm.УстСтатистику([locStorageS.КолТестовВсего,locStorageS.КолТестовУспех,locStorageS.КолТестовПровал] as integer[]);
+      fi;
+    od;
+  end;
+
+  proc ОбновитьИконкиТестПлана(locBranch: GridItem = nil);
+    var локЭлемент: variant[];
+    var s, ss: integer;
+    if (locBranch = nil):
+      locBranch = тблНавигатор.Root.Items[1];
+    fi;
+    локЭлемент = locBranch.Value as variant[];
+    if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ПрограммаСеанса):
+      ss = locBranch.Count;
+      for s = 1 .. ss do
+        ОбновитьИконкиТестПлана(locBranch.Items[s]);
       od;
-      if (tt = UnCount):
-        locBranch.Image = ImageOfGrid[iClassGray];
-      elsif  (tt = GreenCount):
-        locBranch.Image = ImageOfGrid[iClassGreen];
-      else
-        locBranch.Image = ImageOfGrid[iClassYellow];
-      fi;--}
+    elsif (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):
+      ss = locBranch.Count;
+      for s = 1 .. ss do
+        locBranch.Image = локЭлемент[типИнтерфейсЭлемента].ИконкаЭлемента;
+        ОбновитьИконкиТестПлана(locBranch.Items[s]);
+      od;
+    elsif (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПлан):
+      ss = locBranch.Count;
+      for s = 1 .. ss do
+        locBranch.Image = локЭлемент[типИнтерфейсЭлемента].ИконкаЭлемента;
+        ОбновитьИконкиТестПлана(locBranch.Items[s]);
+      od;
     fi;
   end;
+
 
   proc ПонизитьЦветФрейма(locFrame: TemplateFrame; locDelta: integer = 40);
     var locColor, locR, locG, locB, newR, newG, newB: Integer;
@@ -429,38 +521,6 @@ import classes Сеанс.Данные.Элемент;
       --CellByField['текстЗаключениеТестировщика'].Enabled = not (Стадия = СтадияСозданиеПрограммы as integer);
     end;--}
   end;
-
-  proc ВычислитьСведенияОПроектах;
-    var p, pp: integer;
-    var locProjectName: string[];
-    var locProjectInfo: ProjectInfo;
-    Record.Проект.Clear;
-    pp = ТестПланПП.Count;
-    for p = 1 .. pp do
-      if (ТестПланПП[p].ТестПланКласса <> nil):
-        СИС2.Функции.AddInArray(locProjectName, ТестПланПП[p].ТестПланКласса.ИмяПроектаКласса, true);
-      fi;
-    od;
-    for p = 1 .. LengthOfArray(locProjectName) do
-      with Record.Проект.AddEx do
-        Имя = locProjectName[p];
-        locProjectInfo = BaseInfo.ProjectByName[Имя];
-        if (locProjectInfo <> nil):
-          Наим = locProjectInfo.Title;
-          Версия = locProjectInfo.Version;
-        fi;
-      end;
-    od;
-    ИзменитьСостояниеЗаписи;
-  end;
-
-  proc ВычислитьСведенияОДанных;
-    ТестовыеДанные.ИмяИБ = SessionInfo.Infobase.Name;
-    ТестовыеДанные.ИмяФБ = Kernel.Settings.CommonFile.ClassInfo.DataBaseName;
-    ТестовыеДанные.ИмяСервера = SessionInfo.ServerName;
-    ТестовыеДанные.ИмяСервера = if((ТестовыеДанные.ИмяСервера = ''), 'localhost', ТестовыеДанные.ИмяСервера);
-  end;
-
 --}}
 
 --{{ Обработчики событий шаблона
@@ -580,8 +640,8 @@ import classes Сеанс.Данные.Элемент;
         (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).УстТестПройден(not locValueL);
         АктивныйЭлементНавигатора.Image = АктивныйЭлементДанных.ИконкаЭлемента;
       fi;
-      ИндикацияСтатусаТестПлана(АктивныйЭлементНавигатора.Parent);
-      --ВычислитьСтатистику(АктивныйЭлементНавигатора.Parent, false);
+      ОбновитьСтатистикуСеанса;
+      ОбновитьИконкиТестПлана;
       ИзменитьСостояниеЗаписи;
     elsif (Cell.Contents = 'ТестНеПройден'):
       if (АктивныйЭлементДанных <> nil):
@@ -589,8 +649,8 @@ import classes Сеанс.Данные.Элемент;
         (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).УстТестПровален(not locValueL);
         АктивныйЭлементНавигатора.Image = АктивныйЭлементДанных.ИконкаЭлемента;
       fi;
-      ИндикацияСтатусаТестПлана(АктивныйЭлементНавигатора.Parent);
-      --ВычислитьСтатистику(АктивныйЭлементНавигатора.Parent, false);
+      ОбновитьСтатистикуСеанса;
+      ОбновитьИконкиТестПлана;
       ИзменитьСостояниеЗаписи;
     fi;
   end;
@@ -638,6 +698,11 @@ import classes Сеанс.Данные.Элемент;
     var locDiscription: string;
     var локПозицииПрограммы: Subtable;
     var локНаим: string;
+    func ЭлементПрограммаСеанса: Сеанс.Данные.Элемент; --{
+      var locValue: variant[];
+      locValue = тблНавигатор.Root.Items[1].Value as variant[];
+      Result = locValue[типИнтерфейсЭлемента];
+    end; --}
     if (Cell.Contents = 'ТестПланКласса.Наим'):--{
       локПозицииПрограммы = ТестПланПП.CreateSubtableView(Cell.Owner.SubtableFilter, '');
       Index = локПозицииПрограммы.IndexByNumber[Cell.Frame] + 1;
@@ -678,14 +743,23 @@ import classes Сеанс.Данные.Элемент;
     elsif (Cell.Contents = 'Комментарий'):--{
       Result = if((АктивныйЭлементДанных <> nil), (АктивныйЭлементДанных as Сеанс.Данные.ТестОтчет).Заключение, '');--}
     --Статистика
---    elsif (Cell.Contents = 'AllCount_csn'): Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'Plus_csn'):     Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'Minus_csn'):    Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'Nil_csn'):      Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'AllCount_psn'): Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'Plus_psn'):     Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'Minus_psn'):    Result = ТекущаяСтатистика.GetField(Cell.Contents);
---    elsif (Cell.Contents = 'Nil_psn'):      Result = ТекущаяСтатистика.GetField(Cell.Contents);
+    elsif (Cell.Contents = 'AllCount_csn'): Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.КолТестовВсего, 0);
+    elsif (Cell.Contents = 'Plus_csn'):     Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.КолТестовУспех, 0);
+    elsif (Cell.Contents = 'Minus_csn'):    Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.КолТестовПровал, 0);
+    elsif (Cell.Contents = 'Nil_csn'):      Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.КолТестовБезРезультата, 0);
+    elsif (Cell.Contents = 'AllCount_psn'): Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.ПрцТестовВсего, 0);
+    elsif (Cell.Contents = 'Plus_psn'):     Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.ПрцТестовУспех, 0);
+    elsif (Cell.Contents = 'Minus_psn'):    Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.ПрцТестовПровал, 0);
+    elsif (Cell.Contents = 'Nil_psn'):      Result = if(ЭлементПрограммаСеанса <> nil, ЭлементПрограммаСеанса.ПрцТестовБезРезультата, 0);
+
+    elsif (Cell.Contents = 'AllCount_ccl'): Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.КолТестовВсего, 0);
+    elsif (Cell.Contents = 'Plus_ccl'):     Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.КолТестовУспех, 0);
+    elsif (Cell.Contents = 'Minus_ccl'):    Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.КолТестовПровал, 0);
+    elsif (Cell.Contents = 'Nil_ccl'):      Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.КолТестовБезРезультата, 0);
+    elsif (Cell.Contents = 'AllCount_pcl'): Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.ПрцТестовВсего, 0);
+    elsif (Cell.Contents = 'Plus_pcl'):     Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.ПрцТестовУспех, 0);
+    elsif (Cell.Contents = 'Minus_pcl'):    Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.ПрцТестовПровал, 0);
+    elsif (Cell.Contents = 'Nil_pcl'):      Result = if(АктивныйЭлементКласс <> nil, АктивныйЭлементКласс.ПрцТестовБезРезультата, 0);
     fi;
   end;
 
@@ -854,31 +928,46 @@ import classes Сеанс.Данные.Элемент;
   proc тблНавигатор_ПриПеремещении(Sender: Grid);
     var локЭлемент: variant[];
     АктивныйЭлементНавигатора = Sender.Current;
-    локЭлемент = if((АктивныйЭлементНавигатора <> nil), АктивныйЭлементНавигатора.Value, nil);
+    локЭлемент = if((АктивныйЭлементНавигатора <> nil), АктивныйЭлементНавигатора.Value, nil) as variant[];
     АктивныйЭлементДанных = if((локЭлемент <> nil), локЭлемент[типИнтерфейсЭлемента] as Сеанс.Данные.Элемент, nil);
     if (АктивныйЭлементДанных is Сеанс.Данные.ПрограммаСеанса): --{
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[1];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[1];
-      фреймРабЭлемент2.CurrentFrame.Visible = true; --}
+      фреймРабЭлемент2.CurrentFrame.Visible = true;
+      АктивныйЭлементКласс = nil; --}
     elsif (АктивныйЭлементДанных is Сеанс.Данные.ТестПланы):
-      секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (АктивныйЭлементДанных.ПолноеИмяКласса) + '"'; --секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (локЭлемент[типИдентификатор] as string) + '"';
+      секцСценарий2.SubtableFilter = 'ПолноеИмяКласса="' + (АктивныйЭлементДанных.ПолноеИмяКласса) + '"';
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[2];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[2];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
+      АктивныйЭлементКласс = АктивныйЭлементДанных;
     elsif (АктивныйЭлементДанных is Сеанс.Данные.ТестПлан):
-      ПрочитатьТестПримеры(АктивныйЭлементДанных.ДанныеВЗаписи as Т9_Тесты.ТестПланКласса);   --ПрочитатьТестПримеры(локЭлемент[типИдентификатор] as Т9_Тесты.ТестПланКласса);
+      ПрочитатьТестПримеры(АктивныйЭлементДанных.ДанныеВЗаписи as Т9_Тесты.ТестПланКласса);
       секцСценарий3.Count = LengthOfArray(Тест_);
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[3];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[3];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
+      локЭлемент = if((Sender.Current.Parent <> nil), Sender.Current.Parent.Value, nil) as variant[];
+      if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):
+        АктивныйЭлементКласс = локЭлемент[типИнтерфейсЭлемента] as Сеанс.Данные.Элемент;
+      else
+        АктивныйЭлементКласс = АктивныйЭлементДанных;
+      fi;
     elsif (АктивныйЭлементДанных is Сеанс.Данные.ТестОтчет):
       фреймРабЭлемент1.CurrentFrame = фреймРабЭлемент1.Frame[4];
       фреймРабЭлемент1.CurrentFrame.Visible = true;
       фреймРабЭлемент2.CurrentFrame = фреймРабЭлемент2.Frame[4];
       фреймРабЭлемент2.CurrentFrame.Visible = true;
+      локЭлемент = if((Sender.Current.Parent.Parent <> nil), Sender.Current.Parent.Parent.Value, nil) as variant[];
+      if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):
+        АктивныйЭлементКласс = локЭлемент[типИнтерфейсЭлемента] as Сеанс.Данные.Элемент;
+      else
+        локЭлемент = if((Sender.Current.Parent <> nil), Sender.Current.Parent.Value, nil) as variant[];
+        АктивныйЭлементКласс = локЭлемент[типИнтерфейсЭлемента] as Сеанс.Данные.Элемент;
+      fi;
     fi;
   end;
 
@@ -888,53 +977,6 @@ import classes Сеанс.Данные.Элемент;
       Result = true;
     fi;
   end;
-
-  proc Button1OnClick(Sender: Button);
-    --Message(Str(ОбновитьСтатистику(тблНавигатор.Root)) + ' , ' + Str(ОбновитьСтатистику(АктивныйЭлементНавигатора)));
-  end;
-
-  proc ОбновитьСтатистику;
-    var r: integer;
-    var locGridItem: GridItem;
-    var locValue: variant[];
-    var locElm: Сеанс.Данные.Элемент;
-    for r = 1 .. тблНавигатор.Root.Count do
-      locGridItem = тблНавигатор.Root.Items[r];
-      locValue = locGridItem.Value;
-      locElm = locValue[типИнтерфейсЭлемента];
-      if (locElm is Сеанс.Данные.ПрограммаСеанса):
-
-      fi;
-    od;
-  end;
-
---  func ОбновитьСтатистику(locBranch: GridItem; SignRecursion: logical = false; var locResult: storage): integer[];
---    var t, tt: integer;
---    var locValue: variant[];
---    var locElm: Сеанс.Данные.Элемент;
---    --if АктивныйЭлементДанных <> nil:
---    --  АктивныйЭлементДанных.ОбновитьСтатистику;
---    --fi;
---    if (not SignRecursion):
---      locResult = Storage.Create;
---      locResult.КолТестовВсего = 0;
---      locResult.КолТестовУспех = 0;
---      locResult.КолТестовПровал = 0;
---    fi;
---    tt = locBranch.Count;
---    for t = 1 .. tt do
---      locValue = locBranch.Value;
---      locElm = locValue[типИнтерфейсЭлемента];
-----      if  then
-----
-----      end;
---
-----      locResult.КолТестовВсего =
-----      ХранилищеСтатДанных.КолТестовВсего = locElm
---    end;
---  end;
---
---  --var ХранилищеСтатДанныхСеанса: storage;
 
 --}}
 

@@ -10,22 +10,7 @@ inclass public
     Result.ОписаниеЭлемента_ = 'Модули';
   end;
 
-  --ObjectsCount
 inobject public
-
-  proc ОбновитьСтатистику;
-    var i, ii, locCount: integer;
-    ii = Сеанс.Данные.ТестПланы.ObjectsCount;
-    for i = 1 .. ii do
-      with Objects[i] do
---        if ((родЭлемент as Сеанс.Данные.ПрограммаСеанса) = Self):
---          locCount = locCount + КолТестовВсего;
---        fi;
-      end;
-      i = i + 1;
-    end;
-  end;
-
 
 inobject
 
