@@ -23,6 +23,12 @@ inobject private
 --}}
 
 --{{ Обработчики событий картотеки
+
+  proc картотека_ПриРисованииСтроки(Rec: Т9_Тесты.СеансТестирования; Selected: Logical; var Color: Integer; Image: Image);
+    if (not (Rec.Стадия = Константы.СтадияСеансЗавершен)) and (not Rec.Deleted):
+      Image.LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Page\Blue.ico");
+    fi;
+  end;
 --}}
 
 --{{ Обработчики событий столбцов картотеки

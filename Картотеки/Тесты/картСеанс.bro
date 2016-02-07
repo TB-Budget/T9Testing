@@ -24,6 +24,7 @@ CanCopy=0
 ShowRecords=0
 OnClick=картотека_ПриНажатии
 OnRearrange=картотека_ПриОформлении
+OnDrawRow=картотека_ПриРисованииСтроки
 ColumnCount=3
 Column:0=Наим
 Column:1=ДатаНачала
