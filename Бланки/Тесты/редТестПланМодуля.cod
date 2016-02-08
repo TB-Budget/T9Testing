@@ -121,10 +121,15 @@ import СИС2 classes Функции, СтроковыеФункции;
 
   func шаблон_ПриЗаписи :Logical;
     --Result = inherited шаблон_ПриЗаписи;
-    if СИС2.ФункцииДокумента.RecordEdited(Record):
-      Record.Post;
-      локТранзакция.Apply(true);
-    fi;
+    try
+      if СИС2.ФункцииДокумента.RecordEdited(Record):
+        Record.Post;
+        локТранзакция.Apply(true);
+      fi;
+    except
+      ИзменитьСостояниеЗаписи;
+      БланкЗакрывается = false;
+    end;
     --Result = true;
   end;
 
@@ -442,12 +447,25 @@ import СИС2 classes Функции, СтроковыеФункции;
 
 --{{ Обработчики событий прочих объектов шаблона
 
+  proc кнОК_ПриНажатии (Sender: Button);
+    БланкЗакрывается = true;
+    if ОпцияБланка[AutoPostOrCancel] = true then
+      try
+        EditorPost;
+      except
+      end;
+    fi;
+    if БланкЗакрывается:
+      Close(cmOK);
+    fi;
+  end;
+
   proc кнПриНажатии (Sender: Button); var locFlt: string[];
     var локЗаписьСпецификации: Т9_Тесты.СпецификацияМодуля;
     var локЗаписьТестПлана: Т9_Тесты.ТестПланМодуля;
     var локЗаписьПримера: Т9_Тесты.ТестовыйПример;
     var локЗаписьПримераШбл: Т9_Тесты.ТестовыйПример;
-    var t, tt: integer;
+    var t, tt, j: integer;
     var aId: integer[]; -- массив DocId использованных шаблонных тестов
     if (Sender = кнСпецификация):
       with Query.Create([Т9_Тесты.СпецификацияМодуля]) do
@@ -516,7 +534,8 @@ import СИС2 classes Функции, СтроковыеФункции;
       locFlt[1] = 'ЭтоШаблон';
       locFlt[2] = if((aId <> nil), 'not DocId in ' + ToStr(aId), nil);
       if CmOk = OpenCardfile('Тесты.картТестовыйПример', локЗаписьПримераШбл, СложитьСтрокиФильтраПоИ(locFlt), Window.ModalWindow):
-        with ТестПП.Insert(1) do
+        j = ТестПП.Count + 1;
+        with ТестПП.Insert(j) do
           локЗаписьПримера = Т9_Тесты.ТестовыйПример.Create;
           локЗаписьПримера.ТипБазовогоКласса  = ТипБазовогоКласса;
           локЗаписьПримера.ПолноеИмяКласса    = ПолноеИмяКласса;
