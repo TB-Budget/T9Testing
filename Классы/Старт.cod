@@ -1,11 +1,11 @@
-class "";
+п»їclass "";
 
 inclass public
 
-  func CreateEx: Т9_Тесты.Старт;
-    Result = Т9_Тесты.Старт.Create;
+  func CreateEx: Рў9_РўРµСЃС‚С‹.РЎС‚Р°СЂС‚;
+    Result = Рў9_РўРµСЃС‚С‹.РЎС‚Р°СЂС‚.Create;
     Result.tmr = Timer.Create(Result);
-    Result.tmr.OnTimer = 'ЗагрузитьИнтСхему';
+    Result.tmr.OnTimer = 'Р—Р°РіСЂСѓР·РёС‚СЊРРЅС‚РЎС…РµРјСѓ';
     Result.tmr.Interval = 500;
     Result.tmr.Active = true;
   end;
@@ -14,10 +14,10 @@ inobject private
 
   var tmr: Timer;
 
-  proc ЗагрузитьИнтСхему(loctmr: Timer = tmr);
-    var локИнтСхема: String;
-    локИнтСхема = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\Интерфейс_Тесты.shi';
-    LoadInterfaceSchema(локИнтСхема);
+  proc Р—Р°РіСЂСѓР·РёС‚СЊРРЅС‚РЎС…РµРјСѓ(loctmr: Timer = tmr);
+    var Р»РѕРєРРЅС‚РЎС…РµРјР°: String;
+    Р»РѕРєРРЅС‚РЎС…РµРјР° = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\РРЅС‚РµСЂС„РµР№СЃ_РўРµСЃС‚С‹.shi';
+    LoadInterfaceSchema(Р»РѕРєРРЅС‚РЎС…РµРјР°);
     if (tmr.Active):
       tmr.Active = false;
     fi;

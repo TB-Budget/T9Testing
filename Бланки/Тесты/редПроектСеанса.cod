@@ -49,7 +49,7 @@ import СИС2 classes Функции;
   func ЕстьГруппаТестПланов(локПолноеИмяКласса: string; var IndexGroup: integer = 0; var LastIndex: integer = 0; локДействие: типДействия): logical;--{ Проверка того, что в программе тестирования уже сформирована запись для описания группы тестов
     var i, Index, p: integer;
     for i = 1 .. ТестПланПП.Count do
-      if (ТестПланПП[i].ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланКласса = nil):
+      if (ТестПланПП[i].ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланМодуля = nil):
         Result = true;
         Break;
       fi;
@@ -87,7 +87,7 @@ import СИС2 classes Функции;
   func ЕстьТестКласса(локПолноеИмяКласса: string; var Index: integer = 0; var LastIndex: integer = 0): logical;--{ Проверка того, что в программе тестирования уже есть тест-план для такого класса
     var i, locIndex1, locIndex2: integer;
     for i = 1 .. ТестПланПП.Count do
-      if (ТестПланПП[i].ТестПланКласса.ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланКласса <> nil):
+      if (ТестПланПП[i].ТестПланМодуля.ПолноеИмяКласса = локПолноеИмяКласса) and (ТестПланПП[i].ТестПланМодуля <> nil):
         Result = true;
         if (locIndex1 = 0): locIndex1 = i; fi;
         if (locIndex1 > 0): locIndex2 = i; fi;
@@ -98,20 +98,20 @@ import СИС2 classes Функции;
   end;--}
 
   func Позиция_ОписаниеГруппы(vStb: Subtable; locIndex: integer): logical;
-    if (vStb <> nil): Return (vStb.ItemsByNumber[locIndex].ТестПланКласса = nil);
-    else              Return (ТестПланПП[locIndex].ТестПланКласса = nil);
+    if (vStb <> nil): Return (vStb.ItemsByNumber[locIndex].ТестПланМодуля = nil);
+    else              Return (ТестПланПП[locIndex].ТестПланМодуля = nil);
     fi;
   end;
 
   func Позиция_ВходитВГруппу(vStb: Subtable; locIndex: integer): logical;
-    if (vStb <> nil): Return (vStb.ItemsByNumber[locIndex].ТестПланКласса <> nil) and (vStb.ItemsByNumber[locIndex].inGroup);
-    else              Return (ТестПланПП[locIndex].ТестПланКласса <> nil) and (ТестПланПП[locIndex].inGroup);
+    if (vStb <> nil): Return (vStb.ItemsByNumber[locIndex].ТестПланМодуля <> nil) and (vStb.ItemsByNumber[locIndex].inGroup);
+    else              Return (ТестПланПП[locIndex].ТестПланМодуля <> nil) and (ТестПланПП[locIndex].inGroup);
     fi;
   end;
 
   func Позиция_ВнеГруппы(vStb: Subtable; locIndex: integer): logical;
-    if (vStb <> nil): Return (vStb.ItemsByNumber[locIndex].ТестПланКласса <> nil) and (not vStb.ItemsByNumber[locIndex].inGroup);
-    else              Return (ТестПланПП[locIndex].ТестПланКласса <> nil) and (not ТестПланПП[locIndex].inGroup);
+    if (vStb <> nil): Return (vStb.ItemsByNumber[locIndex].ТестПланМодуля <> nil) and (not vStb.ItemsByNumber[locIndex].inGroup);
+    else              Return (ТестПланПП[locIndex].ТестПланМодуля <> nil) and (not ТестПланПП[locIndex].inGroup);
     fi;
   end;
 
@@ -132,22 +132,22 @@ import СИС2 classes Функции;
     fi;
   end;
 
-  func ДобавитьТестПлан(locCell: TemplateCell; var ЗаписьТестПлана: Т9_Тесты.ТестПланКласса; ВНачало: logical): integer;
+  func ДобавитьТестПлан(locCell: TemplateCell; var ЗаписьТестПлана: Т9_Тесты.ТестПланМодуля; ВНачало: logical): integer;
     var p, Index, IndexGroup, LastIndex: integer;
     var aDocId: integer[];
-    var locCrd: Тесты.картТестПланКласса;
+    var locCrd: Тесты.картТестПланМодуля;
     var ЕстьГруппа: logical;
     for p = 1 .. ТестПланПП.Count do
-      aDocId[p] = ТестПланПП[p].ТестПланКласса.DocId;
+      aDocId[p] = ТестПланПП[p].ТестПланМодуля.DocId;
     od;
-    locCrd = Тесты.картТестПланКласса.Create;
+    locCrd = Тесты.картТестПланМодуля.Create;
     locCrd.обУсловие_ТипТестПлана = 2; --только НЕ шаблоны
     locCrd.НеИзменятьПростойФильтр = true;
     if CmOk = locCrd.ShowEx(ЗаписьТестПлана, 'not DocId in ' + Str(aDocId), Window.ModalWindow):
       if ЕстьТестКласса(ЗаписьТестПлана.ПолноеИмяКласса, , LastIndex):
         ЕстьГруппа = ЕстьГруппаТестПланов(ЗаписьТестПлана.ПолноеИмяКласса, IndexGroup, LastIndex, СоздатьЕслиНет);
         with ТестПланПП.Insert(LastIndex + 1) do
-          ТестПланКласса = ЗаписьТестПлана;
+          ТестПланМодуля = ЗаписьТестПлана;
           ПолноеИмяКласса = ЗаписьТестПлана.ПолноеИмяКласса;
           inGroup = ЕстьГруппа;
         end;
@@ -155,13 +155,13 @@ import СИС2 classes Функции;
       else
         if ВНачало:
           with ТестПланПП.Insert(1) do
-            ТестПланКласса = ЗаписьТестПлана;
+            ТестПланМодуля = ЗаписьТестПлана;
             ПолноеИмяКласса = ЗаписьТестПлана.ПолноеИмяКласса;
           end;
         else
           Index = locCell.Frame;
           with ТестПланПП.Insert(Index + 1) do
-            ТестПланКласса = ЗаписьТестПлана;
+            ТестПланМодуля = ЗаписьТестПлана;
             ПолноеИмяКласса = ЗаписьТестПлана.ПолноеИмяКласса;
           end;
         fi;
@@ -173,10 +173,10 @@ import СИС2 classes Функции;
 
   proc УдалитьТестПлан(locCell: TemplateCell);
     var Index, p, pp: integer;
-    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
+    var локЗаписьТестПлана: Т9_Тесты.ТестПланМодуля;
     var локПолноеИмяКласса: string;
     Index = locCell.Frame;
-    локЗаписьТестПлана = ТестПланПП[Index].ТестПланКласса;
+    локЗаписьТестПлана = ТестПланПП[Index].ТестПланМодуля;
     if (локЗаписьТестПлана <> nil):
       ДоУдаленияПозиции(locCell);
       ТестПланПП.Delete(Index);
@@ -281,11 +281,11 @@ import СИС2 classes Функции;
 
   proc ПоказатьТестПлан(locCell: TemplateCell);
     var Index: integer;
-    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
+    var локЗаписьТестПлана: Т9_Тесты.ТестПланМодуля;
     Index = locCell.Frame;
-    локЗаписьТестПлана = ТестПланПП[Index].ТестПланКласса;
+    локЗаписьТестПлана = ТестПланПП[Index].ТестПланМодуля;
     if (локЗаписьТестПлана <> nil):
-      OpenBlankEditor('Тесты.редТестПланКласса', локЗаписьТестПлана,  Window.ModalWindow);
+      OpenBlankEditor('Тесты.редТестПланМодуля', локЗаписьТестПлана,  Window.ModalWindow);
     else
       Message('Просмотр тест-плана на строке группы невозможен.');
     fi;
@@ -305,7 +305,7 @@ import СИС2 classes Функции;
 --{{ Обработчики событий клеток шаблона
 
   func Поле_ПриНажатии (Cell: TemplateCell; Action: Template.ClickTypes): Logical;
-    var локЗаписьТестПлана: Т9_Тесты.ТестПланКласса;
+    var локЗаписьТестПлана: Т9_Тесты.ТестПланМодуля;
     --var locCrd: CardForm;
     --var Index, IndexGroup, p, pp, LastIndex: integer;
     --var aDocId: integer[];
@@ -331,14 +331,14 @@ import СИС2 classes Функции;
     var locIsGroup: logical;
     var locDiscription: string;
     Index = Cell.Frame;
-    locIsGroup = (ТестПланПП[Index].ТестПланКласса = nil) and (ТестПланПП[Index].ПолноеИмяКласса <> nil);
+    locIsGroup = (ТестПланПП[Index].ТестПланМодуля = nil) and (ТестПланПП[Index].ПолноеИмяКласса <> nil);
     locDiscription = Библио.ОписаниеКлассаПоИмени(ТестПланПП[Index].ПолноеИмяКласса);
     locDiscription = if((locDiscription <> nil), locDiscription, 'НЕВЕРНОЕ ИМЯ КЛАССА');
     if (locIsGroup):
       Result = '<b+>' + locDiscription;
     else
-      if (ТестПланПП[Index].inGroup) and (ТестПланПП[Index].ТестПланКласса <> nil):
-        Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланКласса.Наим;
+      if (ТестПланПП[Index].inGroup) and (ТестПланПП[Index].ТестПланМодуля <> nil):
+        Result = RepStr(' ', 8) + ТестПланПП[Index].ТестПланМодуля.Наим;
       elsif (not ТестПланПП[Index].inGroup):
         Result = locDiscription;
       fi;

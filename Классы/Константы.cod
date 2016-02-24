@@ -40,4 +40,20 @@ InClass Public
                                        [СтадияСеансЗавершен, 'Завершенный сеанс'],
                                        [СтадияСеансВозобновлен, 'Возобновленный сеанс']];
 
+  type ImageType = (iProject = 1, iClassGray, iClassGreen, iClassYellow, iUnCheck, iCheckGreen, iCheckRed);
+
+  var ImageOfGrid: Image[];
+
+  proc ИнициализироватьИконки;--{
+    ImageOfGrid = nil;
+    ImageOfGrid[iProject]     = Image.Create; ImageOfGrid[iProject].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Project.ico");
+    ImageOfGrid[iClassGray]   = Image.Create; ImageOfGrid[iClassGray].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Gray.ico");
+    ImageOfGrid[iClassYellow] = Image.Create; ImageOfGrid[iClassYellow].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Yellow.ico");
+    ImageOfGrid[iClassGreen]  = Image.Create; ImageOfGrid[iClassGreen].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\Plugin\Green.ico");
+    ImageOfGrid[iUnCheck]     = Image.Create; ImageOfGrid[iUnCheck].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_white.ico");
+    ImageOfGrid[iCheckGreen]  = Image.Create; ImageOfGrid[iCheckGreen].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_green.ico");
+    ImageOfGrid[iCheckRed]    = Image.Create; ImageOfGrid[iCheckRed].LoadFromFile("%Projects%\Т9_Тесты\Приложения\Иконки\bullet_red.ico");
+  end;--}
+
+
 end

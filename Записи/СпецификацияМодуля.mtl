@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-hierarchical record СпецификацияКласса inherited БазоваяЗаписьТесты title "Описание функциональной спецификации классов Т9";
+hierarchical record СпецификацияМодуля inherited БазоваяЗаписьТесты title "Описание функциональной спецификации модулей (классов)";
   field GroupPath: String(MaxIndexedStr);
   field ТипБазовогоКласса: integer;
   field ПолноеИмяКласса: string title 'Имя тестируемого класса'; -- Полное имя класса, включающее имя проекта

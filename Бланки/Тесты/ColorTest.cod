@@ -1,4 +1,4 @@
-Class  "999" ;
+п»їClass  "999" ;
 
 InClass Public
 
@@ -18,7 +18,7 @@ Color2: integer = R2 + (256 * G2) + (256 * 256 * B2);
 --{{
 inobject
 
-  func Поле_ПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+  func РџРѕР»Рµ_РџСЂРёР’С…РѕРґРµ(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
     var locColor: integer;
     if (Cell.Contents = 'Color1') and (Action <> Template.Clear):
       locColor = Color1;
@@ -32,7 +32,7 @@ inobject
     fi;
   end;
 
-  proc Поле_ПриВыходе(Cell: TemplateCell; Index: Integer);
+  proc РџРѕР»Рµ_РџСЂРёР’С‹С…РѕРґРµ(Cell: TemplateCell; Index: Integer);
     if (Cell.Contents = 'D0'):
       D1 = D0;
       D2 = D0;
@@ -40,7 +40,7 @@ inobject
     fi;
   end;
 
-  proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+  proc РџРѕР»Рµ_РџСЂРёР РёСЃРѕРІР°РЅРёРё(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
     if (Cell.Contents = 'Color1'):
       FieldColor = Color1;
     elsif (Cell.Contents = 'Color2'):
@@ -49,9 +49,9 @@ inobject
   end;
 
   proc BlankOnOpen(Create :Logical);
-    var локИнтСхема: String;
-    локИнтСхема = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\Интерфейс_Тесты.shi';
-    LoadInterfaceSchema(локИнтСхема);
+    var Р»РѕРєРРЅС‚РЎС…РµРјР°: String;
+    Р»РѕРєРРЅС‚РЎС…РµРјР° = SubStr(SessionInfo.TempFolder,1, Pos('\Temp\',SessionInfo.TempFolder)) + 'Config\Interfaces\РРЅС‚РµСЂС„РµР№СЃ_РўРµСЃС‚С‹.shi';
+    LoadInterfaceSchema(Р»РѕРєРРЅС‚РЎС…РµРјР°);
   end;
 
 

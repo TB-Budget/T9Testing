@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.БазовыйБланкРедактор "Функциональная спецификация класса Т9", editor СпецификацияКласса;
+class inherited СИС2.БазовыйБланкРедактор "Функциональная спецификация модуля", editor СпецификацияМодуля;
 
 import СИС2 classes Функции;
 
@@ -201,7 +201,7 @@ import СИС2 classes Функции;
       if (Value = nil):
         Return true;
       else
-        with Query.Create([Т9_Тесты.СпецификацияКласса]) do
+        with Query.Create([Т9_Тесты.СпецификацияМодуля]) do
           Filter = 'ExtId<>' + Record.ExtId + ' and ПолноеИмяКласса<>"' + Value + '"';
           if RecordsExists:
             Message('Для выбранного класса уже существует спецификация!');

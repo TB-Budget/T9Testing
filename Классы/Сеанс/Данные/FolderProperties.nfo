@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Properties Version="1"/>
+<Items>
+  <Item Name="Дерево"/>
+  <Item Name="Элемент"/>
+  <Item Name="ПрограммаСеанса"/>
+  <Item Name="ТестПланы"/>
+  <Item Name="ТестПлан"/>
+  <Item Name="ТестОтчет"/>
+  <Item Name="расшДерево"/>
+</Items>

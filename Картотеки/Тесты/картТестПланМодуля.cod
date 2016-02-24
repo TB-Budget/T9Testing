@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 --}
 
-class inherited СИС2.картБазовая "Тест-планы классов Т9";
+class inherited СИС2.картБазовая "Тест-планы модулей";
 
 import СИС2 classes СтроковыеФункции;
 
@@ -50,7 +50,7 @@ inobject private
     fi;
     if (Условие_ИмяНаим <> nil):
       locFltOr[1] = 'Match(ПолноеИмяКласса,"*' + Условие_ИмяНаим + '*")';
-      with Query.Create([Т9_Тесты.СпецификацияКласса]) do
+      with Query.Create([Т9_Тесты.СпецификацияМодуля]) do
         Filter = 'Match(НаимКласса,"*' + Условие_ИмяНаим + '*")';
         Select;
         while not Eof do
