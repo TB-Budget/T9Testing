@@ -19,6 +19,8 @@ class inherited СИС2.БазовыйБланкРедактор "Тестовы
 
 inobject private
 
+  var секцТиповойСтенд: TemplateSection;
+
 --{{ Вспомогательные методы
 
   proc ВидФормы;
@@ -37,12 +39,12 @@ inobject private
     locCell = Template.CellByField['РевизияК'];
     locCell.Style = if(not ЭтоШаблон, StyleByName('Поле ввода'), StyleByName('Поле вывода'));
     locCell.Enabled = not ЭтоШаблон;
+    секцТиповойСтенд.Visible = (ТипБазовогоКласса = Константы.ТипКартотека);
   end;
 
   proc УстановитьФокусНаПервоеПолеВвода;
     Self.Template.CellByField['Наим'].SetFocus;
   end;
-
 --}}
 
 --{{ Обработчики событий шаблона
@@ -53,7 +55,10 @@ inobject private
     locCell = Self.Template.CellByField['ТипБазовогоКласса'];
     Библио.ОбновитьСписокПоля(locCell, Константы.ТипыБазовыйхКлассов);
     locCell.List.Add('Не определено|0');
+    locCell = Self.Template.CellByField['ТиповойСтенд'];
+    Библио.ОбновитьСписокПоля(locCell, Константы.ТипыСтендов);
   end;
+
 
   proc шаблон_ПриСчитывании;
     inherited шаблон_ПриСчитывании;
@@ -63,6 +68,13 @@ inobject private
 
 
 --{{ Обработчики событий клеток шаблона
+
+  proc Поле_ПриВыходе(Cell: TemplateCell; Index: Integer);
+    if (Cell.Contents = 'ТипБазовогоКласса'):
+      ВидФормы;
+    fi;
+  end;
+
 
   func Поле_ПриВыводе(Cell: TemplateCell; Value: Variant; Action: Template.OutputTypes; var Format: String): String;
     Result = Библио.ОписаниеКлассаПоИмени(ПолноеИмяКласса);
