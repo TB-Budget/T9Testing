@@ -30,7 +30,7 @@ import classes Сеанс.Данные.Элемент;
   inobject private
 
   var фреймДопСервис: TemplateFrame;
-  var тблНавигатор: Grid;
+  var тблНавигаторТестов: Grid;
   var фреймРабЭлемент1: TemplateFrame;
   var фреймРабЭлемент2: TemplateFrame;
 
@@ -249,15 +249,15 @@ import classes Сеанс.Данные.Элемент;
   proc ИнициализироватьНавигатор;
     var i, ii: integer;
     --{ очистка навигатора
-    тблНавигатор.BeginModify;
-    тблНавигатор.Root.Clear;
-    ii = тблНавигатор.ColumnsCount;
+    тблНавигаторТестов.BeginModify;
+    тблНавигаторТестов.Root.Clear;
+    ii = тблНавигаторТестов.ColumnsCount;
     for i = ii .. 1 step -1 do
-      тблНавигатор.DeleteColumn(i);
+      тблНавигаторТестов.DeleteColumn(i);
     od;
-    тблНавигатор.EndModify;--}
+    тблНавигаторТестов.EndModify;--}
     --{ создание столбцов навигатора
-    with тблНавигатор.AddColumn do
+    with тблНавигаторТестов.AddColumn do
       Caption      = '';
       Font.Name    = 'Arial';
       Font.Size    = 8;
@@ -269,7 +269,7 @@ import classes Сеанс.Данные.Элемент;
     end;
     --}
     --{ оформление навигатора
-    with тблНавигатор do
+    with тблНавигаторТестов do
       ShowHeader = false;
       ShowIcons = true;
       ShowRoot = false;
@@ -292,6 +292,7 @@ import classes Сеанс.Данные.Элемент;
       with Query.Create([Т9_Тесты.ТестОтчет]) do
         locFlt[1] = 'Сеанс=' + Str(Record);
         locFlt[2] = 'ТестПлан=' + Str(Record.ТестПланПП[locItem].ТестПланМодуля);
+        --
         Filter = СложитьСтрокиФильтраПоИ(locFlt);
         Order = 'НомерПП';
         Select;
@@ -385,8 +386,8 @@ import classes Сеанс.Данные.Элемент;
       локОбъектПрограммаСеанса = Сеанс.Данные.ПрограммаСеанса.CreateEx(CreateParam);
       локЭлементНавигатора[типОписание] = локОбъектПрограммаСеанса.ОписаниеЭлемента;
       локЭлементНавигатора[типИнтерфейсЭлемента] = локОбъектПрограммаСеанса; --
-      тблНавигатор.Root.Add(локЭлементНавигатора);
-      ВетвьПрограммаСеанса = тблНавигатор.Root[1];
+      тблНавигаторТестов.Root.Add(локЭлементНавигатора);
+      ВетвьПрограммаСеанса = тблНавигаторТестов.Root[1];
       ВетвьПрограммаСеанса.Image = локОбъектПрограммаСеанса.ИконкаЭлемента;
       ВетвьПрограммаСеанса.isGroup = true;
       ВетвьПрограммаСеанса.Opened = true;
@@ -460,8 +461,8 @@ import classes Сеанс.Данные.Элемент;
       locValue = GridItem_.Value as variant[];
       Result = locValue[типИнтерфейсЭлемента];
     end; --}
-    for s = 1 .. тблНавигатор.Root.Count do
-      ItemS = тблНавигатор.Root.Items[s];
+    for s = 1 .. тблНавигаторТестов.Root.Count do
+      ItemS = тблНавигаторТестов.Root.Items[s];
       locElm = Элемент(ItemS);
       if (locElm is Сеанс.Данные.ПрограммаСеанса):
         locStorageS = Storage.Create;
@@ -534,7 +535,7 @@ import classes Сеанс.Данные.Элемент;
     var локЭлемент: variant[];
     var s, ss: integer;
     if (locBranch = nil):
-      locBranch = тблНавигатор.Root.Items[1];
+      locBranch = тблНавигаторТестов.Root.Items[1];
     fi;
     локЭлемент = locBranch.Value as variant[];
     if (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ПрограммаСеанса):
@@ -542,6 +543,7 @@ import classes Сеанс.Данные.Элемент;
       for s = 1 .. ss do
         ОбновитьИконкиТестПлана(locBranch.Items[s]);
       od;
+    ---
     elsif (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестПланы):
       ss = locBranch.Count;
       locBranch.Image = локЭлемент[типИнтерфейсЭлемента].ИконкаЭлемента;
@@ -635,7 +637,7 @@ import classes Сеанс.Данные.Элемент;
 
   proc шаблон_ПриОткрытии(Create :Logical);
     inherited шаблон_ПриОткрытии(Create); --
-    тблНавигатор.Align = true;
+    тблНавигаторТестов.Align = true;
     with фреймРабЭлемент1 do
       ShowTabs = false;
       AutoSize = true;
@@ -658,7 +660,7 @@ import classes Сеанс.Данные.Элемент;
     --ОбновитьДеревоДанных;
     ЗаполнитьНавигатор;
     локТранзакция = Transaction.Create([Т9_Тесты.СеансТестирования,Т9_Тесты.ТестОтчет]); --
-    тблНавигатор.SetFocus;
+    тблНавигаторТестов.SetFocus;
     ВидФормы;
   end;
 
@@ -719,21 +721,21 @@ import classes Сеанс.Данные.Элемент;
       ПоказатьТестПлан(Cell);
       ЗаполнитьНавигатор;
     elsif (Cell.Contents = 'Предыдущий тест'):
-      тблНавигатор.SetFocus;
+      тблНавигаторТестов.SetFocus;
       Self.Template.BeginModify;
-      тблНавигатор.Current = АктивныйЭлементНавигатора;
+      тблНавигаторТестов.Current = АктивныйЭлементНавигатора;
       ExecuteCommand('Kernel.Move.Up', false);
       Sleep(0.5);
       Self.Template.EndModify;
     elsif (Cell.Contents = 'Следующий тест'):
-      тблНавигатор.SetFocus;
+      тблНавигаторТестов.SetFocus;
       Self.Template.BeginModify;
       локЭлемент = АктивныйЭлементНавигатора.Parent.Value as variant[];
       локНаимТестПлана = локЭлемент[типОписание] as string;
-      тблНавигатор.Current = АктивныйЭлементНавигатора;
+      тблНавигаторТестов.Current = АктивныйЭлементНавигатора;
       ExecuteCommand('Kernel.Move.Down', false);
       Sleep(0.5);
-      локЭлемент = тблНавигатор.Current.Value as variant[];
+      локЭлемент = тблНавигаторТестов.Current.Value as variant[];
       if not (локЭлемент[типИнтерфейсЭлемента] is Сеанс.Данные.ТестОтчет):
         Message('В тест-плане <' + локНаимТестПлана + '> выполнены все тесты.');
       fi;
@@ -853,7 +855,7 @@ import classes Сеанс.Данные.Элемент;
     var локНаим: string;
     func ЭлементПрограммаСеанса: Сеанс.Данные.Элемент; --{
       var locValue: variant[];
-      locValue = тблНавигатор.Root.Items[1].Value as variant[];
+      locValue = тблНавигаторТестов.Root.Items[1].Value as variant[];
       Result = locValue[типИнтерфейсЭлемента];
     end; --}
     if (Cell.Contents = 'ТестПланМодуля.Наим'):--{
@@ -988,9 +990,11 @@ import classes Сеанс.Данные.Элемент;
         if (локРешение = 1): --{ По шаблону
           locPrjCrd = Тесты.картПроектСеанса.Create;
           if CmOk = locPrjCrd.ShowEx(локЗаписьПроектаСеанса, '', Window.ModalWindow):
+            ---
             Наим = локЗаписьПроектаСеанса.Наим;
             pp = локЗаписьПроектаСеанса.ТестПланПП.Count;
             for p = 1 .. pp do
+              ---
               локПолноеИмяКласса = локЗаписьПроектаСеанса.ТестПланПП[p].ПолноеИмяКласса;
               локТестПланМодуля = локЗаписьПроектаСеанса.ТестПланПП[p].ТестПланМодуля;
               locInGroup = локЗаписьПроектаСеанса.ТестПланПП[p].InGroup;
